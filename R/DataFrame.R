@@ -11,6 +11,10 @@ DataFrame <- R6::R6Class(
             private$.tbl
         },
 
+        get_key = function() {
+            data.table::key(private$.tbl)
+        },
+
         set_key = function(key) {
             data.table::setkeyv(x=private$.tbl, cols=key)
         }
