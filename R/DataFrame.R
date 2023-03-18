@@ -21,6 +21,10 @@ DataFrame <- R6::R6Class(
 
         is_key_unique = function() {
             uniqueN(private$.tbl, by = get_key(private$.tbl)) == nrow(private$.tbl)
+        },
+
+        count = function(by="") {
+            private$.tbl[, .N, keyby = by]
         }
 
     ),
