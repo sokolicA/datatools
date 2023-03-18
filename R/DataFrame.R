@@ -25,6 +25,10 @@ DataFrame <- R6::R6Class(
 
         count = function(by="") {
             private$.tbl[, .N, keyby = by]
+        },
+
+        append = function(rows) {
+
         }
 
     ),
