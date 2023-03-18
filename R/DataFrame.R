@@ -5,6 +5,10 @@ DataFrame <- R6::R6Class(
             data.table::setDT(tbl, key = primary_key)
             private$.tbl <- tbl
             private$.id <- id
+        },
+
+        get_data = function() {
+            private$.tbl
         }
 
     ),
