@@ -29,6 +29,10 @@ DataFrame <- R6::R6Class(
 
         append = function(rows) {
 
+        },
+
+        extract = function(where) {
+
         }
 
     ),
