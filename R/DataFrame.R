@@ -1,8 +1,8 @@
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
-        initialize = function(tbl, primary_key = NULL, id = NULL) {
-            data.table::setDT(tbl, key = primary_key)
+        initialize = function(tbl, key = NULL, id = NULL) {
+            data.table::setDT(tbl, key = key)
             private$.tbl <- tbl
             private$.id <- id
         },
