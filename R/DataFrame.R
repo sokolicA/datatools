@@ -1,3 +1,10 @@
+#' Title
+#'
+#' @return
+#' @export
+#' @import data.table
+#'
+#' @examples
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
@@ -29,6 +36,11 @@ DataFrame <- R6::R6Class(
 
         append = function(rows) {
 
+        },
+
+        drop = function(columns) {
+            if (!is.character(columns)) stop("Provide a vector of column names!")
+            private$.tbl[, (c(columns)) := NULL]
         },
 
         extract = function(where) {
