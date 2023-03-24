@@ -33,6 +33,13 @@ DataFrame <- R6::R6Class(
 
         extract = function(where) {
 
+        },
+
+        deep_clone = function() {
+            result <- self$clone(deep=TRUE)
+            result_private <- .subset2(result, ".__enclos_env__")$private
+            result_private$.tbl <- copy(private$.tbl)
+            return(result)
         }
 
     ),
