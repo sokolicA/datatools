@@ -7,11 +7,11 @@ DataFrame <- R6::R6Class(
             private$.id <- id
         },
 
-        get_data = function() {
+        data = function() {
             private$.tbl
         },
 
-        get_key = function() {
+        key = function() {
             data.table::key(private$.tbl)
         },
 
