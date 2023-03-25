@@ -43,8 +43,20 @@ DataFrame <- R6::R6Class(
             private$.tbl[, (c(columns)) := NULL]
         },
 
-        extract = function(where) {
-
+        remove = function(where) {
+            condition <- substitute(where)
+            if (!is.language(condition)) {
+                stop("Provide either an expression, an integer vector specifying rows or a logical vector")
+            }
+            remove_rows <- eval(substitute(where), envir=private$.tbl, enclos=parent.frame())
+            if (is.logical(remove_rows) & length(remove_rows) != private$.tbl[,.N]) stop("Condition length does not match data size!")
+            if (is.numeric(remove_rows)) {
+                if (max(remove_rows) > private$.tbl[,.N]) stop("Rows specified are out of bounds!")
+                if (any(duplicated(remove_rows))) stop("Duplicated row numbers not allowed!")
+            }
+            removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key())
+            private$.tbl <- private$.tbl[!remove_rows]
+            return(removed)
         },
 
         deep_clone = function() {
