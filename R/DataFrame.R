@@ -14,6 +14,10 @@ DataFrame <- R6::R6Class(
             private$.id <- id
         },
 
+        print = function() {
+          print(private$.tbl)
+        },
+
         data = function() {
             private$.tbl
         },
