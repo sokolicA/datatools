@@ -70,16 +70,17 @@ DataFrame <- R6::R6Class(
             }
         },
 
-        update = function(columns, mapper, where=NULL) {
-            if (!is.character(columns)) stop("Provide column names!")
+        update = function(column, mapper, where=NULL) {
+            if (!is.character(column)) stop("Provide column names!")
+            if (!column %in% self$columns) stop("Nonexisting column! Use add method to add it!")
             if (!is.function(mapper)) stop("Provide a mapping function!")
 
             condition <- substitute(where)
             map <- parse(text=deparse(mapper))
-            if (!is.null(condition)) {
-                private$.tbl[eval(condition), (c(columns)) := lapply(.SD, eval(map)), .SDcols = columns]
+            if (is.null(condition)) {
+                private$.tbl[, (column) := eval(map)()]
             } else {
-                private$.tbl[, (c(columns)) := lapply(.SD, eval(map)), .SDcols = columns]
+                private$.tbl[eval(condition), (column) := eval(map)()]
             }
         },
 
@@ -98,7 +99,7 @@ DataFrame <- R6::R6Class(
         },
 
         drop = function(columns) {
-              if (!is.character(columns)) stop("Provide a vector of column names!")
+            if (!is.character(columns)) stop("Provide a vector of column names!")
             private$.tbl[, (c(columns)) := NULL]
         },
 
