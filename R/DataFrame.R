@@ -37,6 +37,10 @@ DataFrame <- R6::R6Class(
             data.table::setnames(private$.tbl, old=mapper)
         },
 
+        reorder = function(order=self$key()) {
+            data.table::setcolorder(private$.tbl, neworder = order)
+        },
+
         key = function() {
             data.table::key(private$.tbl)
         },
