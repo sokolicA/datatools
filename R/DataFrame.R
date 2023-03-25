@@ -72,6 +72,12 @@ DataFrame <- R6::R6Class(
 
     ),
 
+    active = list(
+      columns = function() {
+          names(private$.tbl)
+      }
+    ),
+
     private = list(
         .tbl = NULL,
         .id = NA_character_
