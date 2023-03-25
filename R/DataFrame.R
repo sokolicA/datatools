@@ -57,8 +57,12 @@ DataFrame <- R6::R6Class(
             private$.tbl[, .N, keyby = by]
         },
 
-        append = function(rows) {
-
+        append = function(..., fill=TRUE) {
+            private$.tbl <- rbindlist(
+                list(private$.tbl, ...),
+                use.names = TRUE,
+                fill = fill
+            )
         },
 
         apply = function(columns, mapper, where=NULL) {
