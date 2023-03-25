@@ -57,6 +57,19 @@ DataFrame <- R6::R6Class(
 
         },
 
+        apply = function(columns, mapper, where=NULL) {
+            if (!is.character(columns)) stop("Provide column names!")
+            if (!is.function(mapper)) stop("Provide a mapping function!")
+
+            condition <- substitute(where)
+            map <- parse(text=deparse(mapper))
+            if (!is.null(condition)) {
+                private$.tbl[eval(condition), (c(columns)) := lapply(.SD, eval(map)), .SDcols = columns]
+            } else {
+                private$.tbl[, (c(columns)) := lapply(.SD, eval(map)), .SDcols = columns]
+            }
+        },
+
         update = function(columns, mapper, where=NULL) {
             if (!is.character(columns)) stop("Provide column names!")
             if (!is.function(mapper)) stop("Provide a mapping function!")
