@@ -15,11 +15,26 @@ DataFrame <- R6::R6Class(
         },
 
         print = function() {
-          print(private$.tbl)
+            print(private$.tbl)
         },
 
         data = function() {
             private$.tbl
+        },
+
+        #' Rename column names in place
+        #'
+        #' @param mapper Function
+        #'
+        #' @examples
+        #' x <- data.table(a=1:5, b=1:5)
+        #' df <- DataFrame$new(x)
+        #' df$rename(toupper)
+        #' custom_mapper = function(x) {return(paste0(x, 1))}
+        #' df$rename(custom_mapper)
+        rename = function(mapper) {
+            if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
+            data.table::setnames(private$.tbl, old=mapper)
         },
 
         key = function() {
@@ -73,9 +88,9 @@ DataFrame <- R6::R6Class(
     ),
 
     active = list(
-      columns = function() {
-          names(private$.tbl)
-      }
+        columns = function() {
+            names(private$.tbl)
+        }
     ),
 
     private = list(
