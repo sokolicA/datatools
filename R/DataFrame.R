@@ -70,8 +70,22 @@ DataFrame <- R6::R6Class(
             }
         },
 
+        add = function(column, mapper, where=NULL) {
+            if (!(is.character(column) & length(column) == 1)) stop("Provide a single column name to add!")
+            if (column %in% self$columns) stop("Column already exists! Use update method to update it!")
+            if (!is.function(mapper)) stop("Provide a mapping function!")
+
+            condition <- substitute(where)
+            map <- parse(text=deparse(mapper))
+            if (is.null(condition)) {
+                private$.tbl[, (column) := eval(map)()]
+            } else {
+                private$.tbl[eval(condition), (column) := eval(map)()]
+            }
+        },
+
         drop = function(columns) {
-            if (!is.character(columns)) stop("Provide a vector of column names!")
+              if (!is.character(columns)) stop("Provide a vector of column names!")
             private$.tbl[, (c(columns)) := NULL]
         },
 
