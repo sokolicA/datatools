@@ -41,6 +41,11 @@ DataFrame <- R6::R6Class(
             data.table::setcolorder(private$.tbl, neworder = order)
         },
 
+        reorder = function(...) {
+            if (!is.null(self$key())) stop("Table is already sorted with key!")
+            data.table::setorder(private$.tbl, ...)
+        },
+
         key = function() {
             data.table::key(private$.tbl)
         },
