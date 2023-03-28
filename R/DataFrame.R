@@ -22,7 +22,7 @@ DataFrame <- R6::R6Class(
             private$.tbl
         },
 
-        #' Rename column names in place
+        #' @description Rename column names in place
         #'
         #' @param mapper Function
         #'
