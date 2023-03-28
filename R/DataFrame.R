@@ -1,10 +1,10 @@
-#' Title
+#' @title DataFrame Class
 #'
-#' @return
-#' @export
+#' @description A class for tabular data objects of class `data.frame`.
+#'
 #' @import data.table
 #'
-#' @examples
+#' @export
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
