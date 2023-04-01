@@ -148,15 +148,15 @@ LeftJoin <- R6::R6Class(
         },
 
         .prefix_all_added_columns = function(x, key_pairs) {
-            data.table::setnames(x, key_pairs, paste0("i.", names(key_pairs)))
+            #TODO The idx logic below could probably be simplified
             idx_keys_x <- names(private$left) %in% names(key_pairs)
-            idx_duplicated <- ifelse(names(private$left) %in% names(private$right) & !idx_keys_x, TRUE, FALSE)
+            idx_duplicated <- names(private$left) %in% names(private$right) & !idx_keys_x
             idx <- !(idx_keys_x | idx_duplicated)
 
-            if (any(idx)) data.table::setnames(
+            data.table::setnames(
                 x,
-                names(private$left)[idx],
-                paste0("i.", names(private$left)[idx])
+                c(key_pairs, names(private$left)[idx]),
+                paste0("i.", c(names(key_pairs), names(private$left)[idx]))
             )
         },
 
