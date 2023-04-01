@@ -1,63 +1,70 @@
+#' Join Class
+#'
+#' @param relationship
+#'
+#' @return
+#'
+#' @import data.table
 Join <- R6::R6Class(
     "Join",
     public = list(
-        initialize = function(left, right) {
+        initialize = function(relationship) {
             # TODO assert that data.table. or DataFrame?
-            private$left <- left
-            private$right <- right
-            private$name_left <- deparse(substitute(left))
-            private$name_right <- deparse(substitute(right))
+            if (relationship$is_not_fully_specified()) stop("Relationship has missing specification!")
+            private$left <- relationship$left
+            private$right <- relationship$right
+            private$.on <- relationship$get_on()
+        },
+
+        test = function() {
+            browser()
         },
 
         print = function() {
-            cat("Join Object")
-            cat("\nJoining", private$name_left, "and", private$name_right)
-            cat("\nJoining on: ", private$join_on)
-            cat("\nAdding columns: ", private$add_columns)
-        },
 
-        on = function(...) {
-            join_on <- private$parse_arguments(deparse(match.call(expand.dots=TRUE)))
-            private$join_on <- paste0("list", join_on)
-            return(invisible(self))
         },
 
         add = function(...) {
-            private$add_columns <- private$parse_arguments(deparse(match.call(expand.dots=TRUE)))
-
-            private$execute(private$command())
+            stop("Method must be used in subclass!")
         },
 
-        add_all = function(suffix="_r") {
-            add <- names(private$right)
-            duplicated <- add %in% names(private$left)
-            add_names <- ifelse(duplicated, paste0(add, suffix), add)
-            add <- paste0("i.", add)
-            result <- paste0("(", paste0(paste0(add_names, "=", add), collapse =", "), ")")
-            private$add_columns <- result
-            private$execute(private$command())
+        add_all = function() {
+            stop("Method must be used in subclass!")
         }
     ),
     private = list(
         left = NULL,
         right = NULL,
-        name_left = NULL,
-        name_right = NULL,
-        join_on = NULL,
-        add_columns = NULL,
-
-        parse_arguments = function(x) {
-            result <-  gsub(".*\\$(.*)$", "\\1", x)
-            result <- gsub("^[^\\(]*", "", result)
-            return(result)
-        },
+        .on = NULL,
+        .add = NULL,
 
         command = function() {
             stop("Method must be used in subclass!")
         },
 
         execute = function(cmd) {
-            eval(parse(text = cmd))
+            eval(parse(text = cmd), envir = parent.frame())
+        },
+
+        convert_langlist_to_vector = function(langlist) {
+            langlist <- langlist[-1L]
+            res <- vector(length = length(langlist))
+            for (i in seq_along(res)) {
+                res[i] <- deparse(langlist[[i]])
+            }
+            names(res) <- if (!is.null(names(langlist))) names(langlist) else res
+            res
+        },
+
+        convert_vector_to_langlist = function(vec){
+            str2lang(paste0("list(", paste0(names(vec), "=", vec, collapse = ", "), ")"))
+        },
+
+        swap_names_values = function(vec) {
+            if (!is.character(vec)) stop("Must provide a character vector!")
+            result <- names(vec)
+            names(result) <- vec
+            return(result)
         }
     )
 )
@@ -66,15 +73,31 @@ UpdateJoin <- R6::R6Class(
     "UpdateJoin",
     inherit = Join,
     public = list(
+        add = function(where=NULL, ...) {
+            private$.add <- parse_dots(substitute(list(...)))
+            private$.update_join(substitute(where))
+        },
 
+        add_all = function() {
+            private$.update_join()
+        }
     ),
 
     private = list(
-        command = function() {
-            paste0(
-                "private$left[private$right, on =", private$join_on,
-                ", `:=` ", private$add_columns, "]"
-            )
+        .update_join = function(where) {
+            key_pairs_orig <- private$convert_langlist_to_vector(private$.on)
+            key_pairs <- private$swap_names_values(key_pairs_orig)
+
+            cmd <- private$cmd_update(where, deparse(private$convert_vector_to_langlist(key_pairs)))
+            private$execute(cmd)
+            private$left[]
+        },
+
+        cmd_update = function(where, on_string) {
+            names <- names(private$.add)[-1]
+            paste0("private$left[", deparse(where),
+                   ", (names(private$.add)[-1]) := private$right[.SD, on =", on_string,
+                   ", ", deparse(private$.add), ", mult = 'all', nomatch = NA]]")
         }
     )
 )
@@ -83,15 +106,68 @@ LeftJoin <- R6::R6Class(
     "LeftJoin",
     inherit = Join,
     public = list(
+        add = function(...) {
+            private$.add <- parse_dots(substitute(list(...)))
+            private$.left_join()
+        },
+
+        add_all = function() {
+            private$.left_join()
+        }
 
     ),
 
     private = list(
-        command = function() {
+        .left_join = function() {
+            key_pairs <- private$convert_langlist_to_vector(private$.on)
+            cmd <- private$cmd_left_join(key_pairs)
+            result <- private$execute(cmd)
+
+            private$.prefix_all_added_columns(result, key_pairs)
+
+            if (!is.null(private$.add)) private$.modify_cols(result, key_pairs)
+
+            private$.fix_names(result)
+            data.table::setcolorder(result, names(private$left))
+
+            result[]
+        },
+
+        .modify_cols = function(result, key_pairs) {
+            add <- gsub("^list", "", deparse(private$.add))
+            private$execute(paste("result[, `:=`", add, "]"))
+            not_used <- names(private$right)[!names(private$right) %in% c(names(private$.add), key_pairs)]
+            if (length(not_used) > 0) result[, (not_used) := NULL]
+            result
+        },
+
+        .fix_names = function(result) {
+            old <- c(names(private$right), paste0("i.", names(private$left)))
+            new <- c(paste0(names(private$right), "_y"), names(private$left))
+            data.table::setnames(result, old, new, skip_absent = TRUE) #skipping key of y
+        },
+
+        .prefix_all_added_columns = function(x, key_pairs) {
+            data.table::setnames(x, key_pairs, paste0("i.", names(key_pairs)))
+            idx_keys_x <- names(private$left) %in% names(key_pairs)
+            idx_duplicated <- ifelse(names(private$left) %in% names(private$right) & !idx_keys_x, TRUE, FALSE)
+            idx <- !(idx_keys_x | idx_duplicated)
+
+            if (any(idx)) data.table::setnames(
+                x,
+                names(private$left)[idx],
+                paste0("i.", names(private$left)[idx])
+            )
+        },
+
+        cmd_left_join = function(key_pairs) {
+            swapped_key_pairs <- private$swap_names_values(key_pairs)
+            on_string <- deparse(private$convert_vector_to_langlist(swapped_key_pairs))
             paste0(
-                "private$right[private$left, on =", private$join_on,
-                ", ", private$add_columns, "]"
+                "private$right[private$left, on =", on_string,
+                ", mult = 'all', nomatch = NA]"
             )
         }
+
     )
 )
