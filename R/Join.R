@@ -73,9 +73,12 @@ UpdateJoin <- R6::R6Class(
     "UpdateJoin",
     inherit = Join,
     public = list(
-        add = function(where=NULL, ...) {
+        add = function(..., where = NULL) {
+            where_expr <- substitute(where)
+            where_parsed <- if(is.null(where_expr)) "" else deparse(where_expr)
+
             private$.add <- parse_dots(substitute(list(...)))
-            private$.update_join(substitute(where))
+            private$.update_join(where_parsed)
         },
 
         add_all = function() {
@@ -85,20 +88,27 @@ UpdateJoin <- R6::R6Class(
 
     private = list(
         .update_join = function(where) {
-            key_pairs_orig <- private$convert_langlist_to_vector(private$.on)
-            key_pairs <- private$swap_names_values(key_pairs_orig)
-
-            cmd <- private$cmd_update(where, deparse(private$convert_vector_to_langlist(key_pairs)))
-            private$execute(cmd)
+            tryCatch(
+                private$execute(private$cmd_update(where)),
+                error = function(e) {
+                    if (grepl(private$one_many_join_err, e$message, fixed=TRUE)) {
+                        stop("Can not perform update join with a one-to-many relationship!")
+                    }
+                })
             private$left[]
         },
 
-        cmd_update = function(where, on_string) {
-            names <- names(private$.add)[-1]
-            paste0("private$left[", deparse(where),
-                   ", (names(private$.add)[-1]) := private$right[.SD, on =", on_string,
+        cmd_update = function(where) {
+            key_pairs_orig <- private$convert_langlist_to_vector(private$.on)
+            key_pairs <- private$swap_names_values(key_pairs_orig)
+            on_parsed <- deparse(private$convert_vector_to_langlist(key_pairs))
+
+            paste0("private$left[", where,
+                   ", (names(private$.add)[-1]) := private$right[.SD, on =", on_parsed,
                    ", ", deparse(private$.add), ", mult = 'all', nomatch = NA]]")
-        }
+        },
+
+        one_many_join_err = "If you wish to 'recycle' the RHS please use rep() to make this intent clear to readers of your code."
     )
 )
 
