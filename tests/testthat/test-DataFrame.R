@@ -18,45 +18,45 @@ test_that("data does not copy the object", {
     expect_equal(address(x), address(df$data))
 })
 
-test_that("columns returns character vector of column names", {
+test_that("columns$names returns character vector of column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    expect_equal(df$columns, c("a", "b"))
+    expect_equal(df$columns$names, c("a", "b"))
 })
 
-test_that("rename changes column names", {
+test_that("columns$rename changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    df$rename(toupper)
-    expect_equal(df$columns, c("A", "B"))
+    df$columns$rename(toupper)
+    expect_equal(df$columns$names, c("A", "B"))
 
     custom_map <- function(x) ifelse(x == "A", "AA", "BB")
-    df$rename(custom_map)
-    expect_equal(df$columns, c("AA", "BB"))
+    df$columns$rename(custom_map)
+    expect_equal(df$columns$names, c("AA", "BB"))
 })
 
-test_that("rename changes column names in place", {
+test_that("columns$rename changes column names in place", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$data)
     old_address_col <- address(df$data$b)
-    df$rename(toupper)
+    df$columns$rename(toupper)
     expect_equal(address(df$data), old_address_tbl)
     expect_equal(address(df$data$B), old_address_col)
 })
 
-test_that("reorder_columns changes column order in place", {
+test_that("columns$reorder changes column order in place", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x, key = "b")
     old_address_tbl <- address(df$data)
     old_address_col <- address(df$data$b)
-    df$reorder_columns()
-    expect_equal(df$columns, c("b", "a"))
+    df$columns$reorder()
+    expect_equal(df$columns$names, c("b", "a"))
     expect_equal(address(df$data), old_address_tbl)
     expect_equal(address(df$data$b), old_address_col)
-    df$reorder_columns(c("a", "b"))
-    expect_equal(df$columns, c("a", "b"))
+    df$columns$reorder(c("a", "b"))
+    expect_equal(df$columns$names, c("a", "b"))
 })
 
 test_that("reorder changes row order in place", {

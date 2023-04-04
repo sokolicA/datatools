@@ -28,25 +28,11 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \item \code{DF()}: DataFrame$new() constructor sugar
 
 }}
-\examples{
-
-## ------------------------------------------------
-## Method `DataFrame$rename`
-## ------------------------------------------------
-
-x <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
-df$rename(toupper)
-custom_mapper = function(x) {return(paste0(x, 1))}
-df$rename(custom_mapper)
-}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-DataFrame-new}{\code{DataFrame$new()}}
 \item \href{#method-DataFrame-print}{\code{DataFrame$print()}}
-\item \href{#method-DataFrame-rename}{\code{DataFrame$rename()}}
-\item \href{#method-DataFrame-reorder_columns}{\code{DataFrame$reorder_columns()}}
 \item \href{#method-DataFrame-reorder}{\code{DataFrame$reorder()}}
 \item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
@@ -77,44 +63,6 @@ df$rename(custom_mapper)
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$print()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-rename"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-rename}{}}}
-\subsection{Method \code{rename()}}{
-Rename column names in place
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$rename(mapper)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{mapper}}{Function}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
-df$rename(toupper)
-custom_mapper = function(x) {return(paste0(x, 1))}
-df$rename(custom_mapper)
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-reorder_columns"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-reorder_columns}{}}}
-\subsection{Method \code{reorder_columns()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$reorder_columns(order = self$key)}\if{html}{\out{</div>}}
 }
 
 }

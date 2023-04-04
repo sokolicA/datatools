@@ -18,25 +18,6 @@ DataFrame <- R6::R6Class(
             print(private$.tbl)
         },
 
-        #' @description Rename column names in place
-        #'
-        #' @param mapper Function
-        #'
-        #' @examples
-        #' x <- data.table(a=1:5, b=1:5)
-        #' df <- DataFrame$new(x)
-        #' df$rename(toupper)
-        #' custom_mapper = function(x) {return(paste0(x, 1))}
-        #' df$rename(custom_mapper)
-        rename = function(mapper) {
-            if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
-            data.table::setnames(private$.tbl, old=mapper)
-        },
-
-        reorder_columns = function(order=self$key) {
-            data.table::setcolorder(private$.tbl, neworder = order)
-        },
-
         reorder = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$.tbl, ...)
@@ -88,7 +69,7 @@ DataFrame <- R6::R6Class(
 
         update = function(column, mapper, where=NULL) {
             if (!is.character(column)) stop("Provide column names!")
-            if (!column %in% self$columns) stop("Nonexisting column! Use add method to add it!")
+            if (!column %in% self$columns$names) stop("Nonexisting column! Use add method to add it!")
             if (!is.function(mapper)) stop("Provide a mapping function!")
 
             condition <- substitute(where)
@@ -102,7 +83,7 @@ DataFrame <- R6::R6Class(
 
         add = function(column, mapper, where=NULL) {
             if (!(is.character(column) & length(column) == 1)) stop("Provide a single column name to add!")
-            if (column %in% self$columns) stop("Column already exists! Use update method to update it!")
+            if (column %in% self$columns$names) stop("Column already exists! Use update method to update it!")
             if (!is.function(mapper)) stop("Provide a mapping function!")
 
             condition <- substitute(where)
@@ -150,7 +131,7 @@ DataFrame <- R6::R6Class(
         },
 
         columns = function() {
-            names(private$.tbl)
+            Columns$new(private$.tbl)
         },
 
         key = function(key) {
@@ -164,5 +145,62 @@ DataFrame <- R6::R6Class(
         .id = NA_character_,
 
         join = NULL
+    )
+)
+
+
+Columns <- R6::R6Class(
+    "Columns",
+
+    public = list(
+        initialize = function(x) {
+            private$.tbl <- x
+        },
+
+        print = function() {
+            cat("Number of columns:", dim(private$.tbl)[2])
+            cat("\nColumn names: ")
+            cat(names(private$.tbl), sep = ", ")
+        },
+
+        #' @description Reorder columns in place
+        #'
+        #' @param order Character vector of the new column name ordering.
+        #' May also be column numbers. If length(order) < length(x),
+        #' the specified columns are moved in order to the "front" of x.
+        #' By default, reorder without a specified order moves the key columns in order to the "front".
+        #'
+        #' @examples
+        #' x <- data.table(a=1:5, b=1:5)
+        #' x_cols <- Columns$new(x)
+        #' x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
+        #' names(x)
+        reorder = function(order=key(private$.tbl)) {
+            data.table::setcolorder(private$.tbl, neworder = order)
+        },
+
+        #' @description Rename column names in place
+        #'
+        #' @param mapper Function
+        #'
+        #' @examples
+        #' x <- data.table(a=1:5, b=1:5)
+        #' df <- DataFrame$new(x)
+        #' df$rename(toupper)
+        #' custom_mapper = function(x) {return(paste0(x, 1))}
+        #' df$rename(custom_mapper)
+        rename = function(mapper) {
+            if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
+            data.table::setnames(private$.tbl, old=mapper)
+        }
+
+    ),
+
+    active = list(
+        names = function() names(private$.tbl)
+    ),
+
+    private = list(
+        .tbl = NULL
     )
 )
