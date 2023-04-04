@@ -2,4 +2,5 @@
 
 export(DF)
 export(DataFrame)
+export(Rel)
 import(data.table)
