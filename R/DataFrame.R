@@ -57,26 +57,11 @@ DataFrame <- R6::R6Class(
             return(invisible(self))
         },
 
-        join_on = function(...) {
-            if (is.null(private$join)) stop("Found no active joins on this DataFrame!")
-            val <- gsub("(list\\(|\\))", "", deparse( substitute(list(...))))
-            eval(parse(text = paste0("private$join$on(", val, ")")))
-            return(invisible(self))
-        },
-
-        join_add = function(...) {
-            if (is.null(private$join)) stop("Found no active joins on this DataFrame!")
-            val <- gsub("^list", "", deparse(substitute(list(...))))
-            eval(parse(text = paste0("private$join$add", val)))
-            private$join <- NULL
-            return(self)
-        },
-
-        join_add_all = function(suffix="_r") {
-            if (is.null(private$join)) stop("Found no active joins on this DataFrame!")
-            private$join$add_all(suffix)
-            private$join <- NULL
-            return(self)
+        left_join = function(relationship, add=NULL) {
+            relationship$left <- private$.tbl
+            join <- LeftJoin$new(relationship)
+            result <- join$add_sub(substitute(add))
+            return(DF(result, key = self$key))
         },
 
         append = function(..., fill=TRUE) {
