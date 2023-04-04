@@ -242,6 +242,13 @@ test_that("remove does not work with logical vector of smaller length", {
     expect_error(df$remove(c(TRUE, TRUE, FALSE)))
 })
 
+test_that("remove treats logical NA as FALSE", {
+    x <- data.table(a=1:3, b=1:3)
+    df <- DataFrame$new(x)
+    df$remove(c(TRUE, NA, FALSE))
+    expect_equal(df$data, data.table(a=2:3, b=2:3))
+})
+
 test_that("remove does not work with longer vectors", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)

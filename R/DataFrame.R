@@ -113,19 +113,45 @@ DataFrame <- R6::R6Class(
             private$.tbl[, (c(columns)) := NULL]
         },
 
+        #' @description Remove specified rows from the table in place.
+        #'
+        #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
+        #'
+        #' @details
+        #' \itemize{
+        #' \item If an expression is passed it will be evaluated inside the context of the table.
+        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
+        #' \item If a logical vector is passed it must be of the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be removed.
+        #'}
+        #'
+        #' @return A `DataFrame` object consisting of removed rows.
+        #' @examples
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df$remove(a > 2)
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df$remove(c(1, 3, 5))
+        #' df <- DataFrame$new(data.table(a=1:3, b=1:3))
+        #' df$remove(c(TRUE, NA, FALSE))
         remove = function(where) {
             condition <- substitute(where)
             if (!is.language(condition)) {
-                stop("Provide either an expression, an integer vector specifying rows or a logical vector")
+                stop(err$remove$not_language)
             }
-            remove_rows <- eval(substitute(where), envir=private$.tbl, enclos=parent.frame())
-            if (is.logical(remove_rows) & length(remove_rows) != private$.tbl[,.N]) stop("Condition length does not match data size!")
+
+            remove_rows <- eval(condition, envir=private$.tbl, enclos=parent.frame())
             if (is.numeric(remove_rows)) {
-                if (max(remove_rows) > private$.tbl[,.N]) stop("Rows specified are out of bounds!")
-                if (any(duplicated(remove_rows))) stop("Duplicated row numbers not allowed!")
+                if (max(remove_rows) > private$.tbl[,.N]) stop(err$remove$int_out_of_bounds)
+                if (any(duplicated(remove_rows))) stop(err$remove$int_duplicated)
+                remove_rows <- private$.tbl[, .I %in% remove_rows]
+                keep <- !remove_rows
             }
+            if (is.logical(remove_rows)) {
+                if(length(remove_rows) != private$.tbl[,.N]) stop(err$remove$unequal_length_logical)
+                keep <- !remove_rows | is.na(remove_rows)
+            }
+
             removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key)
-            private$.tbl <- private$.tbl[!remove_rows]
+            private$.tbl <- private$.tbl[keep]
             return(removed)
         },
 
@@ -161,7 +187,16 @@ DataFrame <- R6::R6Class(
         .tbl = NULL,
         .id = NA_character_,
 
-        join = NULL
+        join = NULL,
+
+        err = list(
+            remove = list(
+                not_language = "Provide either an expression, an integer vector specifying rows or a logical vector of same length as the number of rows!",
+                unequal_length_logical = "Provided logical vector does not match the number of rows!",
+                int_out_of_bounds = "Rows specified are out of bounds!",
+                duplicated_int = "Duplicated row numbers not allowed!"
+            )
+        )
     )
 )
 

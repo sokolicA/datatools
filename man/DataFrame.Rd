@@ -38,6 +38,17 @@ df <- DataFrame$new(data.table(a=1:5, b=1:5))
 df$count()
 df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
+
+## ------------------------------------------------
+## Method `DataFrame$remove`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$remove(a > 2)
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$remove(c(1, 3, 5))
+df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df$remove(c(TRUE, NA, FALSE))
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -204,8 +215,40 @@ df$count(by = list(a)) # df$count(by = .(a))
 \if{html}{\out{<a id="method-DataFrame-remove"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-remove}{}}}
 \subsection{Method \code{remove()}}{
+Remove specified rows from the table in place.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$remove(where)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{where}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+\itemize{
+\item If an expression is passed it will be evaluated inside the context of the table.
+\item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
+\item If a logical vector is passed it must be of the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
+}
+}
+
+\subsection{Returns}{
+A \code{DataFrame} object consisting of removed rows.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$remove(a > 2)
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$remove(c(1, 3, 5))
+df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df$remove(c(TRUE, NA, FALSE))
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
