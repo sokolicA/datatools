@@ -28,6 +28,17 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \item \code{DF()}: DataFrame$new() constructor sugar
 
 }}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{data}}{Data getter.}
+
+\item{\code{columns}}{Column names object.}
+
+\item{\code{key}}{Key getter and setter.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

@@ -126,14 +126,18 @@ DataFrame <- R6::R6Class(
     ),
 
     active = list(
+
+        #' @field data Data getter.
         data = function() {
             private$.tbl
         },
 
+        #' @field columns Column names object.
         columns = function() {
             Columns$new(private$.tbl)
         },
 
+        #' @field key Key getter and setter.
         key = function(key) {
             if (missing(key)) return(data.table::key(private$.tbl))
             data.table::setkeyv(x=private$.tbl, cols=key)
