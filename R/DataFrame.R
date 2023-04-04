@@ -42,14 +42,6 @@ DataFrame <- R6::R6Class(
             data.table::setorder(private$.tbl, ...)
         },
 
-        key = function() {
-            data.table::key(private$.tbl)
-        },
-
-        set_key = function(key) {
-            data.table::setkeyv(x=private$.tbl, cols=key)
-        },
-
         is_key_unique = function() {
             uniqueN(private$.tbl, by = self$key()) == nrow(private$.tbl)
         },
@@ -171,6 +163,11 @@ DataFrame <- R6::R6Class(
 
         columns = function() {
             names(private$.tbl)
+        },
+
+        key = function(key) {
+            if (missing(key)) return(data.table::key(private$.tbl))
+            data.table::setkeyv(x=private$.tbl, cols=key)
         }
     ),
 
