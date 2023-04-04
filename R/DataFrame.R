@@ -177,6 +177,7 @@ Columns <- R6::R6Class(
         #' names(x)
         reorder = function(order=key(private$.tbl)) {
             data.table::setcolorder(private$.tbl, neworder = order)
+            return(invisible(self))
         },
 
         #' @description Rename column names in place
@@ -192,6 +193,7 @@ Columns <- R6::R6Class(
         rename = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
             data.table::setnames(private$.tbl, old=mapper)
+            return(invisible(self))
         }
 
     ),

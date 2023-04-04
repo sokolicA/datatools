@@ -25,6 +25,15 @@ test_that("columns$names returns character vector of column names", {
     expect_equal(df$columns$names, c("a", "b"))
 })
 
+test_that("columns$rename and $reorder can be chained", {
+    x <- data.table(a=1:5, b=1:5)
+    df <- DataFrame$new(x)
+
+    df$columns$rename(toupper)$reorder("B")
+    expect_equal(df$columns$names, c("B", "A"))
+
+})
+
 test_that("columns$rename changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
