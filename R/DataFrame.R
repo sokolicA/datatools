@@ -18,10 +18,6 @@ DataFrame <- R6::R6Class(
             print(private$.tbl)
         },
 
-        data = function() {
-            private$.tbl
-        },
-
         #' @description Rename column names in place
         #'
         #' @param mapper Function
@@ -169,6 +165,10 @@ DataFrame <- R6::R6Class(
     ),
 
     active = list(
+        data = function() {
+            private$.tbl
+        },
+
         columns = function() {
             names(private$.tbl)
         }
