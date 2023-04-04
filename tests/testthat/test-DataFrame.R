@@ -85,11 +85,11 @@ test_that("reorder changes row order in place", {
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$data)
     old_address_col <- address(df$data$b)
-    df$reorder(b)
+    df$sort(b)
     expect_equal(df$data, data.table(a=5:1, b=1:5))
     expect_equal(address(df$data), old_address_tbl)
     expect_equal(address(df$data$b), old_address_col)
-    df$reorder(-b)
+    df$sort(-b)
     expect_equal(df$data, data.table(a=1:5, b=5:1))
 })
 
