@@ -1,19 +1,58 @@
+#' Relationship class
+#'
+#' @param left
+#' @param right
+#'
+#' @describeIn Relationship Object
+#'
+#' @import data.table
+#'
+#' @examples
 Relationship <- R6::R6Class(
     "Relationship",
     public = list(
-        initialize = function(x, y) {
+        initialize = function(left, right) {
+            if(!missing(left)) private$.left <- left;
+            if(!missing(right)) private$.right <- right;
+        },
 
+        get_on = function() {
+            private$.on
         },
 
         on = function(...) {
+            .on <- substitute(list(...))
+            private$.on <- parse_dots(.on)
+            return(invisible(self))
+        },
 
+        is_not_fully_specified = function() {
+            return(any(is.null(private$.left), is.null(private$.right), is.null(private$.on)))
+        }
+    ),
+
+    active = list(
+        left = function(x) {
+            if (!missing(x)) {
+                private$.left <- x
+            } else {
+                private$.left
+            }
+        },
+
+        right = function(x) {
+            if (!missing(x)) {
+                private$.right <- x
+            } else {
+                private$.right
+            }
         }
     ),
 
     private = list(
-        x = NULL,
-        y = NULL,
-        on = NULL
+        .left = NULL,
+        .right = NULL,
+        .on = NULL
 
     )
 )
