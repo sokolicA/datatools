@@ -45,15 +45,13 @@ df$rename(custom_mapper)
 \itemize{
 \item \href{#method-DataFrame-new}{\code{DataFrame$new()}}
 \item \href{#method-DataFrame-print}{\code{DataFrame$print()}}
-\item \href{#method-DataFrame-data}{\code{DataFrame$data()}}
 \item \href{#method-DataFrame-rename}{\code{DataFrame$rename()}}
 \item \href{#method-DataFrame-reorder_columns}{\code{DataFrame$reorder_columns()}}
 \item \href{#method-DataFrame-reorder}{\code{DataFrame$reorder()}}
-\item \href{#method-DataFrame-key}{\code{DataFrame$key()}}
-\item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
 \item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
+\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-apply}{\code{DataFrame$apply()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
@@ -79,15 +77,6 @@ df$rename(custom_mapper)
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$print()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-data"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-data}{}}}
-\subsection{Method \code{data()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$data()}\if{html}{\out{</div>}}
 }
 
 }
@@ -125,7 +114,7 @@ df$rename(custom_mapper)
 \if{latex}{\out{\hypertarget{method-DataFrame-reorder_columns}{}}}
 \subsection{Method \code{reorder_columns()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$reorder_columns(order = self$key())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$reorder_columns(order = self$key)}\if{html}{\out{</div>}}
 }
 
 }
@@ -135,24 +124,6 @@ df$rename(custom_mapper)
 \subsection{Method \code{reorder()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$reorder(...)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-key"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-key}{}}}
-\subsection{Method \code{key()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$key()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-set_key}{}}}
-\subsection{Method \code{set_key()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set_key(key)}\if{html}{\out{</div>}}
 }
 
 }
@@ -179,7 +150,16 @@ df$rename(custom_mapper)
 \if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
 \subsection{Method \code{update_join()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(relationship, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(relationship, columns = NULL, where = NULL)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
+\subsection{Method \code{left_join()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(relationship, add = NULL)}\if{html}{\out{</div>}}
 }
 
 }
