@@ -163,30 +163,28 @@ test_that("apply does not copy the data", {
 
 
 
-test_that("add adds new column by reference", {
-    x <- data.table(a=2:6, b=1:5)
-    df <- DataFrame$new(x)
-    df$add("c", function() {a**2}, b == 4)
-    expect_equal(df$data[4], data.table(a=5, b=4, c=25))
-
-    x <- data.table(a=2:6, b=1:5)
-    df <- DataFrame$new(x)
+test_that("update updates/adds columns by reference", {
+    df <- DF(data.table(a=1:5, b=1:5))
     old_address_tbl <- address(df$data)
     old_address_cola <- address(df$data$a)
     old_address_col <- address(df$data$b)
-    df$add("d", function() {a**2})
-    expect_equal(df$data, data.table(a=2:6, b=1:5, d=(2:6)**2))
+
+    df$update(.(a = 2), b == 3)
+    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+    df$update(list(s = as.character(b)), rep(TRUE, 5))
+
+    expect_equal(df$data, data.table(
+        a=c(1,2,2,4,5), b=1:5,
+        g=c(1,2,NA,NA,NA),
+        dd=c(0,2,NA,NA,NA),
+        s = paste(1:5))
+    )
     expect_equal(address(df$data), old_address_tbl)
     expect_equal(address(df$data$a), old_address_cola)
     expect_equal(address(df$data$b), old_address_col)
 
 })
 
-test_that("add does not work for existing columns", {
-    x <- data.table(a=2:6, b=1:5)
-    df <- DataFrame$new(x)
-    expect_error(df$add("a", function() {a**2}))
-})
 
 
 

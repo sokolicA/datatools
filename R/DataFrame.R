@@ -80,18 +80,25 @@ DataFrame <- R6::R6Class(
             }
         },
 
-        update = function(column, mapper, where=NULL) {
-            if (!is.character(column)) stop("Provide column names!")
-            if (!column %in% self$columns$names) stop("Nonexisting column! Use add method to add it!")
-            if (!is.function(mapper)) stop("Provide a mapping function!")
-
+        #' @description Update table columns by reference.
+        #'
+        #' @param columns A list of columns to update or add and the corresponding calculation.
+        #' @param where Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.
+        #'
+        #' @return Nothing.
+        #'
+        #' @examples
+        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df$update(.(a = 2), b == 3)
+        #'    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+        update = function(columns, where=NULL) {
+            call <- quote(private$.tbl[, j])
             condition <- substitute(where)
-            map <- parse(text=deparse(mapper))
-            if (is.null(condition)) {
-                private$.tbl[, (column) := eval(map)()]
-            } else {
-                private$.tbl[eval(condition), (column) := eval(map)()]
-            }
+            if (!is.null(condition)) call[[3]] <-condition
+            j_sub <- substitute(columns)
+            j_sub[[1]] <- quote(`:=`)
+            call[[4]] <- j_sub
+            eval(call)
         },
 
         add = function(column, mapper, where=NULL) {

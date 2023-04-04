@@ -40,6 +40,14 @@ df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
 
 ## ------------------------------------------------
+## Method `DataFrame$update`
+## ------------------------------------------------
+
+   df <- DF(data.table(a=1:5, b=1:5))
+   df$update(.(a = 2), b == 3)
+   df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+
+## ------------------------------------------------
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
@@ -187,8 +195,31 @@ df$count(by = list(a)) # df$count(by = .(a))
 \if{html}{\out{<a id="method-DataFrame-update"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-update}{}}}
 \subsection{Method \code{update()}}{
+Update table columns by reference.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(column, mapper, where = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(columns, where = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{columns}}{A list of columns to update or add and the corresponding calculation.}
+
+\item{\code{where}}{Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Nothing.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+   df$update(.(a = 2), b == 3)
+   df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
