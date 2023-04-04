@@ -273,6 +273,25 @@ test_that("UpdateJoin$add(where) works", {
     expect_equal(address(x), address(df$data))
 })
 
+test_that("UpdateJoin$add(where) works with data.frame", {
+    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
+    y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+    df <- DF(x)
+    rel <- Relationship$new(right=y)$on(x = y)
+
+    df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
+
+    expect_equal(x, data.table(
+        x= c(1, 2, 3),
+        y= c("A", "B", "C"),
+        z = c("F", "G","K"),
+        v = c(1, 2, 3),
+        a = c(3, 3, NA),
+        c = c(3, 2, NA)
+    ))
+    expect_equal(address(x), address(df$data))
+})
+
 test_that("UpdateJoin$add(where) works with 2 keys", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3, w = 5:7)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7], w = c(5, 8))

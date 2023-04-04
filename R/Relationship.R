@@ -1,19 +1,15 @@
-#' Relationship class
+#' @title Relationship Class
 #'
-#' @param left
-#' @param right
-#'
-#' @describeIn Relationship Object
+#' @description A class for relationships between objects of class `data.frame`.
 #'
 #' @import data.table
 #'
-#' @examples
 Relationship <- R6::R6Class(
     "Relationship",
     public = list(
-        initialize = function(left, right) {
-            if(!missing(left)) private$.left <- left;
-            if(!missing(right)) private$.right <- right;
+        initialize = function(left=NULL, right=NULL) {
+            if(!is.null(left)) self$left <- left;
+            if(!is.null(right)) self$right <- right;
         },
 
         get_on = function() {
@@ -33,6 +29,7 @@ Relationship <- R6::R6Class(
     active = list(
         left = function(x) {
             if (!missing(x)) {
+                if (!is.data.table(x)) x <- as.data.table(x)
                 private$.left <- x
             } else {
                 private$.left
@@ -41,6 +38,7 @@ Relationship <- R6::R6Class(
 
         right = function(x) {
             if (!missing(x)) {
+                if (!is.data.table(x)) x <- as.data.table(x)
                 private$.right <- x
             } else {
                 private$.right
