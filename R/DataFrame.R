@@ -78,7 +78,7 @@ DataFrame <- R6::R6Class(
         },
 
         append = function(..., fill=TRUE) {
-            private$.tbl <- rbindlist(
+            result <- rbindlist(
                 list(private$.tbl, ...),
                 use.names = TRUE,
                 fill = fill
