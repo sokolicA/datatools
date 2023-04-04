@@ -13,7 +13,7 @@ Join <- R6::R6Class(
             if (relationship$is_not_fully_specified()) stop("Relationship has missing specification!")
             private$left <- relationship$left
             private$right <- relationship$right
-            private$.on <- relationship$get_on()
+            private$.on <- private$add_missing_expr_names(relationship$get_on())
         },
 
         test = function() {
@@ -77,6 +77,21 @@ Join <- R6::R6Class(
             result <- names(vec)
             names(result) <- vec
             return(result)
+        },
+
+        add_missing_expr_names = function(e) {
+            if (is.null(names(e))) {
+                names <- vector(length = length(e))
+                names[1] <- ""
+                for (i in seq_along(e)[-1L]) {
+                    names[i] <- deparse(e[[i]])
+                }
+                names(e) <- names
+            } else {
+                idx_missing <- names(e) == ""
+                names(e)[idx_missing][-1L] <-  gsub("\\(\\)", "", e[idx_missing])[-1L]
+            }
+            e
         }
     )
 )
@@ -88,7 +103,7 @@ UpdateJoin <- R6::R6Class(
         add_sub = function(columns, where=NULL) {
             private$.where <- where
             if (is.null(columns)) return(self$add_all_sub())
-            private$.add <- parse_dots(columns)
+            private$.add <- private$add_missing_expr_names(columns)
             private$.update_join()
         },
 
@@ -98,7 +113,7 @@ UpdateJoin <- R6::R6Class(
         },
 
         add = function(columns, where=NULL) {
-            private$.add <- parse_dots(substitute(columns))
+            private$.add <- private$add_missing_expr_names(substitute(columns))
             private$.where <- substitute(where)
             private$.update_join()
         },
@@ -160,7 +175,7 @@ LeftJoin <- R6::R6Class(
     public = list(
         add_sub = function(columns) {
             if (is.null(columns)) return(private$full_join())
-            private$.add <- parse_dots(columns)
+            private$.add <- private$add_missing_expr_names(columns)
             private$specific_join()
         },
 

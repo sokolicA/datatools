@@ -21,8 +21,7 @@ Relationship <- R6::R6Class(
         },
 
         on = function(...) {
-            .on <- substitute(list(...))
-            private$.on <- parse_dots(.on)
+            private$.on <- substitute(list(...))
             return(invisible(self))
         },
 
