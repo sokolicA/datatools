@@ -33,17 +33,17 @@ DataFrame <- R6::R6Class(
             data.table::setnames(private$.tbl, old=mapper)
         },
 
-        reorder_columns = function(order=self$key()) {
+        reorder_columns = function(order=self$key) {
             data.table::setcolorder(private$.tbl, neworder = order)
         },
 
         reorder = function(...) {
-            if (!is.null(self$key())) stop("Table is already sorted with key!")
+            if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$.tbl, ...)
         },
 
         is_key_unique = function() {
-            uniqueN(private$.tbl, by = self$key()) == nrow(private$.tbl)
+            uniqueN(private$.tbl, by = self$key) == nrow(private$.tbl)
         },
 
         count = function(by="") {
@@ -83,6 +83,7 @@ DataFrame <- R6::R6Class(
                 use.names = TRUE,
                 fill = fill
             )
+            return(DF(result, key = self$key))
         },
 
         apply = function(columns, mapper, where=NULL) {
@@ -142,7 +143,7 @@ DataFrame <- R6::R6Class(
                 if (max(remove_rows) > private$.tbl[,.N]) stop("Rows specified are out of bounds!")
                 if (any(duplicated(remove_rows))) stop("Duplicated row numbers not allowed!")
             }
-            removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key())
+            removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key)
             private$.tbl <- private$.tbl[!remove_rows]
             return(removed)
         },
