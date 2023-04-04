@@ -28,6 +28,17 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \item \code{DF()}: DataFrame$new() constructor sugar
 
 }}
+\examples{
+
+## ------------------------------------------------
+## Method `DataFrame$count`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$count()
+df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+df$count(by = list(a)) # df$count(by = .(a))
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -99,8 +110,30 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \if{html}{\out{<a id="method-DataFrame-count"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-count}{}}}
 \subsection{Method \code{count()}}{
+Count the number of rows.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count(by = "")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count(by = .())}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{by}}{An optional list() specifying the columns to group by. Defaults to no grouping.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A data.table with the row counts in the \code{N} column.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$count()
+df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+df$count(by = list(a)) # df$count(by = .(a))
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

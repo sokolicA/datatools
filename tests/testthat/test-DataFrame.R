@@ -18,6 +18,18 @@ test_that("data does not copy the object", {
     expect_equal(address(x), address(df$data))
 })
 
+test_that("count returns a data.table with count of the number of rows", {
+    x <- data.table(a=1:5, b=1:5)
+    df <- DataFrame$new(x)
+    expect_equal(df$count(), data.table(N=5))
+
+    x <- data.table(a=c(1,1,1,2,3), b=1:5)
+    df <- DataFrame$new(x)
+    expect_equal(df$count(.(a)), data.table(a=c(1,2,3), N=c(3,1,1), key = "a"))
+    expect_equal(df$count(list(a)), data.table(a=c(1,2,3), N=c(3,1,1), key = "a"))
+})
+
+
 test_that("columns$names returns character vector of column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)

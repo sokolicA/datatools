@@ -27,8 +27,21 @@ DataFrame <- R6::R6Class(
             uniqueN(private$.tbl, by = self$key) == nrow(private$.tbl)
         },
 
-        count = function(by="") {
-            private$.tbl[, .N, keyby = by]
+        #' @description Count the number of rows.
+        #'
+        #' @param by An optional list() specifying the columns to group by. Defaults to no grouping.
+        #'
+        #' @return A data.table with the row counts in the `N` column.
+        #'
+        #' @examples
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df$count()
+        #' df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+        #' df$count(by = list(a)) # df$count(by = .(a))
+        count = function(by=.()) {
+            call <- quote(private$.tbl[, .N, keyby = by])
+            call[[5]] <- substitute(by)
+            eval(call)
         },
 
         update_join = function(relationship, columns=NULL, where=NULL) {
