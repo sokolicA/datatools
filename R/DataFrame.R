@@ -50,8 +50,10 @@ DataFrame <- R6::R6Class(
             private$.tbl[, .N, keyby = by]
         },
 
-        update_join = function(tbl) {
-            private$join <- UpdateJoin$new(private$.tbl, tbl)
+        update_join = function(relationship, columns=NULL, where=NULL) {
+            relationship$left <- private$.tbl
+            join <- UpdateJoin$new(relationship)
+            join$add_sub(columns=substitute(columns), where=substitute(where))
             return(invisible(self))
         },
 
