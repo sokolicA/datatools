@@ -19,7 +19,7 @@ A \code{Relationship} object.
 A class for relationships between objects of class \code{data.frame}.
 }
 \details{
-If the objects passed are not \code{data.table} objects then a \code{data.table} copy of the objects will be created with \code{data.table::as.data.table}
+If the objects passed are not \code{data.table} objects then a \code{data.table} copy of the objects will be created with \code{data.table::as.data.table}.
 }
 \section{Functions}{
 \itemize{
