@@ -18,7 +18,7 @@ DataFrame <- R6::R6Class(
             print(private$.tbl)
         },
 
-        reorder = function(...) {
+        sort = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$.tbl, ...)
         },

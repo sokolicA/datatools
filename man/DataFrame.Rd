@@ -33,7 +33,7 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \itemize{
 \item \href{#method-DataFrame-new}{\code{DataFrame$new()}}
 \item \href{#method-DataFrame-print}{\code{DataFrame$print()}}
-\item \href{#method-DataFrame-reorder}{\code{DataFrame$reorder()}}
+\item \href{#method-DataFrame-sort}{\code{DataFrame$sort()}}
 \item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
 \item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
@@ -67,11 +67,11 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-reorder"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-reorder}{}}}
-\subsection{Method \code{reorder()}}{
+\if{html}{\out{<a id="method-DataFrame-sort"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-sort}{}}}
+\subsection{Method \code{sort()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$reorder(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$sort(...)}\if{html}{\out{</div>}}
 }
 
 }
