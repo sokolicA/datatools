@@ -1,0 +1,87 @@
+---
+title: "Benchmarking data.table joins"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r}
+library(bench)
+library(data.table)
+```
+
+```{r}
+set.seed(2019)
+A <- data.table(a = 1:1e8, b = sample(12:19, 1e7, TRUE), c = sample(12:19, 1e7, TRUE))
+B <- data.table(a = sample(A$a, 2e5), d = sample(2:8, 2e5, TRUE))
+```
+
+## 
+
+```{r}
+bm_1 <- bench::mark(
+    A[B, on = .(a)][, `:=` (a=a, c=c, d=d)][, c("b") := NULL],
+    A[B, on = .(a)][, c("b") := NULL],
+    A[B, on = .(a)][, `:=` (a=a, c=c, d=d, b = NULL)],
+    A[, .(a, c)][B, on = .(a)],
+    A[B, on = .(a), .(a, c, d)],
+    min_iterations = 10
+)
+bm_1
+```
+
+```{r}
+ggplot2::autoplot(bm_1, "violin")
+```
+
+
+```{r}
+bm_2 <- bench::mark(
+    A[B, on = .(a)][, `:=` (a=a, c=c, g = c)][, c("b", "d") := NULL],
+    A[B, on = .(a)][, `:=` (a=a, c=c, g=c, b = NULL, d = NULL)],
+    A[, .(a, c, g=c)][B, on = .(a)][, (c("d")) := NULL],
+    A[B, on = .(a), .(a, c, g=c)],
+    min_iterations = 10
+)
+bm_2
+```
+
+```{r}
+ggplot2::autoplot(bm_2, "violin")
+```
+
+```{r}
+bm_3 <- bench::mark(
+    A[B, on = .(a)][, `:=` (a=a, c=c, d=d, g = ifelse(c==12, 1, 0))][, c("b") := NULL],
+    A[B, on = .(a)][, `:=` (a=a, c=c, d=d, g = ifelse(c==12, 1, 0), b = NULL)],
+    A[, .(a, c)][B, on = .(a)][, g := ifelse(c==12, 1, 0)],
+    A[B, on = .(a), .(a, c, d, g = ifelse(c==12, 1, 0))],
+    min_iterations = 10
+)
+bm_3
+```
+
+```{r}
+ggplot2::autoplot(bm_3, "violin")
+```
+
+```{r}
+set.seed(2019)
+C <- data.table(a = 1:1e7, b = sample(12:19, 1e6, TRUE))
+C[, (letters[3:26]) := 1:1e7]
+D <- data.table(a = sample(A$a, 2e5), d = sample(2:8, 2e5, TRUE))
+```
+
+
+```{r}
+bm_4 <- bench::mark(
+    C[D, on = .(a), .(a, b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v, w, x, y, z, i.d)],
+    C[D, on = .(a)],
+    min_iterations = 10
+)
+bm_4
+```
+```{r}
+ggplot2::autoplot(bm_4, "violin")
+```
