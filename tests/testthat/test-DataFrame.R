@@ -194,7 +194,7 @@ test_that("drop removes the supplied columns", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df$drop("a")
+    df$columns$drop("a")
 
     expect_equal(names(df$data), "b")
 })
@@ -204,7 +204,7 @@ test_that("drop does not copy the data object or its columns", {
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$data)
     old_address_col <- address(df$data$b)
-    df$drop("a")
+    df$columns$drop("a")
 
     expect_equal(address(df$data), old_address_tbl)
     expect_equal(address(df$data$b), old_address_col)

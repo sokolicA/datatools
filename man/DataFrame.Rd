@@ -75,7 +75,6 @@ df$remove(c(TRUE, NA, FALSE))
 \item \href{#method-DataFrame-apply}{\code{DataFrame$apply()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-add}{\code{DataFrame$add()}}
-\item \href{#method-DataFrame-drop}{\code{DataFrame$drop()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-deep_clone}{\code{DataFrame$deep_clone()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
@@ -199,15 +198,6 @@ df$count(by = list(a)) # df$count(by = .(a))
 \subsection{Method \code{add()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$add(column, mapper, where = NULL)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-drop"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-drop}{}}}
-\subsection{Method \code{drop()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$drop(columns)}\if{html}{\out{</div>}}
 }
 
 }

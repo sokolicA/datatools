@@ -108,11 +108,6 @@ DataFrame <- R6::R6Class(
             }
         },
 
-        drop = function(columns) {
-            if (!is.character(columns)) stop("Provide a vector of column names!")
-            private$.tbl[, (c(columns)) := NULL]
-        },
-
         #' @description Remove specified rows from the table in place.
         #'
         #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
@@ -213,6 +208,20 @@ Columns <- R6::R6Class(
             cat("Number of columns:", dim(private$.tbl)[2])
             cat("\nColumn names: ")
             cat(names(private$.tbl), sep = ", ")
+        },
+
+        #' @description Drop columns in place
+        #'
+        #' @param column Character vector of the column names to remove.
+        #'
+        #' @examples
+        #' x <- data.table(a=1:5, b=1:5)
+        #' x_cols <- Columns$new(x)
+        #' x_cols$drop("b") #
+        #' names(x)
+        drop = function(columns) {
+            if (!is.character(columns)) stop("Provide a vector of column names!")
+            private$.tbl[, (c(columns)) := NULL]
         },
 
         #' @description Reorder columns in place
