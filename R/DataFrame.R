@@ -101,18 +101,38 @@ DataFrame <- R6::R6Class(
             eval(call)
         },
 
-        add = function(column, mapper, where=NULL) {
-            if (!(is.character(column) & length(column) == 1)) stop("Provide a single column name to add!")
-            if (column %in% self$columns$names) stop("Column already exists! Use update method to update it!")
-            if (!is.function(mapper)) stop("Provide a mapping function!")
+        #' @description Transform columns with function
+        #'
+        #' @param columns Either a list of columns to transform or a function that evaluates to boolean with the column names as argument. See details.
+        #' @param fun A function that is applied to the selected columns.
+        #' @param where Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.
+        #' @param ... Optional arguments that are passed to `fun`.
+        #'
+        #' @details If a function is passed as argument to `columns` it must be prefixed with en exclamation mark (**`!`**) and the function's argument
+        #' that takes the column names must be aliased with **`.names`**. See examples.
+        #'
+        #' @return Nothing.
+        #'
+        #' @examples
+        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df$transform(.(a, b), function(x) x*2, b%%2==0)
+        #'    df$transform(! .names %in% c("a"), function(x) x*2, b>2)
+        #'    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
+        transform = function(columns, fun, where=NULL, ...) {
+            call <- quote(private$.tbl[, j, .SDcols=x])
 
+            col_sub <- substitute(columns)
+            col_names <- private$parse_colnames(col_sub)
             condition <- substitute(where)
-            map <- parse(text=deparse(mapper))
-            if (is.null(condition)) {
-                private$.tbl[, (column) := eval(map)()]
-            } else {
-                private$.tbl[eval(condition), (column) := eval(map)()]
-            }
+            if (!is.null(condition)) call[[3]] <- condition
+            j_sub <- quote(`:=` (x, y))
+            col_names_sub <- str2lang(paste0("c(", paste0("'", col_names, "'", collapse = ","), ")"))
+            j_sub[[2]] <- col_names_sub
+            j_sub[[3]] <-  substitute(lapply(.SD, fun, ...))
+            call[[4]] <- j_sub
+            call[[5]] <- col_names_sub
+            eval(call)
+            return(self)
         },
 
         #' @description Remove specified rows from the table in place.
@@ -190,6 +210,28 @@ DataFrame <- R6::R6Class(
         .id = NA_character_,
 
         join = NULL,
+
+        parse_colnames = function(e) {
+            if (e[[1]] == substitute(`!`)) {
+                name_func <- e[[2]]
+                if (name_func[[1]] == substitute(`!`)) {
+                    for (i in seq_along(name_func)[-1L])
+                        if (name_func[[-1L]][[i]] == substitute(.names)) {
+                            name_func[[-1L]][[i]] <- quote(names(private$.tbl))
+                            break;
+                        }
+                } else {
+                    for (i in seq_along(name_func)[-1L])
+                        if (name_func[[i]] == substitute(.names)) {
+                            name_func[[i]] <- quote(names(private$.tbl))
+                            break;
+                        }
+                }
+
+                result <- names(private$.tbl)[eval(name_func)]
+            } else {result <- as.character(e)[-1L]}
+            result
+        },
 
         err = list(
             remove = list(

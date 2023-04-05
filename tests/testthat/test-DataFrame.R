@@ -185,6 +185,82 @@ test_that("update updates/adds columns by reference", {
 
 })
 
+test_that("transform transforms columns by reference if where filter is supplied", {
+    df <- DF(data.table(a=1:5, b=1:5))
+    old_address_tbl <- address(df$data)
+    old_address_cola <- address(df$data$a)
+    old_address_colb <- address(df$data$b)
+
+    df$transform(.(a, b), function(x) x*2, b%%2==0)
+    df$transform(list(b), sqrt, b %in% c(1, 4, 9))
+
+    expect_equal(df$data, data.table(
+        a=c(1,4,3,8,5), b=c(1,2,3,8,5)
+    )
+    )
+    expect_equal(address(df$data), old_address_tbl)
+    expect_equal(address(df$data$a), old_address_cola)
+    expect_equal(address(df$data$b), old_address_colb)
+
+})
+
+test_that("transform passes ... to fun", {
+    df <- DF(data.table(a=c(1,2, 3, NA, 5), b=1:5))
+    old_address_tbl <- address(df$data)
+    old_address_cola <- address(df$data$a)
+    old_address_colb <- address(df$data$b)
+
+    df$transform(.(a, b), mean, b%%2==0, na.rm=TRUE)
+
+    expect_equal(df$data, data.table(
+        a=c(1,2,3,2,5), b=c(1,3,3,3,5)
+    )
+    )
+    expect_equal(address(df$data), old_address_tbl)
+    expect_equal(address(df$data$a), old_address_cola)
+    expect_equal(address(df$data$b), old_address_colb)
+
+})
+
+
+
+test_that("transform works with functions that find colnames", {
+    df <- DF(data.table(a=1:5, b=1:5))
+    old_address_tbl <- address(df$data)
+    old_address_cola <- address(df$data$a)
+    old_address_colb <- address(df$data$b)
+
+    df$transform(! .names %in% c("a"), function(x) x*2, b%%2==0)
+    expect_equal(df$data, data.table(
+        a=c(1,4,3,8,5), b=1:5
+    ))
+    df$transform(! !.names %in% c("b"),  function(x) x*2, b>=2)
+    expect_equal(df$data, data.table(
+        a=c(1,8,6,16,10), b=1:5
+    ))
+    expect_equal(address(df$data), old_address_tbl)
+    expect_equal(address(df$data$a), old_address_cola)
+    expect_equal(address(df$data$b), old_address_colb)
+})
+
+test_that("transform without where (on all values) changes the type??", {
+    df <- DF(data.table(a=1:5, b=1:5))
+    old_address_tbl <- address(df$data)
+    old_address_cola <- address(df$data$a)
+    old_address_colb <- address(df$data$b)
+
+    df$transform(!.names %in% c("a"), function(x) x*2)
+    expect_equal(df$data, data.table(
+        a=1:5*2, b=1:5
+    ))
+    expect_equal(address(df$data), old_address_tbl)
+    expect_equal(address(df$data$b), old_address_colb)
+
+    # ADDRESSES WILL CHANGE!
+    expect_false(address(df$data$a) == old_address_cola)
+})
+
+
 
 
 

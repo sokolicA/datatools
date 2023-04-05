@@ -48,6 +48,15 @@ df$count(by = list(a)) # df$count(by = .(a))
    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
 
 ## ------------------------------------------------
+## Method `DataFrame$transform`
+## ------------------------------------------------
+
+   df <- DF(data.table(a=1:5, b=1:5))
+   df$transform(.(a, b), function(x) x*2, b\%\%2==0)
+   df$transform(! .names \%in\% c("a"), function(x) x*2, b>2)
+   df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
+
+## ------------------------------------------------
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
@@ -82,7 +91,7 @@ df$remove(c(TRUE, NA, FALSE))
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-apply}{\code{DataFrame$apply()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
-\item \href{#method-DataFrame-add}{\code{DataFrame$add()}}
+\item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-deep_clone}{\code{DataFrame$deep_clone()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
@@ -224,11 +233,44 @@ Nothing.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-add"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-add}{}}}
-\subsection{Method \code{add()}}{
+\if{html}{\out{<a id="method-DataFrame-transform"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-transform}{}}}
+\subsection{Method \code{transform()}}{
+Transform columns with function
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$add(column, mapper, where = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$transform(columns, fun, where = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{columns}}{Either a list of columns to transform or a function that evaluates to boolean with the column names as argument. See details.}
+
+\item{\code{fun}}{A function that is applied to the selected columns.}
+
+\item{\code{where}}{Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.}
+
+\item{\code{...}}{Optional arguments that are passed to \code{fun}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+If a function is passed as argument to \code{columns} it must be prefixed with en exclamation mark (\strong{\code{!}}) and the function's argument
+that takes the column names must be aliased with \strong{\code{.names}}. See examples.
+}
+
+\subsection{Returns}{
+Nothing.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+   df$transform(.(a, b), function(x) x*2, b\%\%2==0)
+   df$transform(! .names \%in\% c("a"), function(x) x*2, b>2)
+   df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
