@@ -261,6 +261,15 @@ test_that("transform without where (on all values) changes the type??", {
 })
 
 
+test_that("transform_if", {
+    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+
+    df$transform_if(is.numeric, function(x) x*2)
+    df$transform_if(is.character, trimws)
+    expect_equal(df$data, data.table(
+        a=1:5*2, b=1:5*2, c=paste0(1:5)
+    ))
+})
 
 
 

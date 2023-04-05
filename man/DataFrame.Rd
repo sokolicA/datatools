@@ -57,6 +57,14 @@ df$count(by = list(a)) # df$count(by = .(a))
    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
 
 ## ------------------------------------------------
+## Method `DataFrame$transform_if`
+## ------------------------------------------------
+
+    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+    df$transform_if(is.numeric, function(x) x*2)
+    df$transform_if(is.character, trimws)
+
+## ------------------------------------------------
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
@@ -92,6 +100,7 @@ df$remove(c(TRUE, NA, FALSE))
 \item \href{#method-DataFrame-apply}{\code{DataFrame$apply()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
+\item \href{#method-DataFrame-transform_if}{\code{DataFrame$transform_if()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-deep_clone}{\code{DataFrame$deep_clone()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
@@ -268,6 +277,42 @@ Nothing.
    df$transform(.(a, b), function(x) x*2, b\%\%2==0)
    df$transform(! .names \%in\% c("a"), function(x) x*2, b>2)
    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-transform_if"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-transform_if}{}}}
+\subsection{Method \code{transform_if()}}{
+Transform across columns with function
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$transform_if(predicate, fun, where = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{predicate}}{A function that is applied to the columns.  The variables for which \code{predicate} returns TRUE are selected.}
+
+\item{\code{fun}}{A transformation function that is applied to the selected columns.}
+
+\item{\code{where}}{Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.}
+
+\item{\code{...}}{Optional arguments that are passed to \code{fun}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Nothing.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+    df$transform_if(is.numeric, function(x) x*2)
+    df$transform_if(is.character, trimws)
 }
 \if{html}{\out{</div>}}
 

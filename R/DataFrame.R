@@ -135,6 +135,42 @@ DataFrame <- R6::R6Class(
             return(self)
         },
 
+        #' @description Transform across columns with function
+        #'
+        #' @param predicate A function that is applied to the columns.  The variables for which `predicate` returns TRUE are selected.
+        #' @param fun A transformation function that is applied to the selected columns.
+        #' @param where Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.
+        #' @param ... Optional arguments that are passed to `fun`.
+        #'
+        #'
+        #' @return Nothing.
+        #'
+        #' @examples
+        #'     df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+        #'     df$transform_if(is.numeric, function(x) x*2)
+        #'     df$transform_if(is.character, trimws)
+        transform_if = function(predicate, fun, where=NULL, ...) {
+            if (!is.function(predicate)) stop("Must provide a function to determine which columns will be transformed!")
+
+            call_predicate <- quote(sapply(private$.tbl, fun, simplify = TRUE))
+            call_predicate[[3]] <- predicate
+            col_names <- names(private$.tbl)[eval(call_predicate)]
+            if(length(col_names) == 0) return(warning("No columns found using the predicate function!"))
+
+            call <- quote(private$.tbl[, j, .SDcols=x])
+            col_sub <- substitute(columns)
+            condition <- substitute(where)
+            if (!is.null(condition)) call[[3]] <- condition
+            j_sub <- quote(`:=` (x, y))
+            col_names_sub <- str2lang(paste0("c(", paste0("'", col_names, "'", collapse = ","), ")"))
+            j_sub[[2]] <- col_names_sub
+            j_sub[[3]] <-  substitute(lapply(.SD, fun, ...))
+            call[[4]] <- j_sub
+            call[[5]] <- col_names_sub
+            eval(call)
+            return(self)
+        },
+
         #' @description Remove specified rows from the table in place.
         #'
         #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
