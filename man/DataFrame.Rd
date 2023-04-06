@@ -135,8 +135,13 @@ df$remove(c(TRUE, NA, FALSE))
 \if{html}{\out{<a id="method-DataFrame-print"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-print}{}}}
 \subsection{Method \code{print()}}{
+Print the table object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$print()}\if{html}{\out{</div>}}
+}
+
+\subsection{Details}{
+The method used is \code{print.data.table}.
 }
 
 }

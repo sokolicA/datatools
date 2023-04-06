@@ -14,6 +14,10 @@ DataFrame <- R6::R6Class(
             private$.id <- id
         },
 
+        #' @description Print the table object.
+        #'
+        #' @details The method used is `print.data.table`.
+        #'
         print = function() {
             print(private$.tbl)
         },
