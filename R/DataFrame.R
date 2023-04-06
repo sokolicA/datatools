@@ -58,13 +58,21 @@ DataFrame <- R6::R6Class(
             return(DF(result, key = self$key))
         },
 
-        append = function(..., fill=TRUE) {
+        #' @description Create a new `DataFrame` by appending tables using column names.
+        #'
+        #' @param ... Objects of class `data.frame`.
+        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
+        #'
+        #' @return A new unkeyed `DataFrame` object with rows appended.
+        #'
+        #' @examples
+        append = function(..., fill=FALSE) {
             result <- rbindlist(
                 list(private$.tbl, ...),
                 use.names = TRUE,
                 fill = fill
             )
-            return(DF(result, key = self$key))
+            return(DF(result, key=NULL))
         },
 
         apply = function(columns, mapper, where=NULL) {
