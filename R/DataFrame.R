@@ -8,6 +8,12 @@
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
+        #' @description `DataFrame` Constructor
+        #'
+        #' @param tbl An object of class `data.frame`.
+        #' @param key Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.
+        #' @param id Optional ID of the object. Not currently used.
+        #'
         initialize = function(tbl, key = NULL, id = NULL) {
             data.table::setDT(tbl, key = key)
             private$.tbl <- tbl

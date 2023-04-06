@@ -126,10 +126,22 @@ df$remove(c(TRUE, NA, FALSE))
 \if{html}{\out{<a id="method-DataFrame-new"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-new}{}}}
 \subsection{Method \code{new()}}{
+\code{DataFrame} Constructor
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, key = NULL, id = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{tbl}}{An object of class \code{data.frame}.}
+
+\item{\code{key}}{Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.}
+
+\item{\code{id}}{Optional ID of the object. Not currently used.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-print"></a>}}
