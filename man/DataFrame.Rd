@@ -38,6 +38,15 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
    df$sort(-b)
 
 ## ------------------------------------------------
+## Method `DataFrame$is_key_unique`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+df$is_key_unique()
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$is_key_unique()
+
+## ------------------------------------------------
 ## Method `DataFrame$count`
 ## ------------------------------------------------
 
@@ -164,8 +173,23 @@ Invisibly returns itself.
 \if{html}{\out{<a id="method-DataFrame-is_key_unique"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-is_key_unique}{}}}
 \subsection{Method \code{is_key_unique()}}{
+Check whether keys represent unique entries
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$is_key_unique()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+\code{TRUE} if the set key is unique and \code{FALSE} otherwise. If no key is set the result is \code{FALSE}.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+df$is_key_unique()
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$is_key_unique()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

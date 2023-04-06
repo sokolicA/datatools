@@ -33,7 +33,17 @@ DataFrame <- R6::R6Class(
             return(invisible(self))
         },
 
+        #' @description Check whether keys represent unique entries
+        #'
+        #' @return `TRUE` if the set key is unique and `FALSE` otherwise. If no key is set the result is `FALSE`.
+        #'
+        #' @examples
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+        #' df$is_key_unique()
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df$is_key_unique()
         is_key_unique = function() {
+            if (is.null(self$key)) return(FALSE)
             uniqueN(private$.tbl, by = self$key) == nrow(private$.tbl)
         },
 

@@ -115,10 +115,10 @@ test_that("is_key_unique returns TRUE when key is unique", {
 })
 
 
-test_that("is_key_unique returns TRUE when there is no key set", {
+test_that("is_key_unique returns FALSE when there is no key set", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    expect_true(df$is_key_unique())
+    expect_false(df$is_key_unique())
 })
 
 
