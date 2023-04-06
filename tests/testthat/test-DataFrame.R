@@ -3,12 +3,12 @@ test_that("deep clone creates an entirely new object and table", {
     df <- DataFrame$new(x)
 
     df_clone <- df$clone(deep=TRUE)
-    df_deep_clone <- df$deep_clone()
+    df_copy <- df$copy()
 
     expect_true(address(x) == address(df$data))
     expect_true(address(x) == address(df_clone$data))
-    expect_true(address(x) != address(df_deep_clone$data))
-    expect_true(address(df) != address(df_deep_clone))
+    expect_true(address(x) != address(df_copy$data))
+    expect_true(address(df) != address(df_copy))
 
 })
 

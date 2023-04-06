@@ -102,7 +102,7 @@ df$remove(c(TRUE, NA, FALSE))
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-transform_if}{\code{DataFrame$transform_if()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
-\item \href{#method-DataFrame-deep_clone}{\code{DataFrame$deep_clone()}}
+\item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
 }
@@ -195,10 +195,23 @@ df$count(by = list(a)) # df$count(by = .(a))
 \if{html}{\out{<a id="method-DataFrame-append"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-append}{}}}
 \subsection{Method \code{append()}}{
+Create a new \code{DataFrame} by appending tables using column names.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append(..., fill = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append(..., fill = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Objects of class \code{data.frame}.}
+
+\item{\code{fill}}{Optional parameter whether to fill missing columns with \code{NA}. Defaults to \code{FALSE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A new unkeyed \code{DataFrame} object with rows appended.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-apply"></a>}}
@@ -361,13 +374,17 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-deep_clone"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-deep_clone}{}}}
-\subsection{Method \code{deep_clone()}}{
+\if{html}{\out{<a id="method-DataFrame-copy"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-copy}{}}}
+\subsection{Method \code{copy()}}{
+Create a deep copy
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$deep_clone()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$copy()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+A copy of the \code{DataFrame}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-clone"></a>}}

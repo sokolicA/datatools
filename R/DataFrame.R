@@ -221,13 +221,16 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
-        deep_clone = function() {
+        #' @description Create a deep copy
+        #'
+        #' @return A copy of the `DataFrame`
+        #'
+        copy = function() {
             result <- self$clone(deep=TRUE)
             result_private <- .subset2(result, ".__enclos_env__")$private
             result_private$.tbl <- copy(private$.tbl)
             return(result)
         }
-
     ),
 
     active = list(
