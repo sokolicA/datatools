@@ -386,6 +386,7 @@ Columns <- R6::R6Class(
     ),
 
     active = list(
+        #' @field names Vector of column names.
         names = function() names(private$.tbl)
     ),
 
