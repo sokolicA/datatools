@@ -18,9 +18,19 @@ DataFrame <- R6::R6Class(
             print(private$.tbl)
         },
 
+        #' @description Sort the table rows
+        #'
+        #' @param ...  The columns to sort by. Do not quote column names. See `?data.table::setorder`.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df$sort(-b)
         sort = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$.tbl, ...)
+            return(invisible(self))
         },
 
         is_key_unique = function() {

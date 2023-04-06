@@ -31,6 +31,13 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \examples{
 
 ## ------------------------------------------------
+## Method `DataFrame$sort`
+## ------------------------------------------------
+
+   df <- DF(data.table(a=1:5, b=1:5))
+   df$sort(-b)
+
+## ------------------------------------------------
 ## Method `DataFrame$count`
 ## ------------------------------------------------
 
@@ -128,8 +135,28 @@ df$remove(c(TRUE, NA, FALSE))
 \if{html}{\out{<a id="method-DataFrame-sort"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-sort}{}}}
 \subsection{Method \code{sort()}}{
+Sort the table rows
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$sort(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{The columns to sort by. Do not quote column names. See \code{?data.table::setorder}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+   df$sort(-b)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
