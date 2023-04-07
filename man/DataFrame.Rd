@@ -226,7 +226,7 @@ df$is_key_unique()
 \subsection{Method \code{count()}}{
 Count the number of rows.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count(by = .())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count(by = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

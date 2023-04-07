@@ -68,10 +68,8 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
         #' df$count(by = list(a)) # df$count(by = .(a))
-        count = function(by=.()) {
-            call <- quote(private$.tbl[, .N, keyby = by])
-            call[[5]] <- substitute(by)
-            eval(call)
+        count = function(by=NULL) {
+            eval(substitute(private$.tbl[, .N, keyby = by]))
         },
 
         update_join = function(relationship, columns=NULL, where=NULL) {
