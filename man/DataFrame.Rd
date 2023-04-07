@@ -109,6 +109,15 @@ df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
 y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
 rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
 df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
+
+## ------------------------------------------------
+## Method `DataFrame$append`
+## ------------------------------------------------
+
+x <- data.table(a=1:5, b=1:5)
+y <- data.table(a=1:5, b=1:5)
+df <- DataFrame$new(x)
+res <- df$append(y, x, y)
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -533,6 +542,17 @@ Create a new \code{DataFrame} by appending tables using column names.
 \subsection{Returns}{
 A new unkeyed \code{DataFrame} object with rows appended.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- data.table(a=1:5, b=1:5)
+y <- data.table(a=1:5, b=1:5)
+df <- DataFrame$new(x)
+res <- df$append(y, x, y)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-copy"></a>}}

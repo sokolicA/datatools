@@ -284,6 +284,10 @@ DataFrame <- R6::R6Class(
         #' @return A new unkeyed `DataFrame` object with rows appended.
         #'
         #' @examples
+        #' x <- data.table(a=1:5, b=1:5)
+        #' y <- data.table(a=1:5, b=1:5)
+        #' df <- DataFrame$new(x)
+        #' res <- df$append(y, x, y)
         append = function(..., fill=FALSE) {
             result <- rbindlist(
                 list(private$.tbl, ...),
