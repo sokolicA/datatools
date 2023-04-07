@@ -118,6 +118,8 @@ x <- data.table(a=1:5, b=1:5)
 y <- data.table(a=1:5, b=1:5)
 df <- DataFrame$new(x)
 res <- df$append(y, x, y)
+df <- DF(data.table(a=1, b=2), key="a")
+
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}

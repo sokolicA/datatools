@@ -1,10 +1,3 @@
-#' Join Class
-#'
-#' @param relationship
-#'
-#' @return
-#'
-#' @import data.table
 Join <- R6::R6Class(
     "Join",
     public = list(
@@ -14,14 +7,6 @@ Join <- R6::R6Class(
             private$left <- relationship$left
             private$right <- relationship$right
             private$.on <- private$add_missing_expr_names(relationship$get_on())
-        },
-
-        test = function() {
-            browser()
-        },
-
-        print = function() {
-
         },
 
         add = function(...) {

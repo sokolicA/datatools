@@ -9,6 +9,7 @@
 #' The key parameter is passed to `data.table::setkey(key)`. If the parameter is not passed, the existing keys of `x` (if any) will be kept.
 #'
 #' @examples
+#' df <- DF(data.table(a=1, b=2), key="a")
 #'
 #' @return A `DataFrame` object.
 #'
