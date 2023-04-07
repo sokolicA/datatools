@@ -93,6 +93,38 @@ DataFrame <- R6::R6Class(
             eval(call)
         },
 
+        #' @description Perform an update join.
+        #'
+        #' Add new or update current table rows on matching positions.
+        #'
+        #' @param relationship A `Relationship` object with `right` table and `on` specified. See details.
+        #' @param columns List of column names to update and/or add. Defaults to `NULL` which adds all columns. Can also be transformations of columns. See details.
+        #' @param where Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.
+        #'
+        #' @return Returns the updated itself. Returns an error if there are multiple matches found in the `right` table.
+        #'
+        #' @details
+        #' A `Relationship` object with a specified `right` table and `on` condition.
+        #' The `left` table of the relationship will be set to the current object's table.
+        #' This will override an existing `left` specification.
+        #' The `right` table is joined to the `left` (current) table based on the `on` condition.
+        #' Multiple Conditions provided in `on` have to be separated by commas. Also note that `on(x)` is the same as `on(x=x)`.
+        #'
+        #' Using columns from the `left` (current) table in calculations provided in `add` can be done by
+        #' prefixing the column names with **`i.`**. See examples.
+        #'
+        #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
+        #'
+        #' The join will not be performed if there are multiple matches found in the `right` table.
+        #' In this case either use `left_join` or delete duplicated foreign keys in the `right` table.
+        #'
+        #'
+        #' @examples
+        #' df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+        #' y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+        #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+        #' df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
+        #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
         update_join = function(relationship, columns=NULL, where=NULL) {
             relationship$left <- private$.tbl
             join <- UpdateJoin$new(relationship)
@@ -212,7 +244,7 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
-        #' Perform a left outer join
+        #' @description Perform a left outer join
         #'
         #' @param relationship A `Relationship` object with `right` table and `on` specified. See details.
         #' @param add Optional list of column names to add. Defaults to `NULL` which adds all columns. Can also be transformations of columns. See details.

@@ -54,17 +54,6 @@ df <- DataFrame$new(data.table(a=1:5, b=1:5))
 df$count()
 df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
-Perform a left outer join
-
-
-## ------------------------------------------------
-## Method `DataFrame$left_join`
-## ------------------------------------------------
-
-df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
-df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
 
 ## ------------------------------------------------
 ## Method `DataFrame$update`
@@ -73,6 +62,16 @@ df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the t
    df <- DF(data.table(a=1:5, b=1:5))
    df$update(.(a = 2), b == 3)
    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+
+## ------------------------------------------------
+## Method `DataFrame$update_join`
+## ------------------------------------------------
+
+df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
+df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
 
 ## ------------------------------------------------
 ## Method `DataFrame$transform`
@@ -101,6 +100,15 @@ df <- DataFrame$new(data.table(a=1:5, b=1:5))
 df$remove(c(1, 3, 5))
 df <- DataFrame$new(data.table(a=1:3, b=1:3))
 df$remove(c(TRUE, NA, FALSE))
+
+## ------------------------------------------------
+## Method `DataFrame$left_join`
+## ------------------------------------------------
+
+df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -121,13 +129,13 @@ df$remove(c(TRUE, NA, FALSE))
 \item \href{#method-DataFrame-sort}{\code{DataFrame$sort()}}
 \item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
-\item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
-\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
-\item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
+\item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-transform_if}{\code{DataFrame$transform_if()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
+\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
+\item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
@@ -245,89 +253,11 @@ A data.table with the row counts in the \code{N} column.
 df$count()
 df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
-Perform a left outer join
-
 }
 \if{html}{\out{</div>}}
 
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-update_join"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
-\subsection{Method \code{update_join()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(relationship, columns = NULL, where = NULL)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
-\subsection{Method \code{left_join()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(relationship, add = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{relationship}}{A \code{Relationship} object with \code{right} table and \code{on} specified. See details.}
-
-\item{\code{add}}{Optional list of column names to add. Defaults to \code{NULL} which adds all columns. Can also be transformations of columns. See details.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-A \code{Relationship} object with a specified \code{right} table and \code{on} condition.
-The \code{left} table of the relationship will be set to the current object's table.
-This will override an existing \code{left} specification.
-The \code{right} table is joined to the \code{left} (current) table based on the \code{on} condition.
-Multiple Conditions provided in \code{on} have to be separated by commas. Also note that \code{on(x)} is the same as \code{on(x=x)}.
-
-Using columns from the \code{left} (current) table in calculations provided in \code{add} can be done by
-prefixing the column names with \code{i.}. See examples.
-
-Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
-}
-
-\subsection{Returns}{
-A new (keyed) \code{DataFrame} object extended with the columns from the joined table.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
-df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-append"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-append}{}}}
-\subsection{Method \code{append()}}{
-Create a new \code{DataFrame} by appending tables using column names.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append(..., fill = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Objects of class \code{data.frame}.}
-
-\item{\code{fill}}{Optional parameter whether to fill missing columns with \code{NA}. Defaults to \code{FALSE}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new unkeyed \code{DataFrame} object with rows appended.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-update"></a>}}
@@ -355,6 +285,58 @@ Nothing.
 \preformatted{   df <- DF(data.table(a=1:5, b=1:5))
    df$update(.(a = 2), b == 3)
    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-update_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
+\subsection{Method \code{update_join()}}{
+Perform an update join.
+
+Add new or update current table rows on matching positions.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(relationship, columns = NULL, where = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{relationship}}{A \code{Relationship} object with \code{right} table and \code{on} specified. See details.}
+
+\item{\code{columns}}{List of column names to update and/or add. Defaults to \code{NULL} which adds all columns. Can also be transformations of columns. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+A \code{Relationship} object with a specified \code{right} table and \code{on} condition.
+The \code{left} table of the relationship will be set to the current object's table.
+This will override an existing \code{left} specification.
+The \code{right} table is joined to the \code{left} (current) table based on the \code{on} condition.
+Multiple Conditions provided in \code{on} have to be separated by commas. Also note that \code{on(x)} is the same as \code{on(x=x)}.
+
+Using columns from the \code{left} (current) table in calculations provided in \code{add} can be done by
+prefixing the column names with \strong{\code{i.}}. See examples.
+
+Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
+
+The join will not be performed if there are multiple matches found in the \code{right} table.
+In this case either use \code{left_join} or delete duplicated foreign keys in the \code{right} table.
+}
+
+\subsection{Returns}{
+Returns the updated itself. Returns an error if there are multiple matches found in the \code{right} table.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
+df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
 }
 \if{html}{\out{</div>}}
 
@@ -479,6 +461,74 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
+\subsection{Method \code{left_join()}}{
+Perform a left outer join
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(relationship, add = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{relationship}}{A \code{Relationship} object with \code{right} table and \code{on} specified. See details.}
+
+\item{\code{add}}{Optional list of column names to add. Defaults to \code{NULL} which adds all columns. Can also be transformations of columns. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+A \code{Relationship} object with a specified \code{right} table and \code{on} condition.
+The \code{left} table of the relationship will be set to the current object's table.
+This will override an existing \code{left} specification.
+The \code{right} table is joined to the \code{left} (current) table based on the \code{on} condition.
+Multiple Conditions provided in \code{on} have to be separated by commas. Also note that \code{on(x)} is the same as \code{on(x=x)}.
+
+Using columns from the \code{left} (current) table in calculations provided in \code{add} can be done by
+prefixing the column names with \code{i.}. See examples.
+
+Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
+}
+
+\subsection{Returns}{
+A new (keyed) \code{DataFrame} object extended with the columns from the joined table.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-append"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-append}{}}}
+\subsection{Method \code{append()}}{
+Create a new \code{DataFrame} by appending tables using column names.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append(..., fill = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Objects of class \code{data.frame}.}
+
+\item{\code{fill}}{Optional parameter whether to fill missing columns with \code{NA}. Defaults to \code{FALSE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A new unkeyed \code{DataFrame} object with rows appended.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-copy"></a>}}
