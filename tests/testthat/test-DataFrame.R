@@ -144,6 +144,26 @@ test_that("update updates/adds columns by reference", {
 
 })
 
+test_that("update works by group", {
+    df <- DF(data.table(a=c(1,1, 2, 2, 2), b=1:5))
+    old_address_tbl <- address(df$data)
+    old_address_cola <- address(df$data$a)
+    old_address_col <- address(df$data$b)
+
+    df$update(.(c = max(b)), by = a)
+    df$update(.(d = max(b)), where= b!=5, by = a)
+
+    expect_equal(df$data, data.table(
+        a=c(1,1, 2, 2, 2), b=1:5,
+        c=c(2,2,5, 5, 5),
+        d=c(2, 2, 4, 4, NA)
+    ))
+    expect_equal(address(df$data), old_address_tbl)
+    expect_equal(address(df$data$a), old_address_cola)
+    expect_equal(address(df$data$b), old_address_col)
+
+})
+
 test_that("transform transforms columns by reference if where filter is supplied", {
     df <- DF(data.table(a=1:5, b=1:5))
     old_address_tbl <- address(df$data)

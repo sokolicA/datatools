@@ -76,6 +76,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @param columns A list of columns to update or add and the corresponding calculation.
         #' @param where Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.
+        #' @param by Optional list of columns to group by before performing the update. Defaults to no grouping.
         #'
         #' @return Nothing.
         #'
@@ -83,8 +84,8 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.table(a=1:5, b=1:5))
         #'    df$update(.(a = 2), b == 3)
         #'    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
-        update = function(columns, where=NULL) {
-            call <- quote(private$.tbl[, j])
+        update = function(columns, where=NULL, by=NULL) {
+            call <- substitute(private$.tbl[, j, by = by])
             condition <- substitute(where)
             if (!is.null(condition)) call[[3]] <-condition
             j_sub <- substitute(columns)

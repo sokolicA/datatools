@@ -265,7 +265,7 @@ df$count(by = list(a)) # df$count(by = .(a))
 \subsection{Method \code{update()}}{
 Update table columns by reference.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(columns, where = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(columns, where = NULL, by = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -274,6 +274,8 @@ Update table columns by reference.
 \item{\code{columns}}{A list of columns to update or add and the corresponding calculation.}
 
 \item{\code{where}}{Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.}
+
+\item{\code{by}}{Optional list of columns to group by before performing the update. Defaults to no grouping.}
 }
 \if{html}{\out{</div>}}
 }
@@ -308,6 +310,8 @@ Add new or update current table rows on matching positions.
 \item{\code{relationship}}{A \code{Relationship} object with \code{right} table and \code{on} specified. See details.}
 
 \item{\code{columns}}{List of column names to update and/or add. Defaults to \code{NULL} which adds all columns. Can also be transformations of columns. See details.}
+
+\item{\code{where}}{Optional expression/integer vector/logical vector specifying which rows to update. Defaults to all rows.}
 }
 \if{html}{\out{</div>}}
 }
