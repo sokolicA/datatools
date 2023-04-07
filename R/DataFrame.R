@@ -72,61 +72,6 @@ DataFrame <- R6::R6Class(
             eval(substitute(private$.tbl[, .N, keyby = by]))
         },
 
-        update_join = function(relationship, columns=NULL, where=NULL) {
-            relationship$left <- private$.tbl
-            join <- UpdateJoin$new(relationship)
-            join$add_sub(columns=substitute(columns), where=substitute(where))
-            return(invisible(self))
-        },
-
-        #' Perform a left outer join
-        #'
-        #' @param relationship A `Relationship` object with `right` table and `on` specified. See details.
-        #' @param add Optional list of column names to add. Defaults to `NULL` which adds all columns. Can also be transformations of columns. See details.
-        #'
-        #' @return A new (keyed) `DataFrame` object extended with the columns from the joined table.
-        #'
-        #' @details
-        #' A `Relationship` object with a specified `right` table and `on` condition.
-        #' The `left` table of the relationship will be set to the current object's table.
-        #' This will override an existing `left` specification.
-        #' The `right` table is joined to the `left` (current) table based on the `on` condition.
-        #' Multiple Conditions provided in `on` have to be separated by commas. Also note that `on(x)` is the same as `on(x=x)`.
-        #'
-        #' Using columns from the `left` (current) table in calculations provided in `add` can be done by
-        #' prefixing the column names with `i.`. See examples.
-        #'
-        #'  Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
-        #'
-        #' @examples
-        #' df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-        #' y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-        #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
-        #' df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
-        left_join = function(relationship, add=NULL) {
-            relationship$left <- private$.tbl
-            join <- LeftJoin$new(relationship)
-            result <- join$add_sub(substitute(add))
-            return(DF(result, key = self$key))
-        },
-
-        #' @description Create a new `DataFrame` by appending tables using column names.
-        #'
-        #' @param ... Objects of class `data.frame`.
-        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
-        #'
-        #' @return A new unkeyed `DataFrame` object with rows appended.
-        #'
-        #' @examples
-        append = function(..., fill=FALSE) {
-            result <- rbindlist(
-                list(private$.tbl, ...),
-                use.names = TRUE,
-                fill = fill
-            )
-            return(DF(result, key=NULL))
-        },
-
         #' @description Update table columns by reference.
         #'
         #' @param columns A list of columns to update or add and the corresponding calculation.
@@ -146,6 +91,13 @@ DataFrame <- R6::R6Class(
             j_sub[[1]] <- quote(`:=`)
             call[[4]] <- j_sub
             eval(call)
+        },
+
+        update_join = function(relationship, columns=NULL, where=NULL) {
+            relationship$left <- private$.tbl
+            join <- UpdateJoin$new(relationship)
+            join$add_sub(columns=substitute(columns), where=substitute(where))
+            return(invisible(self))
         },
 
         #' @description Transform columns with function
@@ -258,6 +210,54 @@ DataFrame <- R6::R6Class(
             removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key)
             private$.tbl <- private$.tbl[keep]
             return(removed)
+        },
+
+        #' Perform a left outer join
+        #'
+        #' @param relationship A `Relationship` object with `right` table and `on` specified. See details.
+        #' @param add Optional list of column names to add. Defaults to `NULL` which adds all columns. Can also be transformations of columns. See details.
+        #'
+        #' @return A new (keyed) `DataFrame` object extended with the columns from the joined table.
+        #'
+        #' @details
+        #' A `Relationship` object with a specified `right` table and `on` condition.
+        #' The `left` table of the relationship will be set to the current object's table.
+        #' This will override an existing `left` specification.
+        #' The `right` table is joined to the `left` (current) table based on the `on` condition.
+        #' Multiple Conditions provided in `on` have to be separated by commas. Also note that `on(x)` is the same as `on(x=x)`.
+        #'
+        #' Using columns from the `left` (current) table in calculations provided in `add` can be done by
+        #' prefixing the column names with `i.`. See examples.
+        #'
+        #'  Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
+        #'
+        #' @examples
+        #' df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+        #' y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+        #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+        #' df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
+        left_join = function(relationship, add=NULL) {
+            relationship$left <- private$.tbl
+            join <- LeftJoin$new(relationship)
+            result <- join$add_sub(substitute(add))
+            return(DF(result, key = self$key))
+        },
+
+        #' @description Create a new `DataFrame` by appending tables using column names.
+        #'
+        #' @param ... Objects of class `data.frame`.
+        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
+        #'
+        #' @return A new unkeyed `DataFrame` object with rows appended.
+        #'
+        #' @examples
+        append = function(..., fill=FALSE) {
+            result <- rbindlist(
+                list(private$.tbl, ...),
+                use.names = TRUE,
+                fill = fill
+            )
+            return(DF(result, key=NULL))
         },
 
         #' @description Create a deep copy
