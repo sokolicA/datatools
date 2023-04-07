@@ -75,6 +75,7 @@ Constructor
 \if{html}{\out{<a id="method-Columns-print"></a>}}
 \if{latex}{\out{\hypertarget{method-Columns-print}{}}}
 \subsection{Method \code{print()}}{
+Print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Columns$print()}\if{html}{\out{</div>}}
 }

@@ -15,6 +15,9 @@ Columns <- R6::R6Class(
             private$.tbl <- x
         },
 
+        #' @description Print method
+        #'
+        #'
         print = function() {
             cat("Number of columns:", dim(private$.tbl)[2])
             cat("\nColumn names: ")
