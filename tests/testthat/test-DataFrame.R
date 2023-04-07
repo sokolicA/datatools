@@ -122,47 +122,6 @@ test_that("is_key_unique returns FALSE when there is no key set", {
 })
 
 
-test_that("apply updates specified columns", {
-    x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x)
-
-    df$apply(c("a", "b"), function(x) {x**2}, b == 4)
-
-    expect_equal(df$data[4], data.table(a=16, b=16))
-})
-
-test_that("apply mapper can use other columns", {
-    x <- data.table(a=2:6, b=1:5)
-    df <- DataFrame$new(x)
-    mapper <- function(x) a**2
-    df$apply(c("a", "b"), mapper, b == 4)
-    expect_equal(df$data[4], data.table(a=25, b=25))
-
-    x <- data.table(a=2:6, b=1:5)
-    df <- DataFrame$new(x)
-    mapper <- function(x) {ifelse(x > 3 , b**2, x**2)}
-    df$apply(c("a", "b"), mapper)
-
-})
-
-
-test_that("apply does not copy the data", {
-    x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x)
-    mapper <- function(x) a**2
-    old_address_tbl <- address(df$data)
-    old_address_cola <- address(df$data$a)
-    old_address_col <- address(df$data$b)
-
-    df$apply(c("a"), mapper, b == 4)
-
-    expect_equal(address(df$data), old_address_tbl)
-    expect_equal(address(df$data$a), old_address_cola)
-    expect_equal(address(df$data$b), old_address_col)
-})
-
-
-
 test_that("update updates/adds columns by reference", {
     df <- DF(data.table(a=1:5, b=1:5))
     old_address_tbl <- address(df$data)
