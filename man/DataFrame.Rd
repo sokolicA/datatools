@@ -18,7 +18,7 @@ DF(tbl, key = NULL, id = NULL)
 A \code{DataFrame} object.
 }
 \description{
-A class for tabular data objects of class \code{data.frame}.
+A wrapper class for tabular data objects of class \code{data.frame}.
 }
 \details{
 The key parameter is passed to \code{data.table::setkey(key)}. If the parameter is not passed, the existing keys of \code{x} (if any) will be kept.

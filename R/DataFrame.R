@@ -1,10 +1,8 @@
 #' @title DataFrame Class
 #'
-#' @description A class for tabular data objects of class `data.frame`.
+#' @description A wrapper class for tabular data objects of class `data.frame`.
 #'
 #' @import data.table
-#'
-#' @export
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
