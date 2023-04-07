@@ -26,6 +26,15 @@ If the objects passed are not \code{data.table} objects then a \code{data.table}
 \item \code{Rel()}: Relationship$new() constructor sugar
 
 }}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{left}}{The left table.}
+
+\item{\code{right}}{The right table.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -40,37 +49,66 @@ If the objects passed are not \code{data.table} objects then a \code{data.table}
 \if{html}{\out{<a id="method-Relationship-new"></a>}}
 \if{latex}{\out{\hypertarget{method-Relationship-new}{}}}
 \subsection{Method \code{new()}}{
+Relationship constructor
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Relationship$new(left = NULL, right = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{left}}{Optional object of class \code{data.table} (or \code{data.frame}, see Details) that is treated as the left table.}
+
+\item{\code{right}}{Optional object of class \code{data.table} (or \code{data.frame}, see Details) that is treated as the right table.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Relationship-get_on"></a>}}
 \if{latex}{\out{\hypertarget{method-Relationship-get_on}{}}}
 \subsection{Method \code{get_on()}}{
+Get the relationship connection.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Relationship$get_on()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+The connection.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Relationship-on"></a>}}
 \if{latex}{\out{\hypertarget{method-Relationship-on}{}}}
 \subsection{Method \code{on()}}{
+Specify the columns the relationship between left and right is based on.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Relationship$on(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Which columns in the left table relate to which columns of the right table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Relationship-is_not_fully_specified"></a>}}
 \if{latex}{\out{\hypertarget{method-Relationship-is_not_fully_specified}{}}}
 \subsection{Method \code{is_not_fully_specified()}}{
+Check if the relationship is not fully specified.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Relationship$is_not_fully_specified()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+\code{TRUE} if \code{left}, \code{right} and \code{on} are specified and \code{FALSE} otherwise.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Relationship-clone"></a>}}
