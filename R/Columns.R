@@ -12,16 +12,16 @@ Columns <- R6::R6Class(
         #' @param x A `data.table` object.
         #'
         initialize = function(x) {
-            private$.tbl <- x
+            private$df <- x
         },
 
         #' @description Print method
         #'
         #'
         print = function() {
-            cat("Number of columns:", dim(private$.tbl)[2])
+            cat("Number of columns:", dim(private$df$data)[2])
             cat("\nColumn names: ")
-            cat(names(private$.tbl), sep = ", ")
+            cat(names(private$df$data), sep = ", ")
         },
 
         #' @description Drop columns in place
@@ -35,7 +35,7 @@ Columns <- R6::R6Class(
         #' names(x)
         drop = function(columns) {
             if (!is.character(columns)) stop("Provide a vector of column names!")
-            private$.tbl[, (c(columns)) := NULL]
+            private$df$data[, (c(columns)) := NULL]
         },
 
         #' @description Reorder columns in place
@@ -50,8 +50,8 @@ Columns <- R6::R6Class(
         #' x_cols <- Columns$new(x)
         #' x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
         #' names(x)
-        reorder = function(order=key(private$.tbl)) {
-            data.table::setcolorder(private$.tbl, neworder = order)
+        reorder = function(order=key(private$df$data)) {
+            data.table::setcolorder(private$df$data, neworder = order)
             return(invisible(self))
         },
 
@@ -67,7 +67,7 @@ Columns <- R6::R6Class(
         #' df$rename(custom_mapper)
         rename = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
-            data.table::setnames(private$.tbl, old=mapper)
+            data.table::setnames(private$df$data, old=mapper)
             return(invisible(self))
         }
 
@@ -75,10 +75,10 @@ Columns <- R6::R6Class(
 
     active = list(
         #' @field names Vector of column names.
-        names = function() names(private$.tbl)
+        names = function() names(private$df$data)
     ),
 
     private = list(
-        .tbl = NULL
+        df = NULL
     )
 )

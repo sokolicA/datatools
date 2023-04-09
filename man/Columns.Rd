@@ -115,7 +115,7 @@ names(x)
 \subsection{Method \code{reorder()}}{
 Reorder columns in place
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Columns$reorder(order = key(private$.tbl))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Columns$reorder(order = key(private$df$data))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
