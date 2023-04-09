@@ -91,6 +91,17 @@ df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
     df$transform_if(is.character, trimws)
 
 ## ------------------------------------------------
+## Method `DataFrame$filter`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$filter(a > 2)
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$filter(c(1, 3, 5))
+df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df$filter(c(TRUE, NA, FALSE))
+
+## ------------------------------------------------
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
@@ -144,6 +155,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-transform_if}{\code{DataFrame$transform_if()}}
+\item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
@@ -430,6 +442,47 @@ Nothing.
 \preformatted{    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
     df$transform_if(is.numeric, function(x) x*2)
     df$transform_if(is.character, trimws)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-filter"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-filter}{}}}
+\subsection{Method \code{filter()}}{
+Create a new \code{DataFrame} with filter applied to the rows.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$filter(keep)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+\itemize{
+\item If an expression is passed it will be evaluated inside the context of the table.
+\item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
+\item If a logical vector is passed it must be of the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
+}
+}
+
+\subsection{Returns}{
+A new \code{DataFrame} with kept rows.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$filter(a > 2)
+df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df$filter(c(1, 3, 5))
+df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df$filter(c(TRUE, NA, FALSE))
 }
 \if{html}{\out{</div>}}
 

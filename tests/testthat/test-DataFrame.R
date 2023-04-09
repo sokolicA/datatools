@@ -325,6 +325,44 @@ test_that("remove does not work with character vector", {
 })
 
 
+test_that("filter works with unevaluated expression", {
+    x <- data.table(a=1:5, b=1:5)
+    df <- DataFrame$new(x)
+    filt_df <- df$filter(a > 2)
+    expect_equal(filt_df$data, data.table(a=3:5, b=3:5))
+})
+
+test_that("filter works with integer vector", {
+    expect_equal(DataFrame$new(data.table(a=1:5, b=1:5))$filter(3:5)$data,
+                 data.table(a=3:5, b=3:5))
+})
+
+test_that("filter does not work with out of bounds integer vector", {
+    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(4:6))
+})
+
+test_that("filter does not work with duplicated row numbers passed", {
+    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(c(4, 4)))
+})
+
+test_that("filter does not work with logical vector of smaller length", {
+    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(c(TRUE, TRUE, FALSE)))
+})
+
+test_that("filter treats logical NA as FALSE", {
+    df <- DataFrame$new(data.table(a=1:3, b=1:3))
+    expect_equal(df$filter(c(TRUE, NA, FALSE))$data, data.table(a=1, b=1))
+})
+
+test_that("filter does not work with longer vectors", {
+    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(1:10))
+})
+
+test_that("filter does not work with character vector", {
+    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter("a"))
+})
+
+
 
 test_that("UpdateJoin$add works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
