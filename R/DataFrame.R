@@ -223,18 +223,18 @@ DataFrame <- R6::R6Class(
         remove = function(where) {
             condition <- substitute(where)
             if (!is.language(condition)) {
-                stop(err$remove$not_language)
+                stop(private$err$remove$not_language)
             }
 
             remove_rows <- eval(condition, envir=private$.tbl, enclos=parent.frame())
             if (is.numeric(remove_rows)) {
-                if (max(remove_rows) > private$.tbl[,.N]) stop(err$remove$int_out_of_bounds)
-                if (any(duplicated(remove_rows))) stop(err$remove$int_duplicated)
+                if (max(remove_rows) > private$.tbl[,.N]) stop(private$err$remove$int_out_of_bounds)
+                if (any(duplicated(remove_rows))) stop(private$err$remove$int_duplicated)
                 remove_rows <- private$.tbl[, .I %in% remove_rows]
                 keep <- !remove_rows
             }
             if (is.logical(remove_rows)) {
-                if(length(remove_rows) != private$.tbl[,.N]) stop(err$remove$unequal_length_logical)
+                if(length(remove_rows) != private$.tbl[,.N]) stop(private$err$remove$unequal_length_logical)
                 keep <- !remove_rows | is.na(remove_rows)
             }
 
