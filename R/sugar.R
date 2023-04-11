@@ -34,3 +34,14 @@ Rel <- function(left=NULL, right=NULL) {
     Relationship$new(left, right)
 }
 
+#' Constant constructor sugar
+#' @describeIn Constant Constant$new() constructor sugar
+#'
+#' @return A `Constant` object.
+#'
+#' @export
+Const <- function() {
+    Constant$new()
+}
+
+
