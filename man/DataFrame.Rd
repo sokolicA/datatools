@@ -139,7 +139,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 
 \item{\code{columns}}{Column names object.}
 
-\item{\code{key}}{Key getter and setter.}
+\item{\code{key}}{Key getter}
 }
 \if{html}{\out{</div>}}
 }
@@ -157,6 +157,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-transform_if}{\code{DataFrame$transform_if()}}
 \item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
+\item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
@@ -529,6 +530,25 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-set_key}{}}}
+\subsection{Method \code{set_key()}}{
+Create a key the table.
+
+\code{set_key} sorts the table and marks it as sorted with an attribute sorted.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set_key(key)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{A Character vector of column names to set the key on.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-left_join"></a>}}

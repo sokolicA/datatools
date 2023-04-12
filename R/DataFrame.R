@@ -279,6 +279,15 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
+        #' @description Create a key the table.
+        #'
+        #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
+        #'
+        #' @param key A Character vector of column names to set the key on.
+        set_key = function(key) {
+            data.table::setkeyv(x=private$.tbl, cols=key)
+        },
+
         #' @description Perform a left outer join
         #'
         #' @param relationship A `Relationship` object with `right` table and `on` specified. See details.
@@ -355,10 +364,9 @@ DataFrame <- R6::R6Class(
             Columns$new(self)
         },
 
-        #' @field key Key getter and setter.
+        #' @field key Key getter
         key = function(key) {
-            if (missing(key)) return(data.table::key(private$.tbl))
-            data.table::setkeyv(x=private$.tbl, cols=key)
+            data.table::key(private$.tbl)
         }
     ),
 
