@@ -22,7 +22,7 @@ See examples for a simple use case.
 
 }}
 \examples{
-CONST <- Constant$new()
+CONST <- Const() # or Constant$new()
 CONST$define("x", 3)
 CONST$get$x
 
