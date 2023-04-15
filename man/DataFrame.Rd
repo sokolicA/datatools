@@ -34,46 +34,46 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 ## Method `DataFrame$head`
 ## ------------------------------------------------
 
-   df <- DF(data.table(a=1:5, b=1:5))
+   df <- DF(data.frame(a=1:5, b=1:5))
    df$head(1)
 
 ## ------------------------------------------------
 ## Method `DataFrame$tail`
 ## ------------------------------------------------
 
-   df <- DF(data.table(a=1:5, b=1:5))
+   df <- DF(data.frame(a=1:5, b=1:5))
    df$tail(1)
 
 ## ------------------------------------------------
 ## Method `DataFrame$sort`
 ## ------------------------------------------------
 
-   df <- DF(data.table(a=1:5, b=1:5))
+   df <- DF(data.frame(a=1:5, b=1:5))
    df$sort(-b)
 
 ## ------------------------------------------------
 ## Method `DataFrame$is_key_unique`
 ## ------------------------------------------------
 
-df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
 df$is_key_unique()
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$is_key_unique()
 
 ## ------------------------------------------------
 ## Method `DataFrame$count`
 ## ------------------------------------------------
 
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$count()
-df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
 
 ## ------------------------------------------------
 ## Method `DataFrame$update`
 ## ------------------------------------------------
 
-   df <- DF(data.table(a=1:5, b=1:5))
+   df <- DF(data.frame(a=1:5, b=1:5))
    df$update(.(a = 2), b == 3)
    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
 
@@ -81,8 +81,8 @@ df$count(by = list(a)) # df$count(by = .(a))
 ## Method `DataFrame$update_join`
 ## ------------------------------------------------
 
-df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
 rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
 df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
 df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
@@ -91,7 +91,7 @@ df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
 ## Method `DataFrame$transform`
 ## ------------------------------------------------
 
-   df <- DF(data.table(a=1:5, b=1:5))
+   df <- DF(data.frame(a=1:5, b=1:5))
    df$transform(.(a, b), function(x) x*2, b\%\%2==0)
    df$transform(! .names \%in\% c("a"), function(x) x*2, b>2)
    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
@@ -100,7 +100,7 @@ df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
 ## Method `DataFrame$transform_if`
 ## ------------------------------------------------
 
-    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+    df <- DF(data.frame(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
     df$transform_if(is.numeric, function(x) x*2)
     df$transform_if(is.character, trimws)
 
@@ -108,7 +108,7 @@ df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
 ## Method `DataFrame$filter`
 ## ------------------------------------------------
 
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$filter(a > 2)
 df$filter(c(1, 3, 5))
 df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -117,7 +117,7 @@ df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
 ## Method `DataFrame$filter_`
 ## ------------------------------------------------
 
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$filter_(a > 2)
 df
 
@@ -125,19 +125,19 @@ df
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$remove(a > 2)
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$remove(c(1, 3, 5))
-df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df <- DF(data.frame(a=1:3, b=1:3))
 df$remove(c(TRUE, NA, FALSE))
 
 ## ------------------------------------------------
 ## Method `DataFrame$left_join`
 ## ------------------------------------------------
 
-df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
 rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
 df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
 
@@ -145,9 +145,9 @@ df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the t
 ## Method `DataFrame$append`
 ## ------------------------------------------------
 
-x <- data.table(a=1:5, b=1:5)
-y <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
+x <- data.frame(a=1:5, b=1:5)
+y <- data.frame(a=1:5, b=1:5)
+df <- DF(x)
 res <- df$append(y, x, y)
 df <- DF(data.table(a=1, b=2), key="a")
 
@@ -243,7 +243,7 @@ For negative values of n, this method returns all rows except the last |n| rows.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
    df$head(1)
 }
 \if{html}{\out{</div>}}
@@ -273,7 +273,7 @@ For negative values of n, this method returns all rows except the first |n| rows
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
    df$tail(1)
 }
 \if{html}{\out{</div>}}
@@ -302,7 +302,7 @@ Invisibly returns itself.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
    df$sort(-b)
 }
 \if{html}{\out{</div>}}
@@ -324,9 +324,9 @@ Check whether keys represent unique entries
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
 df$is_key_unique()
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$is_key_unique()
 }
 \if{html}{\out{</div>}}
@@ -355,9 +355,9 @@ A data.table with the row counts in the \code{N} column.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$count()
-df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
 df$count(by = list(a)) # df$count(by = .(a))
 }
 \if{html}{\out{</div>}}
@@ -390,7 +390,7 @@ Nothing.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
    df$update(.(a = 2), b == 3)
    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
 }
@@ -442,8 +442,8 @@ Returns the updated itself. Returns an error if there are multiple matches found
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+\preformatted{df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
 rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
 df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
 df$update_join(rel, columns=list(g=c**2), where=x \%in\% 1:2)
@@ -485,7 +485,7 @@ Nothing.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
    df$transform(.(a, b), function(x) x*2, b\%\%2==0)
    df$transform(! .names \%in\% c("a"), function(x) x*2, b>2)
    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
@@ -522,7 +522,7 @@ Nothing.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+\preformatted{    df <- DF(data.frame(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
     df$transform_if(is.numeric, function(x) x*2)
     df$transform_if(is.character, trimws)
 }
@@ -560,7 +560,7 @@ A new \code{DataFrame} with kept rows.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$filter(a > 2)
 df$filter(c(1, 3, 5))
 df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -601,7 +601,7 @@ Returns itself with kept rows only.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$filter_(a > 2)
 df
 }
@@ -639,11 +639,11 @@ A \code{DataFrame} object consisting of removed rows.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:5, b=1:5))
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$remove(a > 2)
-df <- DataFrame$new(data.table(a=1:5, b=1:5))
+df <- DF(data.frame(a=1:5, b=1:5))
 df$remove(c(1, 3, 5))
-df <- DataFrame$new(data.table(a=1:3, b=1:3))
+df <- DF(data.frame(a=1:3, b=1:3))
 df$remove(c(TRUE, NA, FALSE))
 }
 \if{html}{\out{</div>}}
@@ -706,8 +706,8 @@ A new (keyed) \code{DataFrame} object extended with the columns from the joined 
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+\preformatted{df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
 rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
 df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
 }
@@ -739,9 +739,9 @@ A new unkeyed \code{DataFrame} object with rows appended.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:5, b=1:5)
-y <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
+\preformatted{x <- data.frame(a=1:5, b=1:5)
+y <- data.frame(a=1:5, b=1:5)
+df <- DF(x)
 res <- df$append(y, x, y)
 }
 \if{html}{\out{</div>}}

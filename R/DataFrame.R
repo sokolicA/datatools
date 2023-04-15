@@ -35,10 +35,10 @@ DataFrame <- R6::R6Class(
         #'
         #'
         #' @examples
-        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            DF(head(private$.tbl, n))
+            DataFrame$new(head(private$.tbl, n))
         },
 
         #' @description Return the last n rows.
@@ -50,10 +50,10 @@ DataFrame <- R6::R6Class(
         #'
         #'
         #' @examples
-        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            DF(tail(private$.tbl, n))
+            DataFrame$new(tail(private$.tbl, n))
         },
 
         #' @description Sort the table rows
@@ -63,7 +63,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         #' @examples
-        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$sort(-b)
         sort = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
@@ -76,9 +76,9 @@ DataFrame <- R6::R6Class(
         #' @return `TRUE` if the set key is unique and `FALSE` otherwise. If no key is set the result is `FALSE`.
         #'
         #' @examples
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5), key = c("a"))
+        #' df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
         #' df$is_key_unique()
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$is_key_unique()
         is_key_unique = function() {
             if (is.null(self$key)) return(FALSE)
@@ -92,9 +92,9 @@ DataFrame <- R6::R6Class(
         #' @return A data.table with the row counts in the `N` column.
         #'
         #' @examples
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$count()
-        #' df <- DataFrame$new(data.table(a=c(1,1,1,2,3), b=1:5))
+        #' df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
         #' df$count(by = list(a)) # df$count(by = .(a))
         count = function(by=NULL) {
             eval(substitute(private$.tbl[, .N, keyby = by]))
@@ -109,7 +109,7 @@ DataFrame <- R6::R6Class(
         #' @return Nothing.
         #'
         #' @examples
-        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$update(.(a = 2), b == 3)
         #'    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
         update = function(columns, where=NULL, by=NULL) {
@@ -149,8 +149,8 @@ DataFrame <- R6::R6Class(
         #'
         #'
         #' @examples
-        #' df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-        #' y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+        #' df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+        #' y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
         #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
         #' df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
         #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
@@ -174,7 +174,7 @@ DataFrame <- R6::R6Class(
         #' @return Nothing.
         #'
         #' @examples
-        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$transform(.(a, b), function(x) x*2, b%%2==0)
         #'    df$transform(! .names %in% c("a"), function(x) x*2, b>2)
         #'    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
@@ -206,7 +206,7 @@ DataFrame <- R6::R6Class(
         #' @return Nothing.
         #'
         #' @examples
-        #'     df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
+        #'     df <- DF(data.frame(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
         #'     df$transform_if(is.numeric, function(x) x*2)
         #'     df$transform_if(is.character, trimws)
         transform_if = function(predicate, fun, where=NULL, ...) {
@@ -244,7 +244,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @return A new `DataFrame` with kept rows.
         #' @examples
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$filter(a > 2)
         #' df$filter(c(1, 3, 5))
         #' df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -267,7 +267,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @return Returns itself with kept rows only.
         #' @examples
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$filter_(a > 2)
         #' df
         filter_ = function(keep) {
@@ -288,11 +288,11 @@ DataFrame <- R6::R6Class(
         #'
         #' @return A `DataFrame` object consisting of removed rows.
         #' @examples
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$remove(a > 2)
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df <- DF(data.frame(a=1:5, b=1:5))
         #' df$remove(c(1, 3, 5))
-        #' df <- DataFrame$new(data.table(a=1:3, b=1:3))
+        #' df <- DF(data.frame(a=1:3, b=1:3))
         #' df$remove(c(TRUE, NA, FALSE))
         remove = function(where) {
             condition <- substitute(where)
@@ -346,15 +346,15 @@ DataFrame <- R6::R6Class(
         #'  Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
         #'
         #' @examples
-        #' df <- DF(data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-        #' y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+        #' df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+        #' y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
         #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
         #' df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
         left_join = function(relationship, add=NULL) {
             relationship$left <- private$.tbl
             join <- LeftJoin$new(relationship)
             result <- join$add_sub(substitute(add))
-            return(DF(result, key = self$key))
+            return(DataFrame$new(result, key = self$key))
         },
 
         #' @description Create a new `DataFrame` by appending tables using column names.
@@ -365,9 +365,9 @@ DataFrame <- R6::R6Class(
         #' @return A new unkeyed `DataFrame` object with rows appended.
         #'
         #' @examples
-        #' x <- data.table(a=1:5, b=1:5)
-        #' y <- data.table(a=1:5, b=1:5)
-        #' df <- DataFrame$new(x)
+        #' x <- data.frame(a=1:5, b=1:5)
+        #' y <- data.frame(a=1:5, b=1:5)
+        #' df <- DF(x)
         #' res <- df$append(y, x, y)
         append = function(..., fill=FALSE) {
             result <- rbindlist(
