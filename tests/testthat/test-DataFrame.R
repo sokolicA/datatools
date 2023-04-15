@@ -337,14 +337,6 @@ test_that("filter works with integer vector", {
                  data.table(a=3:5, b=3:5))
 })
 
-test_that("filter does not work with out of bounds integer vector", {
-    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(4:6))
-})
-
-test_that("filter does not work with duplicated row numbers passed", {
-    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(c(4, 4)))
-})
-
 test_that("filter does not work with logical vector of smaller length", {
     expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(c(TRUE, TRUE, FALSE)))
 })
@@ -352,10 +344,6 @@ test_that("filter does not work with logical vector of smaller length", {
 test_that("filter treats logical NA as FALSE", {
     df <- DataFrame$new(data.table(a=1:3, b=1:3))
     expect_equal(df$filter(c(TRUE, NA, FALSE))$data, data.table(a=1, b=1))
-})
-
-test_that("filter does not work with longer vectors", {
-    expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter(1:10))
 })
 
 test_that("filter does not work with character vector", {

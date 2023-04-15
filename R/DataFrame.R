@@ -208,7 +208,7 @@ DataFrame <- R6::R6Class(
         #' @details
         #' \itemize{
         #' \item If an expression is passed it will be evaluated inside the context of the table.
-        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
+        #' \item If an integer vector is passed, the rows specified will be kept. Passing duplicated numbers will result in duplicated rows and passing numbers larger than the number of rows will result in `NA` rows.
         #' \item If a logical vector is passed it must be of the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be removed.
         #'}
         #'
@@ -216,25 +216,10 @@ DataFrame <- R6::R6Class(
         #' @examples
         #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
         #' df$filter(a > 2)
-        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
         #' df$filter(c(1, 3, 5))
-        #' df <- DataFrame$new(data.table(a=1:3, b=1:3))
-        #' df$filter(c(TRUE, NA, FALSE))
+        #' df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
         filter = function(keep) {
-            condition <- substitute(keep)
-            if (!is.language(condition)) stop(private$err$remove$not_language)
-
-            keep_rows <- eval(condition, envir=private$.tbl, enclos=parent.frame())
-            if (is.numeric(keep_rows)) {
-                if (max(keep_rows) > private$.tbl[,.N]) stop(private$err$remove$int_out_of_bounds)
-                if (any(duplicated(keep_rows))) stop(private$err$remove$int_duplicated)
-                keep_rows <- private$.tbl[, .I %in% keep_rows]
-            }
-            if (is.logical(keep_rows)) {
-                if(length(keep_rows) != private$.tbl[,.N]) stop(private$err$remove$unequal_length_logical)
-            }
-
-            DataFrame$new(private$.tbl[keep_rows])
+            DataFrame$new(eval(substitute(private$.tbl[keep])))
         },
 
         #' @description Remove specified rows from the table in place.
