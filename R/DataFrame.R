@@ -222,6 +222,29 @@ DataFrame <- R6::R6Class(
             DataFrame$new(eval(substitute(private$.tbl[keep])))
         },
 
+        #' @description Filter the table in place.
+        #'
+        #' Same as `$filter` method, just done in place. Opposite of the `$remove` method.
+        #'
+        #' @param keep An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
+        #'
+        #' @details
+        #' \itemize{
+        #' \item If an expression is passed it will be evaluated inside the context of the table.
+        #' \item If an integer vector is passed, the rows specified will be kept. Passing duplicated numbers will result in duplicated rows and passing numbers larger than the number of rows will result in `NA` rows.
+        #' \item If a logical vector is passed it must be of the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be removed.
+        #'}
+        #'
+        #' @return Returns itself with kept rows only.
+        #' @examples
+        #' df <- DataFrame$new(data.table(a=1:5, b=1:5))
+        #' df$filter_(a > 2)
+        #' df
+        filter_ = function(keep) {
+            private$.tbl <- eval(substitute(private$.tbl[keep]))
+            self
+        },
+
         #' @description Remove specified rows from the table in place.
         #'
         #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
