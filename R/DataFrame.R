@@ -41,6 +41,21 @@ DataFrame <- R6::R6Class(
             DF(head(private$.tbl, n))
         },
 
+        #' @description Return the last n rows.
+        #'
+        #' @param n  The number of rows to return. Defaults to 5.
+        #'
+        #' @return A new `DataFrame` object with only the first `n` rows.
+        #' For negative values of n, this method returns all rows except the first |n| rows.
+        #'
+        #'
+        #' @examples
+        #'    df <- DF(data.table(a=1:5, b=1:5))
+        #'    df$tail(1)
+        tail = function(n=5L) {
+            DF(tail(private$.tbl, n))
+        },
+
         #' @description Sort the table rows
         #'
         #' @param ...  The columns to sort by. Do not quote column names. See `?data.table::setorder`.
