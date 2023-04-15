@@ -141,8 +141,6 @@ df <- DF(data.table(a=1, b=2), key="a")
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{data}}{Data getter.}
-
 \item{\code{columns}}{Column names object.}
 
 \item{\code{key}}{Key getter}
@@ -167,6 +165,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
+\item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
 \item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
@@ -673,6 +672,19 @@ res <- df$append(y, x, y)
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-unwrap"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-unwrap}{}}}
+\subsection{Method \code{unwrap()}}{
+Get the underlying data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$unwrap()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+The underlying \code{data.table} object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-copy"></a>}}

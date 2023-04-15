@@ -19,9 +19,9 @@ Columns <- R6::R6Class(
         #'
         #'
         print = function() {
-            cat("Number of columns:", dim(private$df$data)[2])
+            cat("Number of columns:", dim(private$df$unwrap())[2])
             cat("\nColumn names: ")
-            cat(names(private$df$data), sep = ", ")
+            cat(names(private$df$unwrap()), sep = ", ")
         },
 
         #' @description Drop columns in place
@@ -35,7 +35,7 @@ Columns <- R6::R6Class(
         #' names(x)
         drop = function(columns) {
             if (!is.character(columns)) stop("Provide a vector of column names!")
-            private$df$data[, (c(columns)) := NULL]
+            private$df$unwrap()[, (c(columns)) := NULL]
         },
 
         #' @description Reorder columns in place
@@ -50,8 +50,8 @@ Columns <- R6::R6Class(
         #' x_cols <- Columns$new(x)
         #' x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
         #' names(x)
-        reorder = function(order=key(private$df$data)) {
-            data.table::setcolorder(private$df$data, neworder = order)
+        reorder = function(order=key(private$df$unwrap())) {
+            data.table::setcolorder(private$df$unwrap(), neworder = order)
             return(invisible(self))
         },
 
@@ -67,7 +67,7 @@ Columns <- R6::R6Class(
         #' df$rename(custom_mapper)
         rename = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
-            data.table::setnames(private$df$data, old=mapper)
+            data.table::setnames(private$df$unwrap(), old=mapper)
             return(invisible(self))
         }
 
@@ -75,7 +75,7 @@ Columns <- R6::R6Class(
 
     active = list(
         #' @field names Vector of column names.
-        names = function() names(private$df$data)
+        names = function() names(private$df$unwrap())
     ),
 
     private = list(

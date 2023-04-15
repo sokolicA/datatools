@@ -348,6 +348,14 @@ DataFrame <- R6::R6Class(
             return(DF(result, key=NULL))
         },
 
+        #' @description Get the underlying data.
+        #'
+        #' @return The underlying `data.table` object.
+        #'
+        unwrap = function() {
+            private$.tbl
+        },
+
         #' @description Create a deep copy
         #'
         #' @return A copy of the `DataFrame`
@@ -361,11 +369,6 @@ DataFrame <- R6::R6Class(
     ),
 
     active = list(
-
-        #' @field data Data getter.
-        data = function() {
-            private$.tbl
-        },
 
         #' @field columns Column names object.
         columns = function() {
