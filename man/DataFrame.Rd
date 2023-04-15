@@ -31,6 +31,13 @@ The key parameter is passed to \code{data.table::setkey(key)}. If the parameter 
 \examples{
 
 ## ------------------------------------------------
+## Method `DataFrame$head`
+## ------------------------------------------------
+
+   df <- DF(data.table(a=1:5, b=1:5))
+   df$head(1)
+
+## ------------------------------------------------
 ## Method `DataFrame$sort`
 ## ------------------------------------------------
 
@@ -152,6 +159,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \itemize{
 \item \href{#method-DataFrame-new}{\code{DataFrame$new()}}
 \item \href{#method-DataFrame-print}{\code{DataFrame$print()}}
+\item \href{#method-DataFrame-head}{\code{DataFrame$head()}}
 \item \href{#method-DataFrame-sort}{\code{DataFrame$sort()}}
 \item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
@@ -202,6 +210,36 @@ Print the table object.
 
 \subsection{Details}{
 The method used is \code{print.data.table}.
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-head"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-head}{}}}
+\subsection{Method \code{head()}}{
+Return the first n rows.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$head(n = 5L)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{n}}{The number of rows to return. Defaults to 5.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A new \code{DataFrame} object with only the first \code{n} rows.
+For negative values of n, this method returns all rows except the last |n| rows.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.table(a=1:5, b=1:5))
+   df$head(1)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
