@@ -403,19 +403,6 @@ StatFrame <- R6::R6Class(
             missing <- which(result=="")
             for (i in missing) result[i] <- deparse(e[[i]])
             result
-        },
-
-        map_expr = function(fun, columns=NULL, where=NULL, by=NULL, ...) {
-            call <- substitute(private$df$unwrap()[, lapply(.SD, fun, ...), .SDcols = cols, keyby=.by])
-            if (!is.null(where)) call[[3]] <- where
-            if (is.call(columns) && (columns[[1]] == quote(.) || columns[[1]] == quote(list))) {
-                columns[[1]] <- quote(c)
-                for (i in 2:length(columns)) columns[[i]] <- deparse(columns[[i]])
-            }
-            call[[".SDcols"]] <- columns
-            call[["keyby"]] <- by
-            eval(call)
         }
-
     )
 )
