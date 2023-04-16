@@ -42,7 +42,7 @@ StatFrame <- R6::R6Class(
         #'
         #' @return A new `StatFrame` with filtered rows.
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=1:5))
+        #' sf <- SF(data.frame(a=1:5, b=1:5))
         #' sf$filter(a > 2)
         #' sf$filter(c(1, 3, 5))
         #' sf$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -57,7 +57,7 @@ StatFrame <- R6::R6Class(
         #' @return A keyed data.table with the row counts in the `N` column and the key to columns passed in `by`.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=1:5))
+        #' sf <- SF(data.frame(a=1:5, b=1:5))
         #' sf$count()
         #' sf <- SF(data.frame(a=c(1,1,1,2,3), b=1:5))
         #' sf$count(by = list(a)) # df$count(by = .(a))
@@ -80,12 +80,12 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table`.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sum_squares <- function(x) sum(x**2)
         #' # sf$import_function(sum_squares) # necessary only if sum_squares is defined locally
         #' sf$aggregate(list(sum_squares(x), mean(x), sd(x))) #mean and sd are always globally accessible
         #' sf$aggregate(list(max(x), mean(x)), by = .(cond = !b %in% c(6, 7)))
-        #' sf <- SF(data.table(a=c(1:5, NA), b=6:11))
+        #' sf <- SF(data.frame(a=c(1:5, NA), b=6:11))
         #' sf$aggregate(list(mean(x), mean_na_rm = mean(x, na.rm=T)))
         aggregate = function(funs, columns=is.numeric, by=NULL) {
             fexpr <- substitute(funs)
@@ -106,7 +106,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the summed columns.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$sum()
         #' sf$sum("a")
         sum = function(columns=is.numeric, by=NULL) {
@@ -123,7 +123,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the means calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$mean()
         #' sf$mean("a")
         mean = function(columns=is.numeric, by=NULL) {
@@ -140,7 +140,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the standard deviations calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$sd()
         #' sf$sd("a")
         sd = function(columns=is.numeric, by=NULL) {
@@ -157,7 +157,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the Median Absolute Deviation calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$mad()
         #' sf$mad("a")
         mad = function(columns=is.numeric, by=NULL) {
@@ -174,7 +174,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the Interquartile Range calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$IQR()
         #' sf$IQR("a")
         IQR = function(columns=is.numeric, by=NULL) {
@@ -191,7 +191,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the medians calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$median()
         #' sf$median("a")
         median = function(columns=is.numeric, by=NULL) {
@@ -208,7 +208,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the minimums calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$min()
         #' sf$min("a")
         min = function(columns=is.numeric, by=NULL) {browser()
@@ -225,7 +225,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the maximum values calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$max()
         #' sf$max("a")
         max = function(columns=is.numeric, by=NULL) {
@@ -243,7 +243,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table` with the quantiles calculated.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$quantile()
         #' sf$quantile(columns="a")
         quantile = function(columns=is.numeric, by=NULL, probs=seq(0, 1, 0.25)) {
@@ -258,8 +258,8 @@ StatFrame <- R6::R6Class(
         #' @param columns Optional selection of columns.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=c(1:5,NA, NA), b=c(1:6, NA)))
-        #' sf$missing_summary()
+        #' sf <- SF(data.frame(a=c(1:5,NA, NA), b=c(1:6, NA)))
+        #' sf$missing_data_summary()
         missing_data_summary = function(columns=NULL) {
             call <- substitute(private$df$unwrap()[, lapply(.SD, function(x) list(sum(is.na(x)),
                                                                                   round(mean(is.na(x))*100, 2))), .SDcols=columns])
@@ -282,7 +282,7 @@ StatFrame <- R6::R6Class(
         #' @return A `StatFrame`.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' add_2 <- function(x) x+2
         #' # sf$import_function(add_2) # necessary only if sum_squares is defined locally
         #' sf$map(add_2) #mean and sd are always globally accessible
@@ -300,7 +300,7 @@ StatFrame <- R6::R6Class(
         #' @return A `data.table`.
         #'
         #' @examples
-        #' sf <- SF(data.table(a=1:5, b=6:10))
+        #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$describe()
         describe = function(col_type=NULL) {browser()
             result = list(numeric=NULL, logical=NULL, factor=NULL, character=NULL)

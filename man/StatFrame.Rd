@@ -28,7 +28,7 @@ All the calculations return a \code{data.table} object.
 ## Method `StatFrame$filter`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=1:5))
+sf <- SF(data.frame(a=1:5, b=1:5))
 sf$filter(a > 2)
 sf$filter(c(1, 3, 5))
 sf$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -37,7 +37,7 @@ sf$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
 ## Method `StatFrame$count`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=1:5))
+sf <- SF(data.frame(a=1:5, b=1:5))
 sf$count()
 sf <- SF(data.frame(a=c(1,1,1,2,3), b=1:5))
 sf$count(by = list(a)) # df$count(by = .(a))
@@ -48,19 +48,19 @@ Data aggregation
 ## Method `StatFrame$aggregate`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sum_squares <- function(x) sum(x**2)
 # sf$import_function(sum_squares) # necessary only if sum_squares is defined locally
 sf$aggregate(list(sum_squares(x), mean(x), sd(x))) #mean and sd are always globally accessible
 sf$aggregate(list(max(x), mean(x)), by = .(cond = !b \%in\% c(6, 7)))
-sf <- SF(data.table(a=c(1:5, NA), b=6:11))
+sf <- SF(data.frame(a=c(1:5, NA), b=6:11))
 sf$aggregate(list(mean(x), mean_na_rm = mean(x, na.rm=T)))
 
 ## ------------------------------------------------
 ## Method `StatFrame$sum`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$sum()
 sf$sum("a")
 
@@ -68,7 +68,7 @@ sf$sum("a")
 ## Method `StatFrame$mean`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$mean()
 sf$mean("a")
 
@@ -76,7 +76,7 @@ sf$mean("a")
 ## Method `StatFrame$sd`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$sd()
 sf$sd("a")
 
@@ -84,7 +84,7 @@ sf$sd("a")
 ## Method `StatFrame$mad`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$mad()
 sf$mad("a")
 
@@ -92,7 +92,7 @@ sf$mad("a")
 ## Method `StatFrame$IQR`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$IQR()
 sf$IQR("a")
 
@@ -100,7 +100,7 @@ sf$IQR("a")
 ## Method `StatFrame$median`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$median()
 sf$median("a")
 
@@ -108,7 +108,7 @@ sf$median("a")
 ## Method `StatFrame$min`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$min()
 sf$min("a")
 
@@ -116,7 +116,7 @@ sf$min("a")
 ## Method `StatFrame$max`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$max()
 sf$max("a")
 
@@ -124,7 +124,7 @@ sf$max("a")
 ## Method `StatFrame$quantile`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$quantile()
 sf$quantile(columns="a")
 
@@ -132,14 +132,14 @@ sf$quantile(columns="a")
 ## Method `StatFrame$missing_data_summary`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=c(1:5,NA, NA), b=c(1:6, NA)))
-sf$missing_summary()
+sf <- SF(data.frame(a=c(1:5,NA, NA), b=c(1:6, NA)))
+sf$missing_data_summary()
 
 ## ------------------------------------------------
 ## Method `StatFrame$map`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 add_2 <- function(x) x+2
 # sf$import_function(add_2) # necessary only if sum_squares is defined locally
 sf$map(add_2) #mean and sd are always globally accessible
@@ -149,7 +149,7 @@ sf$map(as.character)
 ## Method `StatFrame$describe`
 ## ------------------------------------------------
 
-sf <- SF(data.table(a=1:5, b=6:10))
+sf <- SF(data.frame(a=1:5, b=6:10))
 sf$describe()
 sf <- SF(data.table(a=1, b=2, key="a"))
 sf <- SF(DF(data.table(a=1, b=2), key="a"))
@@ -249,7 +249,7 @@ A new \code{StatFrame} with filtered rows.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=1:5))
+\preformatted{sf <- SF(data.frame(a=1:5, b=1:5))
 sf$filter(a > 2)
 sf$filter(c(1, 3, 5))
 sf$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
@@ -280,7 +280,7 @@ A keyed data.table with the row counts in the \code{N} column and the key to col
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=1:5))
+\preformatted{sf <- SF(data.frame(a=1:5, b=1:5))
 sf$count()
 sf <- SF(data.frame(a=c(1,1,1,2,3), b=1:5))
 sf$count(by = list(a)) # df$count(by = .(a))
@@ -322,12 +322,12 @@ A \code{data.table}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sum_squares <- function(x) sum(x**2)
 # sf$import_function(sum_squares) # necessary only if sum_squares is defined locally
 sf$aggregate(list(sum_squares(x), mean(x), sd(x))) #mean and sd are always globally accessible
 sf$aggregate(list(max(x), mean(x)), by = .(cond = !b \%in\% c(6, 7)))
-sf <- SF(data.table(a=c(1:5, NA), b=6:11))
+sf <- SF(data.frame(a=c(1:5, NA), b=6:11))
 sf$aggregate(list(mean(x), mean_na_rm = mean(x, na.rm=T)))
 }
 \if{html}{\out{</div>}}
@@ -362,7 +362,7 @@ A \code{data.table} with the summed columns.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$sum()
 sf$sum("a")
 }
@@ -398,7 +398,7 @@ A \code{data.table} with the means calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$mean()
 sf$mean("a")
 }
@@ -434,7 +434,7 @@ A \code{data.table} with the standard deviations calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$sd()
 sf$sd("a")
 }
@@ -470,7 +470,7 @@ A \code{data.table} with the Median Absolute Deviation calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$mad()
 sf$mad("a")
 }
@@ -506,7 +506,7 @@ A \code{data.table} with the Interquartile Range calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$IQR()
 sf$IQR("a")
 }
@@ -542,7 +542,7 @@ A \code{data.table} with the medians calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$median()
 sf$median("a")
 }
@@ -578,7 +578,7 @@ A \code{data.table} with the minimums calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$min()
 sf$min("a")
 }
@@ -614,7 +614,7 @@ A \code{data.table} with the maximum values calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$max()
 sf$max("a")
 }
@@ -652,7 +652,7 @@ A \code{data.table} with the quantiles calculated.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$quantile()
 sf$quantile(columns="a")
 }
@@ -679,8 +679,8 @@ Summary on missing values.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=c(1:5,NA, NA), b=c(1:6, NA)))
-sf$missing_summary()
+\preformatted{sf <- SF(data.frame(a=c(1:5,NA, NA), b=c(1:6, NA)))
+sf$missing_data_summary()
 }
 \if{html}{\out{</div>}}
 
@@ -717,7 +717,7 @@ A \code{StatFrame}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 add_2 <- function(x) x+2
 # sf$import_function(add_2) # necessary only if sum_squares is defined locally
 sf$map(add_2) #mean and sd are always globally accessible
@@ -749,7 +749,7 @@ A \code{data.table}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{sf <- SF(data.table(a=1:5, b=6:10))
+\preformatted{sf <- SF(data.frame(a=1:5, b=6:10))
 sf$describe()
 }
 \if{html}{\out{</div>}}
