@@ -6,7 +6,7 @@ Authors@R:
 Description: The package provides structured and consistent approach to handling data using classes. The main data model class consists of data objects and relationships between them. The data objects are created from a wrapper class around tabular data and provide straightforward and useful methods to operate on data. Any relationships between the data objects can be specified and allow easy and safe merging.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, r6 = TRUE)
 RoxygenNote: 7.2.1
 Suggests: 
     testthat (>= 3.0.0)
