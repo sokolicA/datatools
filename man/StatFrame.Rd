@@ -305,7 +305,7 @@ Data aggregation
 \describe{
 \item{\code{funs}}{A single function or a list of functions used to create an aggregate summary. See details.}
 
-\item{\code{columns}}{Optional list of columns to aggregate or a predicate. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to aggregate or a predicate. Defaults to all numeric columns.}
 
 \item{\code{by}}{By group.}
 }
@@ -347,7 +347,7 @@ Sum the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to sum. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to sum. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -383,7 +383,7 @@ Calculate the mean of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the mean. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the mean. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -419,7 +419,7 @@ Calculate the standard deviation of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the standard deviation. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the standard deviation. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping.}
 }
@@ -455,7 +455,7 @@ Calculate the Median Absolute Deviation of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the Median Absolute Deviation. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the Median Absolute Deviation. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -491,7 +491,7 @@ Calculate the Interquartile Range of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the Interquartile Range. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the Interquartile Range. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -527,7 +527,7 @@ Calculate the median of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the median. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the median. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -563,7 +563,7 @@ Calculate the minimum value of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the minimum. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the minimum. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -599,7 +599,7 @@ Calculate the maximum value of the columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the maximum. Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the maximum. Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 }
@@ -635,7 +635,7 @@ Calculate quantiles of columns
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{Optional list of columns to calculate the quantiles Defaults to all numeric columns.}
+\item{\code{columns}}{Optional character vector of column names to calculate the quantiles Defaults to all numeric columns.}
 
 \item{\code{by}}{Grouping}
 
@@ -701,7 +701,7 @@ Apply a function to columns
 \describe{
 \item{\code{fun}}{Function to apply. See details.}
 
-\item{\code{columns}}{Optional list of columns to apply the function on. Can also be a predicate (e.g. \code{is.numeric})}
+\item{\code{columns}}{Optional character vector of column names to apply the function on. Can also be a predicate (e.g. \code{is.numeric})}
 
 \item{\code{...}}{Additional arguments passed to \code{fun}}
 }

@@ -68,7 +68,7 @@ StatFrame <- R6::R6Class(
         #' Data aggregation
         #'
         #' @param funs A single function or a list of functions used to create an aggregate summary. See details.
-        #' @param columns Optional list of columns to aggregate or a predicate. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to aggregate or a predicate. Defaults to all numeric columns.
         #' @param by By group.
         #'
         #' @details
@@ -98,7 +98,7 @@ StatFrame <- R6::R6Class(
 
         #' @description Sum the columns
         #'
-        #' @param columns Optional list of columns to sum. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to sum. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -110,12 +110,12 @@ StatFrame <- R6::R6Class(
         #' sf$sum()
         #' sf$sum("a")
         sum = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, sum), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(sum)
         },
 
         #' @description Calculate the mean of the columns
         #'
-        #' @param columns Optional list of columns to calculate the mean. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the mean. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -127,12 +127,12 @@ StatFrame <- R6::R6Class(
         #' sf$mean()
         #' sf$mean("a")
         mean = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, mean), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(mean)
         },
 
         #' @description Calculate the standard deviation of the columns
         #'
-        #' @param columns Optional list of columns to calculate the standard deviation. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the standard deviation. Defaults to all numeric columns.
         #' @param by Grouping.
         #'
         #' @details  `NA` values are not ignored.
@@ -144,12 +144,12 @@ StatFrame <- R6::R6Class(
         #' sf$sd()
         #' sf$sd("a")
         sd = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, sd), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(sd)
         },
 
         #' @description Calculate the Median Absolute Deviation of the columns
         #'
-        #' @param columns Optional list of columns to calculate the Median Absolute Deviation. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the Median Absolute Deviation. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -161,12 +161,12 @@ StatFrame <- R6::R6Class(
         #' sf$mad()
         #' sf$mad("a")
         mad = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, mad), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(mad)
         },
 
         #' @description Calculate the Interquartile Range of the columns
         #'
-        #' @param columns Optional list of columns to calculate the Interquartile Range. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the Interquartile Range. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -178,12 +178,12 @@ StatFrame <- R6::R6Class(
         #' sf$IQR()
         #' sf$IQR("a")
         IQR = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, IQR), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(IQR)
         },
 
         #' @description Calculate the median of the columns
         #'
-        #' @param columns Optional list of columns to calculate the median. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the median. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -195,12 +195,12 @@ StatFrame <- R6::R6Class(
         #' sf$median()
         #' sf$median("a")
         median = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, median), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(median)
         },
 
         #' @description Calculate the minimum value of the columns
         #'
-        #' @param columns Optional list of columns to calculate the minimum. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the minimum. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -211,13 +211,13 @@ StatFrame <- R6::R6Class(
         #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$min()
         #' sf$min("a")
-        min = function(columns=is.numeric, by=NULL) {browser()
-            eval(substitute(private$df$unwrap()[, lapply(.SD, min), .SDcols=columns, keyby = by]))
+        min = function(columns=is.numeric, by=NULL) {
+            private$eval_lapply_fun(min)
         },
 
         #' @description Calculate the maximum value of the columns
         #'
-        #' @param columns Optional list of columns to calculate the maximum. Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the maximum. Defaults to all numeric columns.
         #' @param by Grouping
         #'
         #' @details  `NA` values are not ignored.
@@ -229,12 +229,12 @@ StatFrame <- R6::R6Class(
         #' sf$max()
         #' sf$max("a")
         max = function(columns=is.numeric, by=NULL) {
-            eval(substitute(private$df$unwrap()[, lapply(.SD, max), .SDcols=columns, keyby = by]))
+            private$eval_lapply_fun(max)
         },
 
         #' @description Calculate quantiles of columns
         #'
-        #' @param columns Optional list of columns to calculate the quantiles Defaults to all numeric columns.
+        #' @param columns Optional character vector of column names to calculate the quantiles Defaults to all numeric columns.
         #' @param by Grouping
         #' @param probs Vector of probabilities.
         #'
@@ -273,7 +273,7 @@ StatFrame <- R6::R6Class(
         #' @description Apply a function to columns
         #'
         #' @param fun Function to apply. See details.
-        #' @param columns Optional list of columns to apply the function on. Can also be a predicate (e.g. `is.numeric`)
+        #' @param columns Optional character vector of column names to apply the function on. Can also be a predicate (e.g. `is.numeric`)
         #' @param ... Additional arguments passed to `fun`
         #'
         #' @details
@@ -302,7 +302,7 @@ StatFrame <- R6::R6Class(
         #' @examples
         #' sf <- SF(data.frame(a=1:5, b=6:10))
         #' sf$describe()
-        describe = function(col_type=NULL) {browser()
+        describe = function(col_type=NULL) {
             result = list(numeric=NULL, logical=NULL, factor=NULL, character=NULL)
             self$import_function(function(x) {mean(is.na(x))}, "prop_missing")
 
@@ -368,6 +368,12 @@ StatFrame <- R6::R6Class(
 
         fun_env = NULL,
 
+        eval_lapply_fun = function(fun) {
+            e <- substitute(private$df$unwrap()[, lapply(.SD, FUN=f), .SDcols=columns, keyby = by], parent.frame())
+            e[[4]][["FUN"]] <- fun
+            eval(e)
+        },
+
         parse_sdcols = function(e) {
             if (is.call(e) && (e[[1]] == quote(.) || e[[1]] == quote(list))) {
                 e[[1]] <- quote(c)
@@ -388,7 +394,6 @@ StatFrame <- R6::R6Class(
             result[, fun := rep(f_names, times=dim(result)[1L] %/% length(f_names))]
 
             groups <- private$make_names_by(by_expr)
-            #if (any(groups %in% names(private$df$unwrap()))) stop("Collision between some column and group (by) names!")
             if (!is.null(groups)) {data.table::setnames(result, seq_along(groups), groups)}
             data.table::setcolorder(result, c(groups, "fun"))
 
