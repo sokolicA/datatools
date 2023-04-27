@@ -322,8 +322,11 @@ DataFrame <- R6::R6Class(
         #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
         #'
         #' @param key A Character vector of column names to set the key on.
+        #'
+        #' @return Invisibly returns itself.
         set_key = function(key) {
-            data.table::setkeyv(x=private$.tbl, cols=key)
+            data.table::setkeyv(x=private$tbl, cols=key)
+            invisible(self)
         },
 
         #' @description Perform a left outer join
