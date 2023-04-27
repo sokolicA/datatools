@@ -392,18 +392,7 @@ DataFrame <- R6::R6Class(
         #' @return The underlying `data.table` object.
         #'
         unwrap = function() {
-            private$.tbl
-        },
-
-        #' @description Create a deep copy
-        #'
-        #' @return A copy of the `DataFrame`
-        #'
-        copy = function() {
-            result <- self$clone(deep=TRUE)
-            result_private <- .subset2(result, ".__enclos_env__")$private
-            result_private$.tbl <- copy(private$.tbl)
-            return(result)
+            private$tbl
         }
     ),
 
@@ -455,6 +444,11 @@ DataFrame <- R6::R6Class(
                 int_out_of_bounds = "Rows specified are out of bounds!",
                 duplicated_int = "Duplicated row numbers not allowed!"
             )
-        )
+        ),
+
+        deep_clone = function(name, value) {
+            if (name == "tbl") return(data.table::copy(value))
+            value
+        }
     )
 )
