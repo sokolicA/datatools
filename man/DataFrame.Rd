@@ -146,7 +146,16 @@ df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the t
 x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-res <- df$append(y, x, y)
+res <- df$append(y, x, y, df)
+
+## ------------------------------------------------
+## Method `DataFrame$append_`
+## ------------------------------------------------
+
+x <- data.frame(a=1:5, b=1:5)
+y <- data.frame(a=1:5, b=1:5)
+df <- DF(x)
+df$append_(y, x, y, df)
 df <- DF(data.table(a=1, b=2), key="a")
 
 }
@@ -179,6 +188,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
+\item \href{#method-DataFrame-append_}{\code{DataFrame$append_()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
@@ -726,7 +736,7 @@ Create a new \code{DataFrame} by appending tables using column names.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{Objects of class \code{data.frame}.}
+\item{\code{...}}{Objects of class \code{data.frame} or \code{DataFrame}.}
 
 \item{\code{fill}}{Optional parameter whether to fill missing columns with \code{NA}. Defaults to \code{FALSE}.}
 }
@@ -740,7 +750,41 @@ A new unkeyed \code{DataFrame} object with rows appended.
 \preformatted{x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-res <- df$append(y, x, y)
+res <- df$append(y, x, y, df)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-append_"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-append_}{}}}
+\subsection{Method \code{append_()}}{
+Append tables to the \code{DataFrame}.
+Same as the \verb{$append} method but without creating a new object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append_(..., fill = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Objects of class \code{data.frame} or \code{DataFrame}.}
+
+\item{\code{fill}}{Optional parameter whether to fill missing columns with \code{NA}. Defaults to \code{FALSE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- data.frame(a=1:5, b=1:5)
+y <- data.frame(a=1:5, b=1:5)
+df <- DF(x)
+df$append_(y, x, y, df)
 }
 \if{html}{\out{</div>}}
 

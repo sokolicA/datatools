@@ -384,6 +384,34 @@ DataFrame <- R6::R6Class(
             return(DF(result, key=NULL))
         },
 
+        #' @description Append tables to the `DataFrame`.
+        #' Same as the `$append` method but without creating a new object.
+        #'
+        #' @param ... Objects of class `data.frame` or `DataFrame`.
+        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' x <- data.frame(a=1:5, b=1:5)
+        #' y <- data.frame(a=1:5, b=1:5)
+        #' df <- DF(x)
+        #' df$append_(y, x, y, df)
+        append_ = function(..., fill=FALSE) {
+            append <- list(private$tbl, ...)
+            tbls <- lapply(append, function(x) {
+                if(inherits(x, "DataFrame")) return(x$unwrap())
+                return(x)
+            })
+o
+            private$tbl <- rbindlist(
+                tbls,
+                use.names = TRUE,
+                fill = fill
+            )
+            invisible(self)
+        },
+
         #' @description Get the underlying data.
         #'
         #' @return The underlying `data.table` object.
