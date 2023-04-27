@@ -414,9 +414,9 @@ DataFrame <- R6::R6Class(
             Columns$new(self)
         },
 
-        #' @field key Key getter
-        key = function(key) {
-            data.table::key(private$.tbl)
+        #' @field key Key getter.
+        key = function() {
+            data.table::key(private$tbl)
         }
     ),
 
