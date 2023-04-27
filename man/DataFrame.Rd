@@ -5,14 +5,12 @@
 \alias{DF}
 \title{DataFrame Class}
 \usage{
-DF(tbl, key = NULL, id = NULL)
+DF(tbl, key = NULL)
 }
 \arguments{
 \item{tbl}{An object of class \code{data.frame}.}
 
 \item{key}{Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.}
-
-\item{id}{Optional ID of the object. Not currently used.}
 }
 \value{
 A \code{DataFrame} object.
@@ -157,7 +155,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \describe{
 \item{\code{columns}}{Column names object.}
 
-\item{\code{key}}{Key getter}
+\item{\code{key}}{Key getter.}
 }
 \if{html}{\out{</div>}}
 }
@@ -182,7 +180,6 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
-\item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
 }
@@ -192,7 +189,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \subsection{Method \code{new()}}{
 \code{DataFrame} Constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, key = NULL, id = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, key = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -201,8 +198,6 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item{\code{tbl}}{An object of class \code{data.frame}.}
 
 \item{\code{key}}{Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.}
-
-\item{\code{id}}{Optional ID of the object. Not currently used.}
 }
 \if{html}{\out{</div>}}
 }
@@ -351,7 +346,7 @@ Count the number of rows.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A data.table with the row counts in the \code{N} column.
+A \code{DataFrame} with the row counts. If \code{by} is specified the result will be keyed.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -669,6 +664,9 @@ Create a key the table.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+Invisibly returns itself.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
@@ -760,19 +758,6 @@ Get the underlying data.
 
 \subsection{Returns}{
 The underlying \code{data.table} object.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-copy"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-copy}{}}}
-\subsection{Method \code{copy()}}{
-Create a deep copy
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$copy()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A copy of the \code{DataFrame}
 }
 }
 \if{html}{\out{<hr>}}

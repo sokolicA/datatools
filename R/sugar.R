@@ -2,7 +2,6 @@
 #' @describeIn DataFrame DataFrame$new() constructor sugar
 #' @param tbl An object of class `data.frame`.
 #' @param key Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.
-#' @param id Optional ID of the object. Not currently used.
 #'
 #' @details
 #'
@@ -14,8 +13,8 @@
 #' @return A `DataFrame` object.
 #'
 #' @export
-DF <- function(tbl, key = NULL, id = NULL) {
-    DataFrame$new(tbl, key, id)
+DF <- function(tbl, key = NULL) {
+    DataFrame$new(tbl, key)
 }
 
 

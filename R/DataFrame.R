@@ -10,12 +10,10 @@ DataFrame <- R6::R6Class(
         #'
         #' @param tbl An object of class `data.frame`.
         #' @param key Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.
-        #' @param id Optional ID of the object. Not currently used.
         #'
-        initialize = function(tbl, key = NULL, id = NULL) {
-            data.table::setDT(tbl, key = key)
-            private$.tbl <- tbl
-            private$.id <- id
+        initialize = function(tbl, key=NULL) {
+            data.table::setDT(tbl, key=key)
+            private$tbl <- tbl
         },
 
         #' @description Print the table object.
@@ -23,7 +21,7 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function() {
-            print(private$.tbl)
+            print(private$tbl)
         },
 
         #' @description Return the first n rows.
@@ -33,12 +31,11 @@ DataFrame <- R6::R6Class(
         #' @return A new `DataFrame` object with only the first `n` rows.
         #' For negative values of n, this method returns all rows except the last |n| rows.
         #'
-        #'
         #' @examples
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            DataFrame$new(head(private$.tbl, n))
+            DataFrame$new(head(private$tbl, n))
         },
 
         #' @description Return the last n rows.
@@ -48,12 +45,11 @@ DataFrame <- R6::R6Class(
         #' @return A new `DataFrame` object with only the first `n` rows.
         #' For negative values of n, this method returns all rows except the first |n| rows.
         #'
-        #'
         #' @examples
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            DataFrame$new(tail(private$.tbl, n))
+            DataFrame$new(tail(private$tbl, n))
         },
 
         #' @description Sort the table rows
@@ -67,7 +63,7 @@ DataFrame <- R6::R6Class(
         #'    df$sort(-b)
         sort = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
-            data.table::setorder(private$.tbl, ...)
+            data.table::setorder(private$tbl, ...)
             return(invisible(self))
         },
 
@@ -82,14 +78,14 @@ DataFrame <- R6::R6Class(
         #' df$is_key_unique()
         is_key_unique = function() {
             if (is.null(self$key)) return(FALSE)
-            uniqueN(private$.tbl, by = self$key) == nrow(private$.tbl)
+            uniqueN(private$tbl, by = self$key) == nrow(private$tbl)
         },
 
         #' @description Count the number of rows.
         #'
         #' @param by An optional list() specifying the columns to group by. Defaults to no grouping.
         #'
-        #' @return A data.table with the row counts in the `N` column.
+        #' @return A `DataFrame` with the row counts. If `by` is specified the result will be keyed.
         #'
         #' @examples
         #' df <- DF(data.frame(a=1:5, b=1:5))
@@ -97,7 +93,8 @@ DataFrame <- R6::R6Class(
         #' df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
         #' df$count(by = list(a)) # df$count(by = .(a))
         count = function(by=NULL) {
-            eval(substitute(private$.tbl[, .N, keyby = by]))
+            result <- eval(substitute(private$tbl[, .N, keyby = by]))
+            DataFrame$new(result)
         },
 
         #' @description Update table columns by reference.
@@ -113,7 +110,7 @@ DataFrame <- R6::R6Class(
         #'    df$update(.(a = 2), b == 3)
         #'    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
         update = function(columns, where=NULL, by=NULL) {
-            call <- substitute(private$.tbl[, j, by = by])
+            call <- substitute(private$tbl[, j, by = by])
             condition <- substitute(where)
             if (!is.null(condition)) call[[3]] <-condition
             j_sub <- substitute(columns)
@@ -155,7 +152,7 @@ DataFrame <- R6::R6Class(
         #' df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
         #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
         update_join = function(relationship, columns=NULL, where=NULL) {
-            relationship$left <- private$.tbl
+            relationship$left <- private$tbl
             join <- UpdateJoin$new(relationship)
             join$execute(substitute(columns), substitute(where))
             return(invisible(self))
@@ -179,7 +176,7 @@ DataFrame <- R6::R6Class(
         #'    df$transform(! .names %in% c("a"), function(x) x*2, b>2)
         #'    df$transform(! grepl("^a", .names), function(x) x*2, a != 1 & a > b)
         transform = function(columns, fun, where=NULL, ...) {
-            call <- quote(private$.tbl[, j, .SDcols=x])
+            call <- quote(private$tbl[, j, .SDcols=x])
 
             col_sub <- substitute(columns)
             col_names <- private$parse_colnames(col_sub)
@@ -212,12 +209,12 @@ DataFrame <- R6::R6Class(
         transform_if = function(predicate, fun, where=NULL, ...) {
             if (!is.function(predicate)) stop("Must provide a function to determine which columns will be transformed!")
 
-            call_predicate <- quote(sapply(private$.tbl, fun, simplify = TRUE))
+            call_predicate <- quote(sapply(private$tbl, fun, simplify = TRUE))
             call_predicate[[3]] <- predicate
-            col_names <- names(private$.tbl)[eval(call_predicate)]
+            col_names <- names(private$tbl)[eval(call_predicate)]
             if(length(col_names) == 0) return(warning("No columns found using the predicate function!"))
 
-            call <- quote(private$.tbl[, j, .SDcols=x])
+            call <- quote(private$tbl[, j, .SDcols=x])
             col_sub <- substitute(columns)
             condition <- substitute(where)
             if (!is.null(condition)) call[[3]] <- condition
@@ -249,7 +246,7 @@ DataFrame <- R6::R6Class(
         #' df$filter(c(1, 3, 5))
         #' df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
         filter = function(keep) {
-            DataFrame$new(eval(substitute(private$.tbl[keep])))
+            DataFrame$new(eval(substitute(private$tbl[keep])))
         },
 
         #' @description Filter the table in place.
@@ -271,7 +268,7 @@ DataFrame <- R6::R6Class(
         #' df$filter_(a > 2)
         #' df
         filter_ = function(keep) {
-            private$.tbl <- eval(substitute(private$.tbl[keep]))
+            private$tbl <- eval(substitute(private$tbl[keep]))
             self
         },
 
@@ -300,20 +297,20 @@ DataFrame <- R6::R6Class(
                 stop(private$err$remove$not_language)
             }
 
-            remove_rows <- eval(condition, envir=private$.tbl, enclos=parent.frame())
+            remove_rows <- eval(condition, envir=private$tbl, enclos=parent.frame())
             if (is.numeric(remove_rows)) {
-                if (max(remove_rows) > private$.tbl[,.N]) stop(private$err$remove$int_out_of_bounds)
+                if (max(remove_rows) > private$tbl[,.N]) stop(private$err$remove$int_out_of_bounds)
                 if (any(duplicated(remove_rows))) stop(private$err$remove$int_duplicated)
-                remove_rows <- private$.tbl[, .I %in% remove_rows]
+                remove_rows <- private$tbl[, .I %in% remove_rows]
                 keep <- !remove_rows
             }
             if (is.logical(remove_rows)) {
-                if(length(remove_rows) != private$.tbl[,.N]) stop(private$err$remove$unequal_length_logical)
+                if(length(remove_rows) != private$tbl[,.N]) stop(private$err$remove$unequal_length_logical)
                 keep <- !remove_rows | is.na(remove_rows)
             }
 
-            removed <- DataFrame$new(private$.tbl[remove_rows], key=self$key)
-            private$.tbl <- private$.tbl[keep]
+            removed <- DataFrame$new(private$tbl[remove_rows], key=self$key)
+            private$tbl <- private$tbl[keep]
             return(removed)
         },
 
@@ -354,7 +351,7 @@ DataFrame <- R6::R6Class(
         #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
         #' df$left_join(rel, add=.(a=3, c=ifelse(i.x==1, 3, 2), z, d=x)) #i.x is from the table stored in df
         left_join = function(relationship, add=NULL) {
-            relationship$left <- private$.tbl
+            relationship$left <- private$tbl
             join <- LeftJoin$new(relationship)
             result <- join$execute(substitute(add))
             return(DataFrame$new(result, key = self$key))
@@ -410,8 +407,7 @@ DataFrame <- R6::R6Class(
     ),
 
     private = list(
-        .tbl = NULL,
-        .id = NA_character_,
+        tbl = NULL,
 
         join = NULL,
 
@@ -421,18 +417,18 @@ DataFrame <- R6::R6Class(
                 if (name_func[[1]] == substitute(`!`)) {
                     for (i in seq_along(name_func)[-1L])
                         if (name_func[[-1L]][[i]] == substitute(.names)) {
-                            name_func[[-1L]][[i]] <- quote(names(private$.tbl))
+                            name_func[[-1L]][[i]] <- quote(names(private$tbl))
                             break;
                         }
                 } else {
                     for (i in seq_along(name_func)[-1L])
                         if (name_func[[i]] == substitute(.names)) {
-                            name_func[[i]] <- quote(names(private$.tbl))
+                            name_func[[i]] <- quote(names(private$tbl))
                             break;
                         }
                 }
 
-                result <- names(private$.tbl)[eval(name_func)]
+                result <- names(private$tbl)[eval(name_func)]
             } else {result <- as.character(e)[-1L]}
             result
         },
