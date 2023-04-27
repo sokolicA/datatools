@@ -362,7 +362,7 @@ DataFrame <- R6::R6Class(
 
         #' @description Create a new `DataFrame` by appending tables using column names.
         #'
-        #' @param ... Objects of class `data.frame`.
+        #' @param ... Objects of class `data.frame` or `DataFrame`.
         #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
         #'
         #' @return A new unkeyed `DataFrame` object with rows appended.
@@ -371,10 +371,16 @@ DataFrame <- R6::R6Class(
         #' x <- data.frame(a=1:5, b=1:5)
         #' y <- data.frame(a=1:5, b=1:5)
         #' df <- DF(x)
-        #' res <- df$append(y, x, y)
+        #' res <- df$append(y, x, y, df)
         append = function(..., fill=FALSE) {
+            append <- list(private$tbl, ...)
+            tbls <- lapply(append, function(x) {
+                if(inherits(x, "DataFrame")) return(x$unwrap())
+                return(x)
+            })
+
             result <- rbindlist(
-                list(private$.tbl, ...),
+                tbls,
                 use.names = TRUE,
                 fill = fill
             )
