@@ -18,30 +18,3 @@ DF <- function(tbl, key = NULL) {
 }
 
 
-#' StatFrame constructor sugar
-#' @describeIn StatFrame StatFrame$new() constructor sugar
-#' @param df An object of class `DataFrame` or `data.frame`.
-#'
-#'
-#' @examples
-#' sf <- SF(data.table(a=1, b=2, key="a"))
-#' sf <- SF(DF(data.table(a=1, b=2), key="a"))
-#'
-#' @return A `StatFrame` object.
-#'
-#' @export
-SF <- function(df) {
-    StatFrame$new(df)
-}
-
-#' Constant constructor sugar
-#' @describeIn Constant Constant$new() constructor sugar
-#'
-#' @return A `Constant` object.
-#'
-#' @export
-Const <- function() {
-    Constant$new()
-}
-
-

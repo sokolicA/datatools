@@ -2,13 +2,13 @@ test_that("deep clone creates an entirely new object and table", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df_clone <- df$clone(deep=TRUE)
-    df_copy <- df$copy()
+    df_shallow_clone <- df$clone(deep=FALSE)
+    df_deep_clone <- df$clone(deep=TRUE)
 
     expect_true(address(x) == address(df$unwrap()))
-    expect_true(address(x) == address(df_clone$unwrap()))
-    expect_true(address(x) != address(df_copy$unwrap()))
-    expect_true(address(df) != address(df_copy))
+    expect_true(address(x) == address(df_shallow_clone$unwrap()))
+    expect_true(address(x) != address(df_deep_clone$unwrap()))
+    expect_true(address(df) != address(df_deep_clone))
 
 })
 
@@ -18,15 +18,15 @@ test_that("data does not copy the object", {
     expect_equal(address(x), address(df$unwrap()))
 })
 
-test_that("count returns a data.table with count of the number of rows", {
+test_that("count returns a DataFrame with count of the number of rows", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    expect_equal(df$count(), data.table(N=5))
+    expect_equal(df$count(), DF(data.table(N=5)))
 
     x <- data.table(a=c(1,1,1,2,3), b=1:5)
     df <- DataFrame$new(x)
-    expect_equal(df$count(.(a)), data.table(a=c(1,2,3), N=c(3,1,1), key = "a"))
-    expect_equal(df$count(list(a)), data.table(a=c(1,2,3), N=c(3,1,1), key = "a"))
+    expect_equal(df$count(.(a)), DF(data.table(a=c(1,2,3), N=c(3,1,1), key = "a")))
+    expect_equal(df$count(list(a)), DF(data.table(a=c(1,2,3), N=c(3,1,1), key = "a")))
 })
 
 
@@ -119,135 +119,6 @@ test_that("is_key_unique returns FALSE when there is no key set", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
     expect_false(df$is_key_unique())
-})
-
-
-test_that("update updates/adds columns by reference", {
-    df <- DF(data.table(a=1:5, b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_col <- address(df$unwrap()$b)
-
-    df$update(.(a = 2), b == 3)
-    df$update(list(g = a, dd = ifelse(a==2, b, 0)), 1:2)
-    df$update(list(s = as.character(b)), rep(TRUE, 5))
-
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,2,2,4,5), b=1:5,
-        g=c(1,2,NA,NA,NA),
-        dd=c(0,2,NA,NA,NA),
-        s = paste(1:5))
-    )
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$a), old_address_cola)
-    expect_equal(address(df$unwrap()$b), old_address_col)
-
-})
-
-test_that("update works by group", {
-    df <- DF(data.table(a=c(1,1, 2, 2, 2), b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_col <- address(df$unwrap()$b)
-
-    df$update(.(c = max(b)), by = a)
-    df$update(.(d = max(b)), where= b!=5, by = a)
-
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,1, 2, 2, 2), b=1:5,
-        c=c(2,2,5, 5, 5),
-        d=c(2, 2, 4, 4, NA)
-    ))
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$a), old_address_cola)
-    expect_equal(address(df$unwrap()$b), old_address_col)
-
-})
-
-test_that("transform transforms columns by reference if where filter is supplied", {
-    df <- DF(data.table(a=1:5, b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_colb <- address(df$unwrap()$b)
-
-    df$transform(.(a, b), function(x) x*2, b%%2==0)
-    df$transform(list(b), sqrt, b %in% c(1, 4, 9))
-
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,4,3,8,5), b=c(1,2,3,8,5)
-    )
-    )
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$a), old_address_cola)
-    expect_equal(address(df$unwrap()$b), old_address_colb)
-
-})
-
-test_that("transform passes ... to fun", {
-    df <- DF(data.table(a=c(1,2, 3, NA, 5), b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_colb <- address(df$unwrap()$b)
-
-    df$transform(.(a, b), mean, b%%2==0, na.rm=TRUE)
-
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,2,3,2,5), b=c(1,3,3,3,5)
-    )
-    )
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$a), old_address_cola)
-    expect_equal(address(df$unwrap()$b), old_address_colb)
-
-})
-
-
-
-test_that("transform works with functions that find colnames", {
-    df <- DF(data.table(a=1:5, b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_colb <- address(df$unwrap()$b)
-
-    df$transform(! .names %in% c("a"), function(x) x*2, b%%2==0)
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,4,3,8,5), b=1:5
-    ))
-    df$transform(! !.names %in% c("b"),  function(x) x*2, b>=2)
-    expect_equal(df$unwrap(), data.table(
-        a=c(1,8,6,16,10), b=1:5
-    ))
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$a), old_address_cola)
-    expect_equal(address(df$unwrap()$b), old_address_colb)
-})
-
-test_that("transform without where (on all values) changes the type??", {
-    df <- DF(data.table(a=1:5, b=1:5))
-    old_address_tbl <- address(df$unwrap())
-    old_address_cola <- address(df$unwrap()$a)
-    old_address_colb <- address(df$unwrap()$b)
-
-    df$transform(!.names %in% c("a"), function(x) x*2)
-    expect_equal(df$unwrap(), data.table(
-        a=1:5*2, b=1:5
-    ))
-    expect_equal(address(df$unwrap()), old_address_tbl)
-    expect_equal(address(df$unwrap()$b), old_address_colb)
-
-    # ADDRESSES WILL CHANGE!
-    expect_false(address(df$unwrap()$a) == old_address_cola)
-})
-
-
-test_that("transform_if", {
-    df <- DF(data.table(a=1:5, b=1:5, c = paste0("  ", 1:5, "   ")))
-
-    df$transform_if(is.numeric, function(x) x*2)
-    df$transform_if(is.character, trimws)
-    expect_equal(df$unwrap(), data.table(
-        a=1:5*2, b=1:5*2, c=paste0(1:5)
-    ))
 })
 
 
@@ -349,167 +220,3 @@ test_that("filter treats logical NA as FALSE", {
 test_that("filter does not work with character vector", {
     expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter("a"))
 })
-
-
-
-test_that("UpdateJoin$add works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on =.(x = y))
-
-    df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z))
-
-    expect_equal(df$unwrap(), data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c(LETTERS[6:7], NA),
-        v = c(1, 2, 3),
-        a = c(3, 3, 3),
-        c = c(3, 2, 2)
-    ))
-})
-
-test_that("UpdateJoin$add(where) works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on=.(x = y))
-
-    df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
-
-    expect_equal(x, data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("F", "G","K"),
-        v = c(1, 2, 3),
-        a = c(3, 3, NA),
-        c = c(3, 2, NA)
-    ))
-    expect_equal(address(x), address(df$unwrap()))
-})
-
-test_that("UpdateJoin$add(where) works with data.frame", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on=.(x = y))
-
-    df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
-
-    expect_equal(x, data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("F", "G","K"),
-        v = c(1, 2, 3),
-        a = c(3, 3, NA),
-        c = c(3, 2, NA)
-    ))
-    expect_equal(address(x), address(df$unwrap()))
-})
-
-test_that("UpdateJoin$add(where) works with 2 keys", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3, w = 5:7)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7], w = c(5, 8))
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on = .(x = y, w))
-
-    df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
-
-    expect_equal(x, data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("F", NA,"K"), # Because there is no match on x=2,w=6 it is NA
-        v = c(1, 2, 3),
-        w = 5:7,
-        a = c(3, 3, NA),
-        c = c(3, 2, NA)
-    ))
-    expect_equal(address(x), address(df$unwrap()))
-})
-
-test_that("UpdateJoin$add_all works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on = .(x = y))
-
-    df$update_join(rel)
-
-    expect_equal(df$unwrap(), data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("I", "J","K"),
-        v = c(1, 2, 3),
-        x_y = c("C", "D", NA),
-        z_y = c("F", "G", NA)
-    ))
-    expect_equal(address(x), address(df$unwrap()))
-})
-
-test_that("UpdateJoin$add_all(where) works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on = .(x = y))
-
-    df$update_join(rel, where = x == 1)
-
-    expect_equal(df$unwrap(), data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("I", "J","K"),
-        v = c(1, 2, 3),
-        x_y = c("C", NA, NA),
-        z_y = c("F", NA, NA)
-    ))
-    expect_equal(address(x), address(df$unwrap()))
-})
-
-test_that("UpdateJoin does not work with one-to-many relationship", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:5], y = c(1, 2, 2), z = LETTERS[6:8])
-
-    df <- DF(x)
-    expect_error(df$update_join(Rel(right=y, on = .(x = y)), .(a=3, c=ifelse(i.x == 1, 3, 2), z)))
-})
-
-
-test_that("LeftJoin works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on=.(x = y))
-
-    result <- df$left_join(rel, add = list(a=3, c=ifelse(i.x == 1, 3, 2), z, d = x))
-
-    expect_equal(result$unwrap(), data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("I", "J","K"),
-        v = c(1, 2, 3),
-        z_y = c("F", "G", NA),
-        a = c(3, 3, 3),
-        c = c(3, 2, 2),
-        d = c("C", "D", NA)
-    ))
-})
-
-test_that("LeftJoin all works", {
-    x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
-    y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-    df <- DF(x)
-    rel <- Relationship$new(right=y, on=.(x = y))
-
-    result <- df$left_join(rel)
-
-    expect_equal(result$unwrap(), data.table(
-        x= c(1, 2, 3),
-        y= c("A", "B", "C"),
-        z = c("I", "J","K"),
-        v = c(1, 2, 3),
-        x_y = c("C", "D", NA),
-        z_y = c("F", "G", NA)
-    ))
-})
-

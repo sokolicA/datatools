@@ -2,9 +2,5 @@
 
 S3method(as.data.frame,DataFrame)
 S3method(as.data.table,DataFrame)
-export(Const)
 export(DF)
-export(Relationship)
-export(SF)
-import(R6)
 import(data.table)
