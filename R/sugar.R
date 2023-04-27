@@ -35,22 +35,6 @@ SF <- function(df) {
     StatFrame$new(df)
 }
 
-#' Relationship constructor sugar
-#' @describeIn Relationship Relationship$new() constructor sugar
-
-#' @param left Optional object of class `data.table` (or `data.frame`, see Details) that is treated as the left table.
-#' @param right Optional object of class `data.table` (or `data.frame`, see Details) that is treated as the right table.
-#'
-#' @details If the objects passed are not `data.table` objects then a `data.table` copy of the objects will be created with `data.table::as.data.table`.
-#'
-#'
-#' @return A `Relationship` object.
-#'
-#' @export
-Rel <- function(left=NULL, right=NULL) {
-    Relationship$new(left, right)
-}
-
 #' Constant constructor sugar
 #' @describeIn Constant Constant$new() constructor sugar
 #'

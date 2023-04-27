@@ -4,43 +4,29 @@ Join <- R6::R6Class(
         initialize = function(relationship) {
             # TODO assert that data.table. or DataFrame?
             if (relationship$is_not_fully_specified()) stop("Relationship has missing specification!")
-            private$left <- relationship$left
-            private$right <- relationship$right
-            private$.on <- private$add_missing_expr_names(relationship$get_on())
+            private$rel <- relationship
         },
 
-        add = function(...) {
-            stop("Method must be used in subclass!")
-        },
-
-        add_all = function() {
+        execute = function(cmd) {
             stop("Method must be used in subclass!")
         }
     ),
     private = list(
-        left = NULL,
-        right = NULL,
-        .on = NULL,
-        .add = NULL,
+        rel = NULL,
+        columns = NULL,
+        column_names = NULL,
 
-        command = function() {
-            stop("Method must be used in subclass!")
-        },
-
-        execute = function(cmd) {
-            eval(parse(text = cmd), envir = parent.frame())
-        },
-
-        swap_on_sub = function() {
-            result <- private$.on
-            names <- names(result)
-            new_names <- names
-            for (i in seq_along(result)[-1L]) {
-                new_names[i] <- deparse(result[[i]])
-                result[[i]] <- str2lang(names[i])
+        add_missing_expr_names = function(e) {
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            missing <- which(result == "")[-1L]
+            if (any(missing)) {
+                for (i in missing) {
+                    val <- deparse(e[[i]])
+                    result[i] <- if(grepl(">|<", val)) "" else val
+                }
+                names(e) <- result
             }
-            names(result) <- new_names
-            result
+            e
         },
 
         convert_langlist_to_vector = function(langlist) {
@@ -55,28 +41,6 @@ Join <- R6::R6Class(
 
         convert_vector_to_langlist = function(vec){
             str2lang(paste0("list(", paste0(names(vec), "=", vec, collapse = ", "), ")"))
-        },
-
-        swap_names_values = function(vec) {
-            if (!is.character(vec)) stop("Must provide a character vector!")
-            result <- names(vec)
-            names(result) <- vec
-            return(result)
-        },
-
-        add_missing_expr_names = function(e) {
-            if (is.null(names(e))) {
-                names <- vector(length = length(e))
-                names[1] <- ""
-                for (i in seq_along(e)[-1L]) {
-                    names[i] <- deparse(e[[i]])
-                }
-                names(e) <- names
-            } else {
-                idx_missing <- names(e) == ""
-                names(e)[idx_missing][-1L] <-  gsub("\\(\\)", "", e[idx_missing])[-1L]
-            }
-            e
         }
     )
 )
@@ -85,37 +49,24 @@ UpdateJoin <- R6::R6Class(
     "UpdateJoin",
     inherit = Join,
     public = list(
-        add_sub = function(columns, where=NULL) {
-            private$.where <- where
-            if (is.null(columns)) return(self$add_all_sub())
-            private$.add <- private$add_missing_expr_names(columns)
-            private$.update_join()
-        },
-
-        add_all_sub = function() {
-            private$build_add_all_sub()
-            private$.update_join()
-        },
-
-        add = function(columns, where=NULL) {
-            private$.add <- private$add_missing_expr_names(substitute(columns))
-            private$.where <- substitute(where)
-            private$.update_join()
-        },
-
-        add_all = function(where=NULL) {
-            private$.where <- substitute(where)
-            private$build_add_all_sub()
-
-            private$.update_join()
+        #https://stackoverflow.com/questions/54312225/which-data-table-syntax-for-left-join-one-column-to-prefer
+        execute = function(col_expr=NULL, where_expr=NULL) {
+            private$where <- where_expr
+            if (is.null(col_expr)) {
+              private$set_columns_add_all()
+            } else {
+                private$columns <- private$add_missing_expr_names(col_expr)
+                private$column_names <- names(private$columns)[-1]
+            }
+            private$execute_call()
         }
     ),
 
     private = list(
 
-        .where = NULL,
+        where = NULL,
 
-        .update_join = function() {
+        execute_call = function() {
             tryCatch(
                 eval(private$build_call()),
                 error = function(e) {
@@ -124,30 +75,24 @@ UpdateJoin <- R6::R6Class(
                     }
                     stop(e$message)
                 })
-            private$left[]
+            private$rel$left[]
         },
 
         build_call = function() {
-            call_sub_j_inner <- substitute(`[` (private$right, i=.SD, on=.(), j=.(), mult="all", nomatch=NA))
-            call_sub_j_inner[[4]] <- private$swap_on_sub()
-            call_sub_j_inner[[5]] <- private$.add #names(private$.add) <- NULL
-            call_sub_j <- substitute(`:=`(c(), call_sub_j_inner))
-            call_sub_j[[2]] <- names(private$.add)[-1]
-            call_sub_j[[3]] <- call_sub_j_inner
-            call <- substitute(`[` (private$left, i, j=call_sub_j))
-            call[[3]] <- if (!is.null(private$.where)) private$.where else substitute(,)
-            call[[4]] <- call_sub_j
-            call
+            ON <- private$rel$reverse()$on
+            NAMES <- private$column_names
+            J <- private$columns
+            e <- substitute(private$rel$left[, `:=`(NAMES, private$rel$right[i = .SD, on = ON, j = J, mult = "all", nomatch = NA])])
+            if (!is.null(private$where)) e[[3]] <- private$where
+            e
         },
 
-        build_add_all_sub = function() {
-            key_pairs <- private$convert_langlist_to_vector(private$.on)
-            names_r <- setdiff(names(private$right), key_pairs)
-            names_l <- names(private$left)
-            add_r <- paste0("x.", names_r)
-            new_right <- ifelse(names_r %in% names_l, paste0(names_r, "_y"), names_r)
-            private$.add <- str2lang(paste0("list(", paste0(
-                paste0(new_right, "=", names_r), collapse = ", "), ")"))
+        set_columns_add_all = function() {
+            columns <- setdiff(names(private$rel$right), private$rel$right_on())
+            if (length(columns) == 0) return(NULL)
+            cols_x <- paste0("x.", columns)
+            private$columns <- str2lang(paste0("list(", paste(cols_x, collapse = ", "), ")"))
+            private$column_names <- ifelse(columns %in% names(private$rel$left), paste0(columns, "_y"), columns)
         },
 
         one_many_join_err = "If you wish to 'recycle' the RHS please use rep() to make this intent clear to readers of your code."
@@ -158,97 +103,82 @@ LeftJoin <- R6::R6Class(
     "LeftJoin",
     inherit = Join,
     public = list(
-        add_sub = function(columns) {
-            if (is.null(columns)) return(private$full_join())
-            private$.add <- private$add_missing_expr_names(columns)
-            private$specific_join()
-        },
-
-        add = function(columns=NULL) {
-            columns_sub <- substitute(columns)
-            self$add_sub(columns_sub)
-        },
-
-        add_all = function() {
-            private$full_join()
+        execute = function(col_expr=NULL) {
+            if (is.null(col_expr)) {
+                return(private$full_join())
+            } else {
+                private$columns <- private$add_missing_expr_names(col_expr)
+                return(private$specific_join())
+            }
         }
-
     ),
 
     private = list(
 
-        build_call_full = function() {
-            call <- substitute(`[` (private$right, i=private$left, on = .(),
-                                    mult="all", nomatch=NA))
-            call[[4]] <- private$swap_on_sub()
-            call
-        },
-
-        build_call_specific = function() {
-            key_pairs <- private$convert_langlist_to_vector(private$.on)
-
-            call <- quote(`[`(result, , j = j_sub))
-            add <- private$.add
-            add[[1]] <- substitute(`:=`)
-            to_remove <- setdiff(setdiff(names(private$right), key_pairs), names(add))
-            for (col in to_remove) add[col] <- list(NULL)
-            call[[4]] <- add
-            call
-        },
-
         full_join = function() {
-            result <- eval(private$build_call_full())
-            private$.fix_names(result);
-            data.table::setcolorder(result, names(private$left))
+            result <- eval(private$build_call())
+            private$fix_names(result);
+            data.table::setcolorder(result, names(private$rel$left))
             result[]
         },
 
         specific_join = function() {
-            result <- eval(private$build_call_full())
-            key_pairs <- private$convert_langlist_to_vector(private$.on)
-
-            private$.prefix_all_added_columns(result, key_pairs)
-
-            result <- eval(private$build_call_specific())
-
+            result <- eval(private$build_call())
+            private$prefix_all_added_columns(result)
+            private$update_columns(result)
             private$reset_names(result)
-
-            data.table::setcolorder(result, names(private$left))
+            data.table::setcolorder(result, names(private$rel$left))
             result[]
         },
 
-        .fix_names = function(result) {
-            key_pairs <- private$convert_langlist_to_vector(private$.on)
-            duplicated_names <- intersect(names(private$left), names(private$right))
-            new_left <- setdiff(duplicated_names, names(key_pairs))
-            names_r <- setdiff(duplicated_names, key_pairs)
+        build_call = function() {
+            ON <- private$rel$reverse()$on
+            substitute(private$rel$right[private$rel$left, on = ON, mult = "all", nomatch = NA])
+        },
+
+        update_columns = function(x) {
+            J <- private$columns
+            J[[1]] <- substitute(`:=`)
+            to_remove <- setdiff(setdiff(names(private$rel$right), private$rel$right_on()), names(J))
+            for (col in to_remove) J[col] <- list(NULL)
+            eval(substitute(x[, j = J]), parent.frame())
+        },
+
+        fix_names = function(result) {
+            keys_left <- private$rel$reverse()$right_on()
+            keys_right <- private$rel$right_on()
+            duplicated_names <- intersect(names(private$rel$left), names(private$rel$right))
+            new_left <- setdiff(duplicated_names, keys_left)
+            names_r <- setdiff(duplicated_names, keys_right)
             names_l <- paste0("i.", new_left)
             new_right <- paste0(names_r, "_y")
             data.table::setnames(
                 result,
-                c(key_pairs, names_r, names_l),
-                c(names(key_pairs), new_right, new_left)
+                c(keys_right, names_r, names_l),
+                c(keys_left, new_right, new_left)
             )
         },
 
-        .prefix_all_added_columns = function(x, key_pairs) {
+        prefix_all_added_columns = function(x) {
             #TODO The idx logic below could probably be simplified
-            idx_keys_x <- names(private$left) %in% names(key_pairs)
-            idx_duplicated <- names(private$left) %in% names(private$right) & !idx_keys_x
+            keys_left <- private$rel$reverse()$right_on()
+            keys_right <- private$rel$right_on()
+            idx_keys_x <- names(private$rel$left) %in% keys_left
+            idx_duplicated <- names(private$rel$left) %in% names(private$rel$right) & !idx_keys_x
             idx <- !(idx_keys_x | idx_duplicated)
 
             data.table::setnames(
                 x,
-                c(key_pairs, names(private$left)[idx]),
-                paste0("i.", c(names(key_pairs), names(private$left)[idx]))
+                c(keys_right, names(private$rel$left)[idx]),
+                paste0("i.", c(keys_left, names(private$rel$left)[idx]))
             )
         },
 
         reset_names = function(x) {
-            duplicated_names <- intersect(names(private$left), names(private$.add))
+            duplicated_names <- intersect(names(private$rel$left), names(private$columns))
             setnames(x,
-                     c(paste0("i.", names(private$left)), duplicated_names),
-                     c(names(private$left), paste0(duplicated_names, "_y")))
+                     c(paste0("i.", names(private$rel$left)), duplicated_names),
+                     c(names(private$rel$left), paste0(duplicated_names, "_y")))
         }
 
     )

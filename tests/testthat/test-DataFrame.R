@@ -356,7 +356,7 @@ test_that("UpdateJoin$add works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on =.(x = y))
 
     df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z))
 
@@ -374,7 +374,7 @@ test_that("UpdateJoin$add(where) works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on=.(x = y))
 
     df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
 
@@ -393,7 +393,7 @@ test_that("UpdateJoin$add(where) works with data.frame", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on=.(x = y))
 
     df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
 
@@ -412,7 +412,7 @@ test_that("UpdateJoin$add(where) works with 2 keys", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3, w = 5:7)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7], w = c(5, 8))
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y, w)
+    rel <- Relationship$new(right=y, on = .(x = y, w))
 
     df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z), where=x %in% 1:2)
 
@@ -432,7 +432,7 @@ test_that("UpdateJoin$add_all works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on = .(x = y))
 
     df$update_join(rel)
 
@@ -451,7 +451,7 @@ test_that("UpdateJoin$add_all(where) works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on = .(x = y))
 
     df$update_join(rel, where = x == 1)
 
@@ -471,7 +471,7 @@ test_that("UpdateJoin does not work with one-to-many relationship", {
     y <- data.table(x = LETTERS[3:5], y = c(1, 2, 2), z = LETTERS[6:8])
 
     df <- DF(x)
-    expect_error(df$update_join(Rel(right=y)$on(x = y), a=3, c=ifelse(i.x == 1, 3, 2), z))
+    expect_error(df$update_join(Rel(right=y, on = .(x = y)), .(a=3, c=ifelse(i.x == 1, 3, 2), z)))
 })
 
 
@@ -479,7 +479,7 @@ test_that("LeftJoin works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on=.(x = y))
 
     result <- df$left_join(rel, add = list(a=3, c=ifelse(i.x == 1, 3, 2), z, d = x))
 
@@ -499,7 +499,7 @@ test_that("LeftJoin all works", {
     x <- data.table(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3)
     y <- data.table(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
     df <- DF(x)
-    rel <- Relationship$new(right=y)$on(x = y)
+    rel <- Relationship$new(right=y, on=.(x = y))
 
     result <- df$left_join(rel)
 

@@ -157,7 +157,7 @@ DataFrame <- R6::R6Class(
         update_join = function(relationship, columns=NULL, where=NULL) {
             relationship$left <- private$.tbl
             join <- UpdateJoin$new(relationship)
-            join$add_sub(columns=substitute(columns), where=substitute(where))
+            join$execute(substitute(columns), substitute(where))
             return(invisible(self))
         },
 
@@ -353,7 +353,7 @@ DataFrame <- R6::R6Class(
         left_join = function(relationship, add=NULL) {
             relationship$left <- private$.tbl
             join <- LeftJoin$new(relationship)
-            result <- join$add_sub(substitute(add))
+            result <- join$execute(substitute(add))
             return(DataFrame$new(result, key = self$key))
         },
 
