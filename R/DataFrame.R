@@ -279,6 +279,15 @@ DataFrame <- R6::R6Class(
         deep_clone = function(name, value) {
             if (name == "tbl") return(data.table::copy(value))
             value
-        }
+        },
+
+        err = list(
+            remove = list(
+                not_language = "Provide either an expression, an integer vector specifying rows or a logical vector of same length as the number of rows!",
+                unequal_length_logical = "Provided logical vector does not match the number of rows!",
+                int_out_of_bounds = "Rows specified are out of bounds!",
+                duplicated_int = "Duplicated row numbers not allowed!"
+            )
+        )
     )
 )
