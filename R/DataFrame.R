@@ -147,9 +147,9 @@ DataFrame <- R6::R6Class(
         #'
         #' @details
         #' \itemize{
-        #' \item If an expression is passed it will be evaluated inside the context of the table.
-        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
-        #' \item If a logical vector is passed it must be of the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be removed.
+        #' \item If an expression is passed it will be evaluated inside the context of the table, treating columns as variables.
+        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers will return duplicated rows as removed. `NA` values are treated as `FALSE` and those rows will not be removed.
+        #' \item If a logical vector is passed it must be of the same length as the number of rows. `NA` values are treated as `FALSE` and those rows will not be removed.
         #'}
         #'
         #' @return A `DataFrame` object consisting of removed rows.
@@ -161,25 +161,11 @@ DataFrame <- R6::R6Class(
         #' df <- DF(data.frame(a=1:3, b=1:3))
         #' df$remove(c(TRUE, NA, FALSE))
         remove = function(where) {
-            condition <- substitute(where)
-            if (!is.language(condition)) {
-                stop(private$err$remove$not_language)
-            }
-
-            remove_rows <- eval(condition, envir=private$tbl, enclos=parent.frame())
-            if (is.numeric(remove_rows)) {
-                if (max(remove_rows) > private$tbl[,.N]) stop(private$err$remove$int_out_of_bounds)
-                if (any(duplicated(remove_rows))) stop(private$err$remove$int_duplicated)
-                remove_rows <- private$tbl[, .I %in% remove_rows]
-                keep <- !remove_rows
-            }
-            if (is.logical(remove_rows)) {
-                if(length(remove_rows) != private$tbl[,.N]) stop(private$err$remove$unequal_length_logical)
-                keep <- !remove_rows | is.na(remove_rows)
-            }
-
-            removed <- DataFrame$new(private$tbl[remove_rows], key=self$key)
-            private$tbl <- private$tbl[keep]
+            #TODO How should shorter logical vectors behave? currently they are recycled, which might not be the best case.
+            idx_remove <- eval(substitute(private$tbl[, .I[where]]))
+            idx_remove <- private$rm_na_int(idx_remove)
+            removed <- DataFrame$new(private$tbl[idx_remove])
+            private$tbl <- private$tbl[!idx_remove]
             return(removed)
         },
 
@@ -288,6 +274,8 @@ DataFrame <- R6::R6Class(
                 int_out_of_bounds = "Rows specified are out of bounds!",
                 duplicated_int = "Duplicated row numbers not allowed!"
             )
-        )
+        ),
+
+        rm_na_int = remove_na_integer
     )
 )

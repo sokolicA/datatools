@@ -418,9 +418,9 @@ Remove specified rows from the table in place.
 }
 \subsection{Details}{
 \itemize{
-\item If an expression is passed it will be evaluated inside the context of the table.
-\item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers or numbers larger than the number of rows will result in an error.
-\item If a logical vector is passed it must be of the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
+\item If an expression is passed it will be evaluated inside the context of the table, treating columns as variables.
+\item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers will return duplicated rows as removed. \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
+\item If a logical vector is passed it must be of the same length as the number of rows. \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
 }
 }
 

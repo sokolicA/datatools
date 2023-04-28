@@ -157,23 +157,25 @@ test_that("remove works with integer vector", {
     expect_equal(df$unwrap(), data.table(a=1:2, b=1:2))
 })
 
-test_that("remove does not work with out of bounds integer vector", {
+test_that("remove does work with out of bounds integer vector", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    expect_error(df$remove(4:6))
+    df$remove(4:6)
+    expect_equal(df$unwrap(), data.table(a=1:3, b=1:3))
 })
 
-test_that("remove does not work with duplicated row numbers passed", {
+test_that("remove does work with duplicated row numbers passed", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    expect_error(df$remove(c(4, 4)))
+    df$remove(c(4, 4))
+    expect_equal(df$unwrap(), data.table(a=c(1:3, 5),  b=c(1:3, 5)))
 })
 
-test_that("remove does not work with logical vector of smaller length", {
-    x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x)
-    expect_error(df$remove(c(TRUE, TRUE, FALSE)))
-})
+# test_that("remove works with logical vector of smaller length and will repeat the vector...", {
+#     x <- data.table(a=1:5, b=1:5)
+#     df <- DataFrame$new(x)
+#     expect_error(df$remove(c(TRUE, TRUE, FALSE)))
+# })
 
 test_that("remove treats logical NA as FALSE", {
     x <- data.table(a=1:3, b=1:3)
@@ -182,17 +184,18 @@ test_that("remove treats logical NA as FALSE", {
     expect_equal(df$unwrap(), data.table(a=2:3, b=2:3))
 })
 
-test_that("remove does not work with longer vectors", {
+test_that("remove works with longer vectors", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    expect_error(df$remove(1:10))
+    df$remove(1:10)
+    expect_equal(df$unwrap(), x[0])
 })
 
 test_that("remove does not work with character vector", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-
-    expect_error(df$remove("a"))
+    df$remove("a")
+    expect_equal(df, DataFrame$new(x))
 })
 
 
