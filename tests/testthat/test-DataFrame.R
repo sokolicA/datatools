@@ -1,3 +1,5 @@
+library(data.table)
+
 test_that("deep clone creates an entirely new object and table", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
