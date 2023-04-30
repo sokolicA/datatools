@@ -1,20 +1,23 @@
 #' Convert `DataFrame` to `data.frame`
 #'
-#' @param df A `DataFrame` object.
+#' @param x A `DataFrame` object.
+#' @param row.names Not used.
+#' @param optional Not used.
+#' @param ... Not used.
 #'
 #' @return A `data.frame` object.
 #' @export
-as.data.frame.DataFrame <- function(df) {
-    data.frame(df$unwrap())
+as.data.frame.DataFrame <- function(x, row.names=NULL, optional=NULL,...) {
+    data.frame(x$unwrap())
 }
 
 
 #' Convert `DataFrame` to `data.table`
 #'
-#' @param df A `DataFrame` object.
+#' @param x A `DataFrame` object.
 #'
 #' @return A `data.table` object.
 #' @export
-as.data.table.DataFrame <- function(df) {
-    df$unwrap()
+as.data.table.DataFrame <- function(x) {
+    x$unwrap()
 }
