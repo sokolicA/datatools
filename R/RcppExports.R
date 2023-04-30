@@ -2,10 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 replace_na_false <- function(x) {
-    invisible(.Call('_datatools_replace_na_false', PACKAGE = 'datatools', x))
+    invisible(.Call(`_datatools_replace_na_false`, x))
 }
 
 remove_na_integer <- function(x) {
-    .Call('_datatools_remove_na_integer', PACKAGE = 'datatools', x)
+    .Call(`_datatools_remove_na_integer`, x)
 }
 

@@ -17,3 +17,10 @@ Imports:
     Rcpp
 LinkingTo: 
     Rcpp
+Collate: 
+    'Columns.R'
+    'RcppExports.R'
+    'DataFrame.R'
+    'datatools-package.R'
+    'misc.R'
+    'sugar.R'

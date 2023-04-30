@@ -11,22 +11,22 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // replace_na_false
-void replace_na_false(LogicalVector& x);
+void replace_na_false(Rcpp::LogicalVector& x);
 RcppExport SEXP _datatools_replace_na_false(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< LogicalVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector& >::type x(xSEXP);
     replace_na_false(x);
     return R_NilValue;
 END_RCPP
 }
 // remove_na_integer
-IntegerVector remove_na_integer(IntegerVector& x);
+Rcpp::IntegerVector remove_na_integer(Rcpp::IntegerVector& x);
 RcppExport SEXP _datatools_remove_na_integer(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(remove_na_integer(x));
     return rcpp_result_gen;
 END_RCPP

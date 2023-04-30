@@ -3,6 +3,8 @@
 #' @description A wrapper class for tabular data objects of class `data.frame`.
 #'
 #' @import data.table
+#' @import R6
+#' @include  RcppExports.R
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
@@ -161,7 +163,9 @@ DataFrame <- R6::R6Class(
         #' df <- DF(data.frame(a=1:3, b=1:3))
         #' df$remove(c(TRUE, NA, FALSE))
         remove = function(where) {
-            #TODO How should shorter logical vectors behave? currently they are recycled, which might not be the best case.
+            if (try(is.logical(where), silent=TRUE) == TRUE && length(where) != dim(private$tbl)[1]) {
+                stop("Logical vectors must be of equal length as the number of table rows.")
+            }
             idx_remove <- eval(substitute(private$tbl[, .I[where]]))
             idx_remove <- private$rm_na_int(idx_remove)
             removed <- DataFrame$new(private$tbl[idx_remove])
@@ -221,6 +225,7 @@ DataFrame <- R6::R6Class(
         #' y <- data.frame(a=1:5, b=1:5)
         #' df <- DF(x)
         #' df$append_(y, x, y, df)
+        #'
         append_ = function(..., fill=FALSE) {
             append <- list(private$tbl, ...)
             tbls <- lapply(append, function(x) {
@@ -266,15 +271,6 @@ DataFrame <- R6::R6Class(
             if (name == "tbl") return(data.table::copy(value))
             value
         },
-
-        err = list(
-            remove = list(
-                not_language = "Provide either an expression, an integer vector specifying rows or a logical vector of same length as the number of rows!",
-                unequal_length_logical = "Provided logical vector does not match the number of rows!",
-                int_out_of_bounds = "Rows specified are out of bounds!",
-                duplicated_int = "Duplicated row numbers not allowed!"
-            )
-        ),
 
         rm_na_int = remove_na_integer
     )

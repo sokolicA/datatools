@@ -112,6 +112,7 @@ x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
 df$append_(y, x, y, df)
+
 df <- DF(data.table(a=1, b=2), key="a")
 
 }
@@ -524,6 +525,7 @@ Invisibly returns itself.
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
 df$append_(y, x, y, df)
+
 }
 \if{html}{\out{</div>}}
 
