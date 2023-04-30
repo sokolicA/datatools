@@ -4,7 +4,7 @@
 \alias{Columns}
 \title{DataFrame Columns Class}
 \description{
-A class for column names of data objects of class \code{data.frame}.
+A class for column names of data objects of class \code{DataFrame}.
 }
 \examples{
 
@@ -12,29 +12,26 @@ A class for column names of data objects of class \code{data.frame}.
 ## Method `Columns$drop`
 ## ------------------------------------------------
 
-x <- data.table(a=1:5, b=1:5)
-x_cols <- Columns$new(x)
-x_cols$drop("b") #
-names(x)
+x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$drop("b") #
+x$columns$names
 
 ## ------------------------------------------------
 ## Method `Columns$reorder`
 ## ------------------------------------------------
 
-x <- data.table(a=1:5, b=1:5)
-x_cols <- Columns$new(x)
-x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
-names(x)
+x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$reorder(c("b", "a")) # same as x_cols$reorder("b")
+x
 
 ## ------------------------------------------------
 ## Method `Columns$rename`
 ## ------------------------------------------------
 
-x <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
-df$rename(toupper)
+x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$rename(toupper)
 custom_mapper = function(x) {return(paste0(x, 1))}
-df$rename(custom_mapper)
+x$columns$rename(custom_mapper)
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -66,7 +63,7 @@ Constructor
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A \code{data.table} object.}
+\item{\code{x}}{A \code{DataFrame} object.}
 }
 \if{html}{\out{</div>}}
 }
@@ -99,10 +96,9 @@ Drop columns in place
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:5, b=1:5)
-x_cols <- Columns$new(x)
-x_cols$drop("b") #
-names(x)
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$drop("b") #
+x$columns$names
 }
 \if{html}{\out{</div>}}
 
@@ -130,10 +126,9 @@ By default, reorder without a specified order moves the key columns in order to 
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:5, b=1:5)
-x_cols <- Columns$new(x)
-x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
-names(x)
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$reorder(c("b", "a")) # same as x_cols$reorder("b")
+x
 }
 \if{html}{\out{</div>}}
 
@@ -158,11 +153,10 @@ Rename column names in place
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:5, b=1:5)
-df <- DataFrame$new(x)
-df$rename(toupper)
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$rename(toupper)
 custom_mapper = function(x) {return(paste0(x, 1))}
-df$rename(custom_mapper)
+x$columns$rename(custom_mapper)
 }
 \if{html}{\out{</div>}}
 

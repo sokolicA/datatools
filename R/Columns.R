@@ -1,6 +1,6 @@
 #' @title DataFrame Columns Class
 #'
-#' @description A class for column names of data objects of class `data.frame`.
+#' @description A class for column names of data objects of class `DataFrame`.
 #'
 #' @import data.table
 Columns <- R6::R6Class(
@@ -9,7 +9,7 @@ Columns <- R6::R6Class(
     public = list(
         #' @description Constructor
         #'
-        #' @param x A `data.table` object.
+        #' @param x A `DataFrame` object.
         #'
         initialize = function(x) {
             private$df <- x
@@ -29,10 +29,9 @@ Columns <- R6::R6Class(
         #' @param columns Character vector of the column names to remove.
         #'
         #' @examples
-        #' x <- data.table(a=1:5, b=1:5)
-        #' x_cols <- Columns$new(x)
-        #' x_cols$drop("b") #
-        #' names(x)
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$columns$drop("b") #
+        #' x$columns$names
         drop = function(columns) {
             if (!is.character(columns)) stop("Provide a vector of column names!")
             private$df$unwrap()[, (c(columns)) := NULL]
@@ -46,10 +45,9 @@ Columns <- R6::R6Class(
         #' By default, reorder without a specified order moves the key columns in order to the "front".
         #'
         #' @examples
-        #' x <- data.table(a=1:5, b=1:5)
-        #' x_cols <- Columns$new(x)
-        #' x_cols$reorder(c("b", "a")) # same as x_cols$reorder("b")
-        #' names(x)
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$columns$reorder(c("b", "a")) # same as x_cols$reorder("b")
+        #' x
         reorder = function(order=key(private$df$unwrap())) {
             data.table::setcolorder(private$df$unwrap(), neworder = order)
             return(invisible(self))
@@ -60,11 +58,10 @@ Columns <- R6::R6Class(
         #' @param mapper Function
         #'
         #' @examples
-        #' x <- data.table(a=1:5, b=1:5)
-        #' df <- DataFrame$new(x)
-        #' df$rename(toupper)
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$columns$rename(toupper)
         #' custom_mapper = function(x) {return(paste0(x, 1))}
-        #' df$rename(custom_mapper)
+        #' x$columns$rename(custom_mapper)
         rename = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
             data.table::setnames(private$df$unwrap(), old=mapper)
