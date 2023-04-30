@@ -4,10 +4,16 @@
 \alias{as.data.frame.DataFrame}
 \title{Convert \code{DataFrame} to \code{data.frame}}
 \usage{
-\method{as.data.frame}{DataFrame}(df)
+\method{as.data.frame}{DataFrame}(x, row.names = NULL, optional = NULL, ...)
 }
 \arguments{
-\item{df}{A \code{DataFrame} object.}
+\item{x}{A \code{DataFrame} object.}
+
+\item{row.names}{Not used.}
+
+\item{optional}{Not used.}
+
+\item{...}{Not used.}
 }
 \value{
 A \code{data.frame} object.

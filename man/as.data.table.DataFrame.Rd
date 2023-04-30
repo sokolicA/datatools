@@ -4,10 +4,10 @@
 \alias{as.data.table.DataFrame}
 \title{Convert \code{DataFrame} to \code{data.table}}
 \usage{
-\method{as.data.table}{DataFrame}(df)
+\method{as.data.table}{DataFrame}(x)
 }
 \arguments{
-\item{df}{A \code{DataFrame} object.}
+\item{x}{A \code{DataFrame} object.}
 }
 \value{
 A \code{data.table} object.
