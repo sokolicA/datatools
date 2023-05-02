@@ -60,9 +60,17 @@ Columns <- R6::R6Class(
         #' @examples
         #' x <- DF(data.frame(a=1:5, b=1:5))
         #' x$columns$rename(toupper)
+
+        #' @description Rename column names in place using a mapping function.
+        #'
+        #' @param mapper Function that accepts old column names as a character vector and returns a character vector of new column names.
+        #'
+        #' @examples
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$columns$rename_with(toupper)
         #' custom_mapper = function(x) {return(paste0(x, 1))}
-        #' x$columns$rename(custom_mapper)
-        rename = function(mapper) {
+        #' x$columns$rename_with(custom_mapper)
+        rename_with = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
             data.table::setnames(private$df$unwrap(), old=mapper)
             return(invisible(self))
