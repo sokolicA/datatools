@@ -29,9 +29,16 @@ x
 ## ------------------------------------------------
 
 x <- DF(data.frame(a=1:5, b=1:5))
-x$columns$rename(toupper)
+x$columns$rename(c("a"="A", "b"="B"))
+
+## ------------------------------------------------
+## Method `Columns$rename_with`
+## ------------------------------------------------
+
+x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$rename_with(toupper)
 custom_mapper = function(x) {return(paste0(x, 1))}
-x$columns$rename(custom_mapper)
+x$columns$rename_with(custom_mapper)
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -48,6 +55,7 @@ x$columns$rename(custom_mapper)
 \item \href{#method-Columns-drop}{\code{Columns$drop()}}
 \item \href{#method-Columns-reorder}{\code{Columns$reorder()}}
 \item \href{#method-Columns-rename}{\code{Columns$rename()}}
+\item \href{#method-Columns-rename_with}{\code{Columns$rename_with()}}
 \item \href{#method-Columns-clone}{\code{Columns$clone()}}
 }
 }
@@ -139,24 +147,50 @@ x
 \if{html}{\out{<a id="method-Columns-rename"></a>}}
 \if{latex}{\out{\hypertarget{method-Columns-rename}{}}}
 \subsection{Method \code{rename()}}{
-Rename column names in place
+Rename column names in place.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Columns$rename(mapper)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Columns$rename(mapping)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{mapper}}{Function}
+\item{\code{mapping}}{Named character vector. Names of the vector elements are the old names and the elements itself are the new names.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{x <- DF(data.frame(a=1:5, b=1:5))
-x$columns$rename(toupper)
+x$columns$rename(c("a"="A", "b"="B"))
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Columns-rename_with"></a>}}
+\if{latex}{\out{\hypertarget{method-Columns-rename_with}{}}}
+\subsection{Method \code{rename_with()}}{
+Rename column names in place using a mapping function.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Columns$rename_with(mapper)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{mapper}}{Function that accepts old column names as a character vector and returns a character vector of new column names.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$columns$rename_with(toupper)
 custom_mapper = function(x) {return(paste0(x, 1))}
-x$columns$rename(custom_mapper)
+x$columns$rename_with(custom_mapper)
 }
 \if{html}{\out{</div>}}
 
