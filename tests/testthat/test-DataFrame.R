@@ -49,7 +49,11 @@ test_that("columns$rename_with and $reorder can be chained", {
 test_that("columns$rename changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    df$columns$rename(toupper)
+    df$columns$rename(c("a" = "A", "b"="B"))
+    expect_equal(df$columns$names, c("A", "B"))
+    df$columns$rename(c("A" = "b"))
+    expect_equal(df$columns$names, c("b", "B"))
+})
 
 test_that("columns$rename_with changes column names", {
     x <- data.table(a=1:5, b=1:5)

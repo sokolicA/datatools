@@ -53,13 +53,18 @@ Columns <- R6::R6Class(
             return(invisible(self))
         },
 
-        #' @description Rename column names in place
+        #' @description Rename column names in place.
         #'
-        #' @param mapper Function
+        #' @param mapping Named character vector. Names of the vector elements are the old names and the elements itself are the new names.
         #'
         #' @examples
         #' x <- DF(data.frame(a=1:5, b=1:5))
-        #' x$columns$rename(toupper)
+        #' x$columns$rename(c("a"="A", "b"="B"))
+        rename = function(mapping) {
+            if (!is.character(mapping) || is.null(names(mapping))) stop("Provide a named character vector!")
+            data.table::setnames(private$df$unwrap(), old=names(mapping), new=mapping)
+            return(invisible(self))
+        },
 
         #' @description Rename column names in place using a mapping function.
         #'
