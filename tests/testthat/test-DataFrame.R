@@ -39,11 +39,11 @@ test_that("columns$names returns character vector of column names", {
     expect_equal(df$columns$names, c("a", "b"))
 })
 
-test_that("columns$rename and $reorder can be chained", {
+test_that("columns$rename_with and $reorder can be chained", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df$columns$rename(toupper)$reorder("B")
+    df$columns$rename_with(toupper)$reorder("B")
     expect_equal(df$columns$names, c("B", "A"))
 
 })
@@ -52,19 +52,24 @@ test_that("columns$rename changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
     df$columns$rename(toupper)
+
+test_that("columns$rename_with changes column names", {
+    x <- data.table(a=1:5, b=1:5)
+    df <- DataFrame$new(x)
+    df$columns$rename_with(toupper)
     expect_equal(df$columns$names, c("A", "B"))
 
     custom_map <- function(x) ifelse(x == "A", "AA", "BB")
-    df$columns$rename(custom_map)
+    df$columns$rename_with(custom_map)
     expect_equal(df$columns$names, c("AA", "BB"))
 })
 
-test_that("columns$rename changes column names in place", {
+test_that("columns$rename_with changes column names in place", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
-    df$columns$rename(toupper)
+    df$columns$rename_with(toupper)
     expect_equal(address(df$unwrap()), old_address_tbl)
     expect_equal(address(df$unwrap()$B), old_address_col)
 })
