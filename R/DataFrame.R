@@ -14,8 +14,9 @@ DataFrame <- R6::R6Class(
         #' @param key Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.
         #'
         initialize = function(tbl, key=NULL) {
-            data.table::setDT(tbl, key=key)
+            data.table::setDT(tbl)
             private$tbl <- tbl
+            if (!is.null(key)) self$set_key(key)
         },
 
         #' @description Print the table object.
