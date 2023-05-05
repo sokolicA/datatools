@@ -23,10 +23,9 @@ test_that("count returns a DataFrame with count of the number of rows", {
     df <- DataFrame$new(x)
     expect_equal(df$count(), DF(data.table(N=5)))
 
-    x <- data.table(a=c(1,1,1,2,3), b=1:5)
-    df <- DataFrame$new(x)
-    expect_equal(df$count(.(a)), DF(data.table(a=c(1,2,3), N=c(3,1,1), key = "a")))
-    expect_equal(df$count(list(a)), DF(data.table(a=c(1,2,3), N=c(3,1,1), key = "a")))
+    df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+    expect_equal(df$count(), DF(data.table(N=5)))
+    expect_equal(df$group_by(g)$count(), DF(data.table(g=c("a", "b", "c"), N=c(2,1,2)), key="g"))
 })
 
 
@@ -89,7 +88,7 @@ test_that("columns$reorder changes column order in place", {
     expect_equal(df$columns$names, c("a", "b"))
 })
 
-test_that("reorder changes row order in place", {
+test_that("sort changes row order in place", {
     x <- data.table(a=1:5, b=5:1)
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$unwrap())
@@ -102,10 +101,10 @@ test_that("reorder changes row order in place", {
     expect_equal(df$unwrap(), data.table(a=1:5, b=5:1))
 })
 
-test_that("reorder does not work with keyed data", {
+test_that("sort does not work with keyed data", {
     x <- data.table(a=1:5, b=5:1)
     df <- DataFrame$new(x, key = "b")
-    expect_error(df$reorder(b))
+    expect_error(df$sort(b))
 })
 
 
@@ -232,3 +231,58 @@ test_that("filter treats logical NA as FALSE", {
 test_that("filter does not work with character vector", {
     expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter("a"))
 })
+
+
+TestPrivateDF <- R6::R6Class(
+    "TestPrivateDF",
+    inherit=DataFrame,
+    public=list(
+        t_grp_expr = function() return(private$grp_expr)
+    )
+)
+
+TestPrivateCol <- R6::R6Class(
+    "TestPrivateCol",
+    inherit=Columns,
+    public=list(
+        t_rename_grouping = function(e, old, new) private$rename_grouping(e, old, new),
+        t_find_group_cols = function(e) private$find_group_cols(e)
+    )
+)
+
+test_that("group_by works", {
+    x <- DataFrame$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+    expect_error(x$group_by(c))
+    expect_error(x$group_by(1))
+    expect_error(x$group_by("c"))
+    x <- TestPrivateDF$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+    x$group_by(x)
+    expect_equal(x$t_grp_expr(), quote(list(x)))
+    x$group_by(NULL)
+    expect_null(x$t_grp_expr())
+    x$group_by("x")
+    expect_equal(x$t_grp_expr(), quote(list(x)))
+    x$group_by(x, x >2, grepl("a", g))
+    expect_equal(x$t_grp_expr(), quote(list(x, x>2, grepl("a", g))))
+
+    grping <- "x"
+    expect_error(df$group_by(grping))
+    x$group_by(c(grping))
+    expect_equal(x$t_grp_expr(), quote(list(x)))
+})
+
+test_that("find_group_col works", {
+    x <- TestPrivateCol$new(data.frame(a=1))
+    expect_null(x$t_find_group_cols(NULL))
+    expect_equal(x$t_find_group_cols(quote(list(a, a>2, g=a !=b, d=a, a=gg, grepl("x", f, d, "g", FALSE)))),
+                 c("a", "a", "a", "b", "a", "gg", "f", "d"))
+})
+
+test_that("rename_grouping works", {
+    x <- TestPrivateCol$new(data.frame(a=1))
+    e <- quote(list(a, a>2, g=a !=b, d=a, a=gg, f=grepl("x", a)))
+    expect_equal(x$t_rename_grouping(e, c("a", "b"), c("c", "d")), quote(list(c, c>2, g=c !=d, d=c, a=gg, f=grepl("x", c))))
+})
+
+
+

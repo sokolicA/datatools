@@ -4,7 +4,7 @@
 #'
 #' @import data.table
 #' @import R6
-#' @include  RcppExports.R
+#' @include RcppExports.R
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
@@ -24,6 +24,7 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function() {
+            if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$grp_expr)), "\n")
             print(private$tbl)
         },
 
@@ -86,18 +87,16 @@ DataFrame <- R6::R6Class(
 
         #' @description Count the number of rows.
         #'
-        #' @param by An optional list() specifying the columns to group by. Defaults to no grouping.
-        #'
-        #' @return A `DataFrame` with the row counts. If `by` is specified the result will be keyed.
+        #' @return A `DataFrame` with the row counts. The result will be keyed by the grouping if a grouped `DataFrame` was used.
         #'
         #' @examples
-        #' df <- DF(data.frame(a=1:5, b=1:5))
+        #' df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
         #' df$count()
-        #' df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
-        #' df$count(by = list(a)) # df$count(by = .(a))
-        count = function(by=NULL) {
-            result <- eval(substitute(private$tbl[, .N, keyby = by]))
-            DataFrame$new(result)
+        #' df$group_by(g)$count()
+        count = function() {
+            by <- private$grp_expr
+            expr <- substitute(private$tbl[, .N, keyby = by])
+            DataFrame$new(eval(expr))
         },
 
         #' @description Create a new `DataFrame` with filter applied to the rows.
@@ -142,6 +141,50 @@ DataFrame <- R6::R6Class(
         filter_ = function(keep) {
             private$tbl <- eval(substitute(private$tbl[keep]))
             self
+        },
+
+        #' @description Group or un-group the data.
+        #' Used in calculation of statistics.
+        #'
+        #' @param ... An expression specifying by what to group the data. See details.
+        #'
+        #' @details Setting by Will override existing grouping without warning.
+        #' Pass a character vector of groups `vec` using `c(vec)`.
+        #' Set to `NULL` to remove any existing grouping.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' df <- DF(data.table(a=1:5, b=3))
+        #' df$group(a)
+        #' df$group("a")
+        #' df$group(a, b)
+        #' df$group(c("a", "b"))
+        #' df$group(a > 2)
+        #' df$group(s = a > 2) # will name the grouping column with s
+        #' a <- "b"
+        #' df$group(a) #will group by a
+        #' df$group(c(a)) # will group by b
+        #' df$group(NULL) # will remove grouping
+        group_by = function(...) {
+            e <- substitute(alist(...))[-1L]
+            result <- private$parse_group_expr(e)
+            check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
+            if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
+            private$grp_expr <- result
+            invisible(self)
+        },
+
+        #' @description Check whether the data is grouped.
+        #'
+        #' @return TRUE or FALSE.
+        #'
+        #' @examples
+        #' df <- DF(data.table(a=1:5, b=3))
+        #' df$is_grouped()
+        #' df$group(a)$is_grouped()
+        is_grouped = function() {
+            !is.null(private$grp_expr)
         },
 
         #' @description Remove specified rows from the table in place.
@@ -268,9 +311,65 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
+        grp_expr = NULL,
+        grp_cols = NULL,
+
         deep_clone = function(name, value) {
             if (name == "tbl") return(data.table::copy(value))
             value
+        },
+
+        parse_group_expr = function(e) {
+            result <- quote(list())
+            idx <- 2L
+            for(i in seq_along(e)) {
+                el <- e[[i]]
+                if (is.name(el)) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                if (is.null(el)) {
+                    result <- NULL
+                    break
+                }
+                if (is.character(el)) {
+                    result[[idx]] <- as.name(el)
+                    idx <- idx + 1L
+                    next
+                }
+                if (!is.name(el) && el[[1]] == quote(c)) {
+                    N <- 2L
+                    while(TRUE) {
+                        cols <- try(eval(el, parent.frame(n=N)), silent=TRUE)
+                        if (!inherits(cols, "try-error")) break
+                        if (identical(globalenv(), parent.frame(n=N))) {
+                            stop(attr(cols, "condition")$message)
+                        }
+                        N <- N+1L
+                    }
+                    for (col in cols) {
+                        result[[idx]] <- as.name(col)
+                        idx <- idx + 1L
+                    }
+                    next
+                }
+                if (is.call(el) &&  grepl("!|>|<|=|%",  as.character(el[[1]]))) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                if (is.call(el)) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                stop("Do not know how to interpret given grouping: ", as.character(el), ".")
+            }
+            return(result)
         },
 
         rm_na_int = remove_na_integer
