@@ -255,7 +255,7 @@ DataFrame <- R6::R6Class(
 
         #' @field columns Column names object.
         columns = function() {
-            Columns$new(self)
+            Columns$new(private)
         },
 
         #' @field key Key getter.
