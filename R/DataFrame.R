@@ -156,16 +156,16 @@ DataFrame <- R6::R6Class(
         #'
         #' @examples
         #' df <- DF(data.table(a=1:5, b=3))
-        #' df$group(a)
-        #' df$group("a")
-        #' df$group(a, b)
-        #' df$group(c("a", "b"))
-        #' df$group(a > 2)
-        #' df$group(s = a > 2) # will name the grouping column with s
+        #' df$group_by(a)
+        #' df$group_by("a")
+        #' df$group_by(a, b)
+        #' df$group_by(c("a", "b"))
+        #' df$group_by(a > 2)
+        #' df$group_by(s = a > 2) # will name the grouping column with s
         #' a <- "b"
-        #' df$group(a) #will group by a
-        #' df$group(c(a)) # will group by b
-        #' df$group(NULL) # will remove grouping
+        #' df$group_by(a) #will group by a
+        #' df$group_by(c(a)) # will group by b
+        #' df$group_by(NULL) # will remove grouping
         group_by = function(...) {
             e <- substitute(alist(...))[-1L]
             result <- private$parse_group_expr(e)
