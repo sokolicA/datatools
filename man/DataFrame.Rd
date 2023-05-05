@@ -163,6 +163,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
+\item \href{#method-DataFrame-subset}{\code{DataFrame$subset()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-append_}{\code{DataFrame$append_()}}
@@ -526,6 +527,36 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-subset"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-subset}{}}}
+\subsection{Method \code{subset()}}{
+Work on a subset of the data.
+
+This method will not remove the rows or columns from the data.
+Instead all further calculations will be based only of the selected subset of data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$subset(rows, columns)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rows}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. Same as the \code{keep} parameter in \verb{$filter} method.}
+
+\item{\code{columns}}{May be character column names or numeric positions. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+See documentation of \code{.SDcols} in \code{?data.table::data.table} for more possibilities.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-set_key"></a>}}

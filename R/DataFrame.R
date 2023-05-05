@@ -25,7 +25,9 @@ DataFrame <- R6::R6Class(
         #'
         print = function() {
             if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$grp_expr)), "\n")
-            print(private$tbl)
+            if (!is.null(private$i_expr)) cat("Rows subset using:", deparse1(private$i_expr), "\n")
+            if (!is.null(private$sdcols_expr)) cat("Columns subset using:", deparse1(private$sdcols_expr), "\n")
+            print(private$subset_tbl())
         },
 
         #' @description Return the first n rows.
@@ -39,7 +41,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            DataFrame$new(head(private$tbl, n))
+            DataFrame$new(head(private$subset_tbl(), n))
         },
 
         #' @description Return the last n rows.
@@ -53,7 +55,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            DataFrame$new(tail(private$tbl, n))
+            DataFrame$new(tail(private$subset_tbl(), n))
         },
 
         #' @description Sort the table rows
@@ -94,9 +96,8 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            by <- private$grp_expr
-            expr <- substitute(private$tbl[, .N, keyby = by])
-            DataFrame$new(eval(expr))
+            result <- eval(private$call(i=private$i_expr,j=quote(list(.N)), keyby=private$grp_expr))
+            DataFrame$new(result)
         },
 
         #' @description Create a new `DataFrame` with filter applied to the rows.
@@ -217,6 +218,25 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
+        #' @description Work on a subset of the data.
+        #'
+        #' This method will not remove the rows or columns from the data.
+        #' Instead all further calculations will be based only of the selected subset of data.
+        #'
+        #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. Same as the `keep` parameter in `$filter` method.
+        #' @param columns May be character column names or numeric positions. See details.
+        #'
+        #' @details
+        #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+        #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
+        #'
+        #' @return Invisibly returns itself.
+        subset = function(rows, columns) {
+            if (!missing(rows)) private$i_expr <- substitute(rows)
+            if (!missing(columns)) private$sdcols_expr <- substitute(columns)
+            invisible(self)
+        },
+
         #' @description Create a key the table.
         #'
         #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
@@ -313,6 +333,22 @@ DataFrame <- R6::R6Class(
 
         grp_expr = NULL,
         grp_cols = NULL,
+
+        i_expr = NULL,
+        sdcols_expr = NULL,
+
+        subset_tbl = function() {
+            eval(private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr))
+        },
+
+        call = function(i, j, keyby, .SDcols) {
+            e <- quote(`[`(private$tbl))
+            if (!missing(i) && !is.null(i)) e[["i"]] <- i
+            if (!missing(j) && !is.null(j)) e[["j"]] <- j
+            if (!missing(keyby) && !is.null(keyby)) e[["keyby"]] <- keyby
+            if (!missing(.SDcols) && !is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
+            e
+        },
 
         deep_clone = function(name, value) {
             if (name == "tbl") return(data.table::copy(value))
