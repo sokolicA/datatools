@@ -65,13 +65,13 @@ x$columns$rename_with(custom_mapper)
 \subsection{Method \code{new()}}{
 Constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Columns$new(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Columns$new(env = private)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A \code{DataFrame} object.}
+\item{\code{env}}{Private environment of the passed \code{DataFrame}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -119,7 +119,7 @@ x$columns$names
 \subsection{Method \code{reorder()}}{
 Reorder columns in place
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Columns$reorder(order = key(private$df$unwrap()))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Columns$reorder(order = key(private$df_env$tbl))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

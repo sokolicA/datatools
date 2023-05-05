@@ -62,10 +62,9 @@ df$is_key_unique()
 ## Method `DataFrame$count`
 ## ------------------------------------------------
 
-df <- DF(data.frame(a=1:5, b=1:5))
+df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
 df$count()
-df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
-df$count(by = list(a)) # df$count(by = .(a))
+df$group_by(g)$count()
 
 ## ------------------------------------------------
 ## Method `DataFrame$filter`
@@ -83,6 +82,30 @@ df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
 df <- DF(data.frame(a=1:5, b=1:5))
 df$filter_(a > 2)
 df
+
+## ------------------------------------------------
+## Method `DataFrame$group_by`
+## ------------------------------------------------
+
+df <- DF(data.table(a=1:5, b=3))
+df$group(a)
+df$group("a")
+df$group(a, b)
+df$group(c("a", "b"))
+df$group(a > 2)
+df$group(s = a > 2) # will name the grouping column with s
+a <- "b"
+df$group(a) #will group by a
+df$group(c(a)) # will group by b
+df$group(NULL) # will remove grouping
+
+## ------------------------------------------------
+## Method `DataFrame$is_grouped`
+## ------------------------------------------------
+
+df <- DF(data.table(a=1:5, b=3))
+df$is_grouped()
+df$group(a)$is_grouped()
 
 ## ------------------------------------------------
 ## Method `DataFrame$remove`
@@ -137,6 +160,8 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
 \item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-filter_}{\code{DataFrame$filter_()}}
+\item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
+\item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
@@ -297,25 +322,17 @@ df$is_key_unique()
 \subsection{Method \code{count()}}{
 Count the number of rows.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count(by = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count()}\if{html}{\out{</div>}}
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{by}}{An optional list() specifying the columns to group by. Defaults to no grouping.}
-}
-\if{html}{\out{</div>}}
-}
 \subsection{Returns}{
-A \code{DataFrame} with the row counts. If \code{by} is specified the result will be keyed.
+A \code{DataFrame} with the row counts. The result will be keyed by the grouping if a grouped \code{DataFrame} was used.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.frame(a=1:5, b=1:5))
+\preformatted{df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
 df$count()
-df <- DF(data.frame(a=c(1,1,1,2,3), b=1:5))
-df$count(by = list(a)) # df$count(by = .(a))
+df$group_by(g)$count()
 }
 \if{html}{\out{</div>}}
 
@@ -395,6 +412,74 @@ Returns itself with kept rows only.
 \preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$filter_(a > 2)
 df
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-group_by"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-group_by}{}}}
+\subsection{Method \code{group_by()}}{
+Group or un-group the data.
+Used in calculation of statistics.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{An expression specifying by what to group the data. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Setting by Will override existing grouping without warning.
+Pass a character vector of groups \code{vec} using \code{c(vec)}.
+Set to \code{NULL} to remove any existing grouping.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(a=1:5, b=3))
+df$group(a)
+df$group("a")
+df$group(a, b)
+df$group(c("a", "b"))
+df$group(a > 2)
+df$group(s = a > 2) # will name the grouping column with s
+a <- "b"
+df$group(a) #will group by a
+df$group(c(a)) # will group by b
+df$group(NULL) # will remove grouping
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-is_grouped"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-is_grouped}{}}}
+\subsection{Method \code{is_grouped()}}{
+Check whether the data is grouped.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$is_grouped()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+TRUE or FALSE.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(a=1:5, b=3))
+df$is_grouped()
+df$group(a)$is_grouped()
 }
 \if{html}{\out{</div>}}
 
