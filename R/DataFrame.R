@@ -27,7 +27,7 @@ DataFrame <- R6::R6Class(
             if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$grp_expr)), "\n")
             if (!is.null(private$i_expr)) cat("Rows subset using:", deparse1(private$i_expr), "\n")
             if (!is.null(private$sdcols_expr)) cat("Columns subset using:", deparse1(private$sdcols_expr), "\n")
-            print(private$subset_tbl())
+            print(private$tbl_subset())
         },
 
         #' @description Return the first n rows.
@@ -41,7 +41,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            DataFrame$new(head(private$subset_tbl(), n))
+            DataFrame$new(head(private$tbl_subset(), n))
         },
 
         #' @description Return the last n rows.
@@ -55,7 +55,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            DataFrame$new(tail(private$subset_tbl(), n))
+            DataFrame$new(tail(private$tbl_subset(), n))
         },
 
         #' @description Sort the table rows
@@ -337,7 +337,7 @@ DataFrame <- R6::R6Class(
         i_expr = NULL,
         sdcols_expr = NULL,
 
-        subset_tbl = function() {
+        tbl_subset = function() {
             eval(private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr))
         },
 
