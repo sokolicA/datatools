@@ -96,7 +96,7 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            result <- eval(private$call(i=private$i_expr,j=quote(list(.N)), keyby=private$grp_expr))
+            result <- private$tbl_eval(i=private$i_expr,j=quote(list(.N)), keyby=private$grp_expr)
             DataFrame$new(result)
         },
 
@@ -339,6 +339,10 @@ DataFrame <- R6::R6Class(
 
         tbl_subset = function() {
             eval(private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr))
+        },
+
+        tbl_eval = function(i, j, keyby, .SDcols) {
+            eval(private$call(i, j, keyby, .SDcols))
         },
 
         call = function(i, j, keyby, .SDcols) {
