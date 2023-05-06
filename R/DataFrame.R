@@ -235,7 +235,7 @@ DataFrame <- R6::R6Class(
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        subset = function(rows, columns, persist=TRUE) {
+        subset = function(rows, columns, persist=FALSE) {
             if (!missing(rows)) private$i_expr <- substitute(rows)
             if (!missing(columns)) private$sdcols_expr <- substitute(columns)
             if (!(missing(rows) && missing(columns))) private$persist_subset=persist

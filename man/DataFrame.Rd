@@ -533,11 +533,11 @@ df$remove(c(TRUE, NA, FALSE))
 \if{latex}{\out{\hypertarget{method-DataFrame-subset}{}}}
 \subsection{Method \code{subset()}}{
 Work on a subset of the data.
-Experimental. Considerations: split rows and columns. #TODO define behaviour of other methods.
+Experimental. Considerations: split rows and columns, set persist elsewhere?. #TODO define behaviour of other methods.
 This method will not remove the rows or columns from the data.
 Selected data modifications or calculations will be based only on the selected subset of data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$subset(rows, columns, persist = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$subset(rows, columns, persist = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
