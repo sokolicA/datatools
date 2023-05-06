@@ -286,3 +286,13 @@ test_that("rename_grouping works", {
 
 
 
+test_that("subset works", {
+    df <- DataFrame$new(data.table(a=1:3, b=1:3))
+    expect_equal(df$subset(a>1)$count()$unwrap(), data.table(N=2))
+    expect_equal(df$count()$unwrap(), data.table(N=2))
+
+    expect_equal(df$subset(a==1, persist=FALSE)$count()$unwrap(), data.table(N=1))
+    expect_equal(df$count()$unwrap(), data.table(N=3))
+
+})
+

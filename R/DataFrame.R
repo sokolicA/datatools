@@ -41,7 +41,8 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            DataFrame$new(head(private$tbl_subset(), n))
+            result <- private$tbl_subset()
+            DataFrame$new(head(result, n))
         },
 
         #' @description Return the last n rows.
@@ -55,7 +56,8 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            DataFrame$new(tail(private$tbl_subset(), n))
+            result <- private$tbl_subset()
+            DataFrame$new(tail(result, n))
         },
 
         #' @description Sort the table rows
@@ -219,21 +221,24 @@ DataFrame <- R6::R6Class(
         },
 
         #' @description Work on a subset of the data.
-        #'
+        #' Experimental. Considerations: split rows and columns, set persist elsewhere?. #TODO define behaviour of other methods.
         #' This method will not remove the rows or columns from the data.
-        #' Instead all further calculations will be based only of the selected subset of data.
+        #' Selected data modifications or calculations will be based only on the selected subset of data.
+        #'
         #'
         #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. Same as the `keep` parameter in `$filter` method.
         #' @param columns May be character column names or numeric positions. See details.
+        #' @param persist Whether the subset should persist after  evaluation.
         #'
         #' @details
         #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        subset = function(rows, columns) {
+        subset = function(rows, columns, persist=TRUE) {
             if (!missing(rows)) private$i_expr <- substitute(rows)
             if (!missing(columns)) private$sdcols_expr <- substitute(columns)
+            if (!(missing(rows) && missing(columns))) private$persist_subset=persist
             invisible(self)
         },
 
@@ -336,13 +341,26 @@ DataFrame <- R6::R6Class(
 
         i_expr = NULL,
         sdcols_expr = NULL,
+        persist_subset = TRUE,
+
+        eval = function(e) {
+            result <- eval(e)
+            if (private$persist_subset == FALSE) private$reset_subset()
+            result
+        },
 
         tbl_subset = function() {
-            eval(private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr))
+            e <- private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr)
+            private$eval(e)
         },
 
         tbl_eval = function(i, j, keyby, .SDcols) {
-            eval(private$call(i, j, keyby, .SDcols))
+            private$eval(private$call(i, j, keyby, .SDcols))
+        },
+
+        reset_subset = function() {
+          private$i_expr <- NULL
+          private$sdcols_expr <- NULL
         },
 
         call = function(i, j, keyby, .SDcols) {
@@ -352,11 +370,6 @@ DataFrame <- R6::R6Class(
             if (!missing(keyby) && !is.null(keyby)) e[["keyby"]] <- keyby
             if (!missing(.SDcols) && !is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
             e
-        },
-
-        deep_clone = function(name, value) {
-            if (name == "tbl") return(data.table::copy(value))
-            value
         },
 
         parse_group_expr = function(e) {
@@ -412,6 +425,11 @@ DataFrame <- R6::R6Class(
             return(result)
         },
 
-        rm_na_int = remove_na_integer
+        rm_na_int = remove_na_integer,
+
+        deep_clone = function(name, value) {
+            if (name == "tbl") return(data.table::copy(value))
+            value
+        }
     )
 )
