@@ -161,9 +161,10 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-filter_}{\code{DataFrame$filter_()}}
 \item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
+\item \href{#method-DataFrame-where}{\code{DataFrame$where()}}
+\item \href{#method-DataFrame-select}{\code{DataFrame$select()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
-\item \href{#method-DataFrame-subset}{\code{DataFrame$subset()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-append_}{\code{DataFrame$append_()}}
@@ -426,13 +427,15 @@ df
 Group or un-group the data.
 Used in calculation of statistics.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., persist = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{An expression specifying by what to group the data. See details.}
+
+\item{\code{persist}}{Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.}
 }
 \if{html}{\out{</div>}}
 }
@@ -463,6 +466,65 @@ df$group_by(NULL) # will remove grouping
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-where"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-where}{}}}
+\subsection{Method \code{where()}}{
+Work (operate?) on a subset of rows.
+Experimental. #TODO define how certain methods use the persist option
+This method will not remove the rows from the data.
+Selected data modifications or calculations will be based only on the selected subset of data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$where(rows, persist = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rows}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.}
+
+\item{\code{persist}}{Optional parameter whether the subset should persist after evaluation.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+#TODO
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-select"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-select}{}}}
+\subsection{Method \code{select()}}{
+Work on a subset of the columns.
+Experimental. #TODO define behaviour of other methods.
+This method will not remove the columns from the data.
+Selected data modifications or calculations will be based only on the selected subset of data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(columns = "all", persist = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{columns}}{May be character column names or numeric positions. See details.}
+
+\item{\code{persist}}{Whether the subset should persist after  evaluation.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+See documentation of \code{.SDcols} in \code{?data.table::data.table} for more possibilities.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-is_grouped"></a>}}
@@ -527,38 +589,6 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-subset"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-subset}{}}}
-\subsection{Method \code{subset()}}{
-Work on a subset of the data.
-Experimental. Considerations: split rows and columns, set persist elsewhere?. #TODO define behaviour of other methods.
-This method will not remove the rows or columns from the data.
-Selected data modifications or calculations will be based only on the selected subset of data.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$subset(rows, columns, persist = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{rows}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. Same as the \code{keep} parameter in \verb{$filter} method.}
-
-\item{\code{columns}}{May be character column names or numeric positions. See details.}
-
-\item{\code{persist}}{Whether the subset should persist after  evaluation.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
-See documentation of \code{.SDcols} in \code{?data.table::data.table} for more possibilities.
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
