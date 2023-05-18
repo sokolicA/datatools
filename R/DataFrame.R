@@ -100,7 +100,7 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            result <- private$tbl_eval(i=private$i_expr,j=quote(list(.N)), keyby=private$grp_expr)
+            result <- private$tbl_eval(i=private$i,j=quote(list(.N)), keyby=private$keyby)
             DataFrame$new(result)
         },
 
@@ -363,31 +363,48 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        grp_expr = NULL,
-        grp_cols = NULL,
+        keyby = NULL,
+        keyby_cols = NULL,
+        keyby_persist = FALSE,
 
-        i_expr = NULL,
-        sdcols_expr = NULL,
-        persist_subset = TRUE,
+        i = NULL,
+        i_txt = NULL,
+        i_env = NULL,
+        i_persist = FALSE,
 
-        eval = function(e) {
-            result <- eval(e)
-            if (private$persist_subset == FALSE) private$reset_subset()
-            result
-        },
+        sdcols = NULL,
+        sdcols_txt = NULL,
+        sdcols_env = NULL,
+        sdcols_persist = FALSE,
+
 
         tbl_subset = function() {
-            e <- private$call(i=private$i_expr, j=quote(.SD), .SDcols=private$sdcols_expr)
-            private$eval(e)
+            e <- private$call(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
+            eval(e)
         },
 
         tbl_eval = function(i, j, keyby, .SDcols) {
             private$eval(private$call(i, j, keyby, .SDcols))
         },
 
-        reset_subset = function() {
-          private$i_expr <- NULL
-          private$sdcols_expr <- NULL
+        reset_i = function() {
+            private$i  <- private$i_txt <- private$i_env <-  NULL
+        },
+
+        reset_sdcols = function() {
+            private$sdcols  <- private$sdcols_txt <- private$sdcols_env <-  NULL
+        },
+
+        reset_keyby = function() {
+            private$keyby  <- private$keyby_cols <- NULL
+        },
+
+        eval = function(e) {
+            result <- eval(e)
+            if (!private$i_persist) private$reset_i()
+            if (!private$sdcols_persist) private$reset_sdcols()
+            if (!private$keyby_persist) private$reset_keyby()
+            result
         },
 
         call = function(i, j, keyby, .SDcols) {
