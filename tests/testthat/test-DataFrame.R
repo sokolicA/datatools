@@ -237,7 +237,10 @@ TestPrivateDF <- R6::R6Class(
     "TestPrivateDF",
     inherit=DataFrame,
     public=list(
-        t_grp_expr = function() return(private$grp_expr)
+        t_keyby = function() return(private$keyby),
+        t_parse_i = function(e, env=parent.frame()) {
+            private$parse_expr(substitute(e), env)
+        }
     )
 )
 
@@ -257,18 +260,18 @@ test_that("group_by works", {
     expect_error(x$group_by("c"))
     x <- TestPrivateDF$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
     x$group_by(x)
-    expect_equal(x$t_grp_expr(), quote(list(x)))
+    expect_equal(x$t_keyby(), quote(list(x)))
     x$group_by(NULL)
-    expect_null(x$t_grp_expr())
+    expect_null(x$t_keyby())
     x$group_by("x")
-    expect_equal(x$t_grp_expr(), quote(list(x)))
+    expect_equal(x$t_keyby(), quote(list(x)))
     x$group_by(x, x >2, grepl("a", g))
-    expect_equal(x$t_grp_expr(), quote(list(x, x>2, grepl("a", g))))
+    expect_equal(x$t_keyby(), quote(list(x, x>2, grepl("a", g))))
 
     grping <- "x"
     expect_error(df$group_by(grping))
     x$group_by(c(grping))
-    expect_equal(x$t_grp_expr(), quote(list(x)))
+    expect_equal(x$t_keyby(), quote(list(x)))
 })
 
 test_that("find_group_col works", {
@@ -285,15 +288,122 @@ test_that("rename_grouping works", {
 })
 
 
+#
+# test_that("subset works", {
+#     df <- DataFrame$new(data.table(a=1:3, b=1:3))
+#     expect_equal(df$subset(a==1)$count()$unwrap(), data.table(N=1))
+#     expect_equal(df$count()$unwrap(), data.table(N=3))
+#
+#     expect_equal(df$subset(a>1, persist=TRUE)$count()$unwrap(), data.table(N=2))
+#     expect_equal(df$count()$unwrap(), data.table(N=2))
+#
+#
+# })
 
-test_that("subset works", {
-    df <- DataFrame$new(data.table(a=1:3, b=1:3))
-    expect_equal(df$subset(a==1)$count()$unwrap(), data.table(N=1))
-    expect_equal(df$count()$unwrap(), data.table(N=3))
-
-    expect_equal(df$subset(a>1, persist=TRUE)$count()$unwrap(), data.table(N=2))
-    expect_equal(df$count()$unwrap(), data.table(N=2))
 
 
+test_that("private$i works", {
+
+    TestPrivateDF <- R6::R6Class(
+        "TestPrivateDF",
+        inherit=DataFrame,
+        public=list(
+            t_parse_i = function(e, env=parent.frame()) {
+                browser()
+                private$parse_i(substitute(e), env)
+            }
+        )
+    )
+
+    chr <- c("a", "b")
+    log <- c(TRUE, FALSE)
+    lng <- quote(mean)
+    blt_1 <- `==`
+    blt_2 <- c
+    fun_base <- mean
+    fun_loc <- function(x) "hi"
+    df <- data.frame(a=1)
+
+    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
+
+    # LENGTH 1
+    expect_null(df$t_parse_i(NULL))
+    expect_equal(df$t_parse_i(a), quote(a))
+    expect_equal(df$t_parse_i("a"), "a")
+    expect_equal(df$t_parse_i(FALSE), FALSE)
+    expect_equal(df$t_parse_i(2), 2)
+    expect_equal(df$t_parse_i(2L), 2L)
+    expect_equal(df$t_parse_i(chr), chr)
+    expect_equal(df$t_parse_i(log), log)
+    expect_equal(df$t_parse_i(blt_1), quote(`==`))
+    expect_equal(df$t_parse_i(blt_2), quote(c))
+    expect_equal(df$t_parse_i(fun_base), quote(get("fun_base", envir=private$i_env)))
+    expect_equal(df$t_parse_i(fun_loc), quote(get("fun_loc", envir=private$i_env)))
+    expect_equal(df$t_parse_i(df), quote(get("df", envir=private$i_env)))
+
+    expect_error(df$t_parse_i(mean()))
+    # LENGTH > 1
+    expect_equal(df$t_parse_i(mean(1:5)), quote(get("mean", envir = private$i_env)(1:5)))
+    expect_equal(df$t_parse_i(list(a)), quote(list(a)))
+})
+
+
+test_that("private$parse_expr works 2", {
+
+    TestPrivateDF <- R6::R6Class(
+        "TestPrivateDF",
+        inherit=DataFrame,
+        public=list(
+            t_parse_i = function(e, env=parent.frame()) {
+                #browser()
+                private$parse_i(substitute(e), env)
+            }
+        )
+    )
+
+
+    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
+
+    c <- "g"
+    d <- data.frame(x=1)
+    f <- function(x) "hi"
+    f2 <- function(x) `==`
+    expect_equal(df$t_parse_i(`==`), quote(`==`))
+    expect_equal(df$t_parse_i(f2), quote(get("f2", envir = private$i_env)))
+    expect_equal(df$t_parse_i(a == 3 & b > 2), quote(a == 3 & b > 2))
+})
+
+
+
+test_that("private$parse_sdcols works", {
+
+    TestPrivateDF <- R6::R6Class(
+        "TestPrivateDF",
+        inherit=DataFrame,
+        public=list(
+            t_parse_sdcols = function(e, env=parent.frame()) {
+                browser()
+                private$parse_sdcols(substitute(e), env)
+            }
+        )
+    )
+
+
+    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
+
+    c <- "a"
+    d <- data.frame(x=1)
+    f <- function(x) "hi"
+    f2 <- function(x) `==`
+    expect_error(df$t_parse_sdcols(d))
+    expect_equal(df$t_parse_sdcols(c), "a")
+    expect_equal(df$t_parse_sdcols("a"), "a")
+    expect_equal(df$t_parse_sdcols(-"a"), quote(-"a"))
+    expect_equal(df$t_parse_sdcols(!"a"), quote(!"a"))
+    expect_equal(df$t_parse_sdcols(1:5), quote(1:5))
+    expect_equal(df$t_parse_sdcols(-1:5), quote(-1:5))
+    expect_equal(df$t_parse_sdcols(!c), quote(!"a"))
+    expect_equal(df$t_parse_sdcols(is.numeric), is.numeric)
+    expect_equal(df$t_parse_sdcols(function(x) is.numeric(x) | is.character(x)), function(x) is.numeric(x) | is.character(x))
 })
 
