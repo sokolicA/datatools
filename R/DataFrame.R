@@ -26,6 +26,8 @@ DataFrame <- R6::R6Class(
         print = function() {
             if (!is.null(private$i_expr)) cat("Rows subset using:", deparse1(private$i_expr), "\n")
             if (!is.null(private$sdcols_expr)) cat("Columns subset using:", deparse1(private$sdcols_expr), "\n")
+            d <- dim(private$tbl)
+            cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
             if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$keyby)), "\n")
             print(private$tbl_subset())
         },
