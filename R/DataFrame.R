@@ -24,11 +24,11 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function() {
-            if (!is.null(private$sdcols_expr)) cat("Columns subset using:", deparse1(private$sdcols_expr), "\n")
             d <- dim(private$tbl)
             cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
             if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$keyby)), "\n")
             if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
+            if (!is.null(private$sdcols)) cat("Columns subset using:", private$sdcols_txt, "\n")
             print(private$tbl_subset())
         },
 
@@ -203,6 +203,27 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Work on a subset of the columns.
+        #' Experimental. #TODO define behaviour of other methods.
+        #' This method will not remove the columns from the data.
+        #' Selected data modifications or calculations will be based only on the selected subset of data.
+        #'
+        #'
+        #' @param columns May be character column names or numeric positions. See details.
+        #' @param persist Whether the subset should persist after  evaluation.
+        #'
+        #' @details
+        #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+        #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
+        #'
+        #' @return Invisibly returns itself.
+        select = function(columns="all", persist=FALSE) {browser()
+            e <- substitute(columns)
+            if (e=="all") columns <- NULL
+            private$sdcols <- private$parse_sdcols(e, parent.frame())
+            private$sdcols_txt <- deparse1(e)
+            private$sdcols_persist <- persist
+            private$sdcols_env = parent.frame()
             invisible(self)
         },
 
