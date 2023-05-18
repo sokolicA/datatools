@@ -372,7 +372,85 @@ DataFrame <- R6::R6Class(
             e
         },
 
-        parse_group_expr = function(e) {
+        parse_i = function(e, env) {#browser()
+            # e can be:
+            # 1. name/symbol - is.name
+            # 2. single character / string is.character, typeof = character
+            # 3. a primitive/builtin - is.primitive `==`, `|`ˇ, c,... typeof == builtin
+            # 3. a direct function call (e.g. grepl("a", b)) typeof closure, is.function
+            # 4. a non built-in comparison (%in%,..) - syntactic sugar over function calls..typeof == closure
+            # a combination of the above.
+
+            # when a name evaluates to a vector (int, dbl, log, chr), the evaluated expr. should be kept unless it is a column nam
+            # if e is of length 1 it can be either a name, an atomic vector of length one, a function without arguments
+
+            if (is.null(e)) return(NULL)
+            if (is.atomic(e)) return(e)
+            if (is.name(e)) {
+                col_check <- try(eval(e, private$tbl, emptyenv()), silent=TRUE)
+                if (!inherits(col_check, "try-error")) return(e)
+
+                ev <- eval(e, env) # note: if name is not found it will throw an error here
+                if (is.atomic(ev)) return(ev)
+                if (is.primitive(ev)) {
+                    enq <- base::enquote(ev)
+                    str <- paste0("`", sub('.*?\\"(.*)\\".*', "\\1", as.character(enq)[[2]]), "`")
+                    return(str2lang(str))
+                }
+
+                e_chr <- as.character(e)
+                return(substitute(get(e_chr, envir=private$i_env)))
+            }
+
+            if (length(e) < 2) stop("Error.")
+
+            if (e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)) {
+                e[[2]] <-  private$parse_expr(e[[2]], env)
+                #TODO  the 3rd element should be evaluated inside the second element
+                return(e)
+            }
+
+            fun <- eval(e[[1]])
+            if (!is.function(fun)) stop("First element of expression must be a function!")
+            fun_chr <- as.character(e[[1]])
+            if (!is.primitive(fun)) e[[1]] <- substitute(get(fun_chr, envir=private$i_env))
+
+            for (i in seq_along(e)[-1L]) {
+                e[[i]] <- private$parse_i(e[[i]], env)
+            }
+
+            e
+
+        },
+
+        parse_sdcols = function(e, env) {#browser() #TODO
+            # e can be:
+            # 1. character column names or numeric positions - is.character, is.numeric
+            # 2. startcol:endcol
+            # 3. .SDcols=patterns(regex1, regex2, ...) - evaluated on names
+            # 3. .SDcols=is.numeric - evaluated on columns
+            # 4. Inversion (column dropping instead of keeping) can be accomplished be prepending the argument with ! or -
+
+            if (is.null(e)) return(NULL)
+            if (length(e) == 3 && e[[1]] == quote(`:`)) return(e)
+            ev <- try(eval(e, env), silent=TRUE)
+            if (!inherits(ev, "try-error")) {
+                if (is.function(ev)) return(ev)
+                if (is.character(ev) || is.numeric(ev)) return(ev)
+            }
+
+            if (length(e) < 2) stop("What now?")
+            if (e[[1]] ==  quote(patterns)) return(e)
+            if (e[[1]] == quote(`!`) || e[[1]] == quote(`-`)) {
+                e[[2]] <- private$parse_sdcols(e[[2]], env)
+                return(e)
+            }
+
+            stop("Do not know?")
+
+        },
+
+        parse_keyby = function(e) {
             result <- quote(list())
             idx <- 2L
             for(i in seq_along(e)) {
