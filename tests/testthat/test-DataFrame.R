@@ -425,3 +425,20 @@ test_that("$set works", {
     expect_equal(df$unwrap(), data.table())
 })
 
+
+test_that("insert works", {
+    df <- DataFrame$new(data.table(a=1:3, b=1:3))
+
+    expect_error(df$insert(a=3, g=a, b=NULL))
+    expect_equal(df$insert(c=a, g=a+b)$unwrap(), data.table(a=1:3, b=1:3, c=1:3, g=2*1:3))
+
+    df <- DataFrame$new(data.table(a=1:3, b=1:3))
+    expect_equal(df$subset(a>1)$insert(c=2*a)$unwrap(), data.table(a=1:3, b=1:3, c=c(NA, 4, 6)))
+
+    expect_equal(df$count()$unwrap(), data.table(N=3))
+
+    expect_equal(df$subset(a==1, persist=TRUE)$count()$unwrap(), data.table(N=1))
+    expect_equal(df$count()$unwrap(), data.table(N=1))
+
+})
+

@@ -347,6 +347,28 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
+        #' @description Insert columns to the `DataFrame`.
+        #'
+        #' Experimental. Considerations:
+        #' This method will insert new columns by reference.
+        #'
+        #' @param ... Columns to add.
+        #'
+        #' @details
+        #'  #'TO ADD
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' TODO
+        insert = function(...) {browser()
+            e <- substitute(alist(...))
+            if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named arguments!")
+            if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
+            e[[1L]] <- quote(`:=`)
+            private$tbl_eval(i=private$i, j=e, keyby=private$keyby)
+            invisible(self)
+        },
+
         #' @description Create a key the table.
         #'
         #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
