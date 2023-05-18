@@ -348,7 +348,7 @@ test_that("private$i works", {
 })
 
 
-test_that("private$parse_expr works 2", {
+test_that("private$i works 2", {
 
     TestPrivateDF <- R6::R6Class(
         "TestPrivateDF",
