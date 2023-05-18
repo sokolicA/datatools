@@ -248,28 +248,6 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
-        #' @description Work on a subset of the data.
-        #' Experimental. Considerations: split rows and columns, set persist elsewhere?. #TODO define behaviour of other methods.
-        #' This method will not remove the rows or columns from the data.
-        #' Selected data modifications or calculations will be based only on the selected subset of data.
-        #'
-        #'
-        #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. Same as the `keep` parameter in `$filter` method.
-        #' @param columns May be character column names or numeric positions. See details.
-        #' @param persist Whether the subset should persist after  evaluation.
-        #'
-        #' @details
-        #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
-        #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
-        #'
-        #' @return Invisibly returns itself.
-        subset = function(rows, columns, persist=FALSE) {
-            if (!missing(rows)) private$i_expr <- substitute(rows)
-            if (!missing(columns)) private$sdcols_expr <- substitute(columns)
-            if (!(missing(rows) && missing(columns))) private$persist_subset=persist
-            invisible(self)
-        },
-
         #' @description Create a key the table.
         #'
         #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
