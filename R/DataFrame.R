@@ -24,11 +24,11 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function() {
-            if (!is.null(private$i_expr)) cat("Rows subset using:", deparse1(private$i_expr), "\n")
             if (!is.null(private$sdcols_expr)) cat("Columns subset using:", deparse1(private$sdcols_expr), "\n")
             d <- dim(private$tbl)
             cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
             if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$keyby)), "\n")
+            if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
             print(private$tbl_subset())
         },
 
@@ -181,6 +181,28 @@ DataFrame <- R6::R6Class(
             private$keyby_persist <- persist
             invisible(self)
         },
+
+        #' @description Work (operate?) on a subset of rows.
+        #' Experimental. #TODO define how certain methods use the persist option
+        #' This method will not remove the rows from the data.
+        #' Selected data modifications or calculations will be based only on the selected subset of data.
+        #'
+        #'
+        #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.
+        #' @param persist Optional parameter whether the subset should persist after evaluation.
+        #'
+        #' @details
+        #' #TODO
+        #'
+        #' @return Invisibly returns itself.
+        where = function(rows, persist=FALSE) {
+            private$i <- private$parse_i(substitute(rows), parent.frame())
+            private$i_txt <- deparse1(substitute(rows))
+            private$i_persist <- persist
+            private$i_env = parent.frame()
+            invisible(self)
+        },
+
             invisible(self)
         },
 
