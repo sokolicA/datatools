@@ -407,3 +407,21 @@ test_that("private$parse_sdcols works", {
     expect_equal(df$t_parse_sdcols(function(x) is.numeric(x) | is.character(x)), function(x) is.numeric(x) | is.character(x))
 })
 
+
+
+test_that("$set works", {
+
+    df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+    df$select(is.character)$where(a==2)$set(a)
+    expect_equal(df$unwrap(), data.table(data.table(a=1:3, b=1:3, d = c("A", "2", "C"))))
+
+    df$where(b > 1)$set(fifelse(a==3, 1, 0))
+    expect_equal(df$unwrap(), data.table(data.table(a=c(1, 0, 1), b=c(1, 0, 1), d = c("A", "0", "1"))))
+
+    df$select(is.numeric)$set(NA);
+    expect_equal(df$unwrap(), data.table(data.table(a=NA_integer_, b=NA_integer_, d = c("A", "0", "1"))))
+
+    df$set(NULL) # is this ok?
+    expect_equal(df$unwrap(), data.table())
+})
+
