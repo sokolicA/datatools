@@ -217,7 +217,7 @@ DataFrame <- R6::R6Class(
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        select = function(columns="all", persist=FALSE) {browser()
+        select = function(columns="all", persist=FALSE) {#browser()
             e <- substitute(columns)
             if (e=="all") columns <- NULL
             private$sdcols <- private$parse_sdcols(e, parent.frame())
