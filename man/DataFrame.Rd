@@ -500,7 +500,7 @@ Selected data modifications or calculations will be based only on the selected s
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-#TODO
+If \code{rows} is missing or \code{NULL} then all rows will be used.
 }
 
 \subsection{Returns}{

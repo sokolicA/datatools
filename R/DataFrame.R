@@ -192,10 +192,12 @@ DataFrame <- R6::R6Class(
         #' @param persist Optional parameter whether the subset should persist after evaluation.
         #'
         #' @details
-        #' #TODO
+        #' If `rows` is missing or `NULL` then all rows will be used.
         #'
         #' @return Invisibly returns itself.
         where = function(rows, persist=FALSE) {
+            if (missing(rows)) rows <- NULL
+            if (!persist %in% c(TRUE, FALSE)) stop("Persist must be either true (1) or false (0).")
             private$i <- private$parse_i(substitute(rows), parent.frame())
             private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist
