@@ -31,10 +31,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// is_true_or_false
+Rcpp::LogicalVector is_true_or_false(Rcpp::IntegerVector& x);
+RcppExport SEXP _datatools_is_true_or_false(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_true_or_false(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_datatools_replace_na_false", (DL_FUNC) &_datatools_replace_na_false, 1},
     {"_datatools_remove_na_integer", (DL_FUNC) &_datatools_remove_na_integer, 1},
+    {"_datatools_is_true_or_false", (DL_FUNC) &_datatools_is_true_or_false, 1},
     {NULL, NULL, 0}
 };
 

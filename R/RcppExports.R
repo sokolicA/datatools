@@ -9,3 +9,7 @@ remove_na_integer <- function(x) {
     .Call(`_datatools_remove_na_integer`, x)
 }
 
+is_true_or_false <- function(x) {
+    .Call(`_datatools_is_true_or_false`, x)
+}
+
