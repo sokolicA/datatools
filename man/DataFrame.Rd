@@ -100,6 +100,16 @@ df$group_by(c(a)) # will group by b
 df$group_by(NULL) # will remove grouping
 
 ## ------------------------------------------------
+## Method `DataFrame$set`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+df$select(is.character)$where(a==2)$set(a); df
+df$where(a==2)$set(fifelse(a==3, 1, 0)); df
+df$select(is.numeric)$set(NA); df
+
+
+## ------------------------------------------------
 ## Method `DataFrame$is_grouped`
 ## ------------------------------------------------
 
@@ -163,6 +173,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
 \item \href{#method-DataFrame-where}{\code{DataFrame$where()}}
 \item \href{#method-DataFrame-select}{\code{DataFrame$select()}}
+\item \href{#method-DataFrame-set}{\code{DataFrame$set()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
@@ -525,6 +536,43 @@ See documentation of \code{.SDcols} in \code{?data.table::data.table} for more p
 \subsection{Returns}{
 Invisibly returns itself.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-set"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-set}{}}}
+\subsection{Method \code{set()}}{
+Set column values.
+Experimental. #TODO define behaviour of other methods.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set(value)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{value}}{Value to assign to the columns and rows specified by where.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+TO ADD
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+df$select(is.character)$where(a==2)$set(a); df
+df$where(a==2)$set(fifelse(a==3, 1, 0)); df
+df$select(is.numeric)$set(NA); df
+
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-is_grouped"></a>}}

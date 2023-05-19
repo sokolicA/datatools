@@ -227,6 +227,29 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Set column values.
+        #' Experimental. #TODO define behaviour of other methods.
+        #'
+        #' @param value Value to assign to the columns and rows specified by where.
+        #'
+        #' @details
+        #' TO ADD
+        #'
+        #' @examples
+        #' df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+        #' df$select(is.character)$where(a==2)$set(a); df
+        #' df$where(a==2)$set(fifelse(a==3, 1, 0)); df
+        #' df$select(is.numeric)$set(NA); df
+        #'
+        #' @return Invisibly returns itself.
+        set = function(value) {#browser()
+            value <- substitute(function(x) value)
+            cols <- if (is.null(private$sdcols)) names(private$tbl) else names(eval(private$tbl[i=0,.SD,.SDcols=private$sdcols]))
+            j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
+            private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+            invisible(self)
+        },
+
         #' @description Check whether the data is grouped.
         #'
         #' @return TRUE or FALSE.
