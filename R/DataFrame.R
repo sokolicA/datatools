@@ -219,7 +219,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         select = function(columns="all", persist=FALSE) {#browser()
             e <- substitute(columns)
-            if (e=="all") columns <- NULL
+            if (e=="all") e <- NULL
             private$sdcols <- private$parse_sdcols(e, parent.frame())
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
