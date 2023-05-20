@@ -211,6 +211,8 @@ DataFrame <- R6::R6Class(
         #' This method will not remove the columns from the data.
         #' Selected data modifications or calculations will be based only on the selected subset of data.
         #'
+        #' $select(mean(x) >5) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
+        #' $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
         #'
         #' @param columns May be character column names or numeric positions. See details.
         #' @param persist Whether the subset should persist after  evaluation.

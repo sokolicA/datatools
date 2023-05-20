@@ -515,6 +515,9 @@ Work on a subset of the columns.
 Experimental. #TODO define behaviour of other methods.
 This method will not remove the columns from the data.
 Selected data modifications or calculations will be based only on the selected subset of data.
+
+$select(mean(x) >5) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
+$select(mean(is.na(x)) >0.2) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(columns, persist = FALSE)}\if{html}{\out{</div>}}
 }
