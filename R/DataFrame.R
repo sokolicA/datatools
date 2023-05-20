@@ -173,6 +173,7 @@ DataFrame <- R6::R6Class(
         #' df$group_by(c(a)) # will group by b
         #' df$group_by(NULL) # will remove grouping
         group_by = function(..., persist=FALSE) {
+            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(alist(...))[-1L]
             result <- private$parse_keyby(e)
             check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
