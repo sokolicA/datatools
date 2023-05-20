@@ -516,7 +516,7 @@ Experimental. #TODO define behaviour of other methods.
 This method will not remove the columns from the data.
 Selected data modifications or calculations will be based only on the selected subset of data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(columns = "all", persist = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(columns, persist = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
