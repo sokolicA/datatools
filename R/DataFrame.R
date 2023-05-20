@@ -412,8 +412,8 @@ DataFrame <- R6::R6Class(
             eval(e)
         },
 
-        tbl_eval = function(i, j, keyby, .SDcols) {
-            private$eval(private$call(i, j, keyby, .SDcols))
+        tbl_eval = function(i, j, keyby, .SDcols, reset=TRUE) {
+            private$eval(private$call(i, j, keyby, .SDcols), reset)
         },
 
         reset_i = function() {
@@ -428,11 +428,13 @@ DataFrame <- R6::R6Class(
             private$keyby  <- private$keyby_cols <- NULL
         },
 
-        eval = function(e) {
+        eval = function(e, reset=TRUE) {
             result <- eval(e)
-            if (!private$i_persist) private$reset_i()
-            if (!private$sdcols_persist) private$reset_sdcols()
-            if (!private$keyby_persist) private$reset_keyby()
+            if (reset) {
+                if (!private$i_persist) private$reset_i()
+                if (!private$sdcols_persist) private$reset_sdcols()
+                if (!private$keyby_persist) private$reset_keyby()
+            }
             result
         },
 
