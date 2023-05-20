@@ -221,6 +221,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @return Invisibly returns itself.
         select = function(columns="all", persist=FALSE) {#browser()
+            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(columns)
             if (e=="all") e <- NULL
             private$sdcols <- private$parse_sdcols(e, parent.frame())
