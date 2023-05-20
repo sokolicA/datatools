@@ -251,7 +251,11 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         set = function(value) {#browser()
             value <- substitute(function(x) value)
-            cols <- if (is.null(private$sdcols)) names(private$tbl) else names(eval(private$tbl[i=0,.SD,.SDcols=private$sdcols]))
+            if (is.null(private$sdcols)) {
+                cols <- names(private$tbl)
+            } else {
+                cols <- names(private$tbl_eval(i=0,j=quote(.SD),.SDcols=private$sdcols, reset=FALSE))
+            }
             j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
             private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
             invisible(self)
