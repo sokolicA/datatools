@@ -220,10 +220,10 @@ DataFrame <- R6::R6Class(
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        select = function(columns="all", persist=FALSE) {#browser()
+        select = function(columns, persist=FALSE) {#browser()
+            if (missing(columns)) columns <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(columns)
-            if (e=="all") e <- NULL
             private$sdcols <- private$parse_sdcols(e, parent.frame())
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
