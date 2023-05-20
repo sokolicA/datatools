@@ -196,7 +196,7 @@ DataFrame <- R6::R6Class(
         #' If `rows` is missing or `NULL` then all rows will be used.
         #'
         #' @return Invisibly returns itself.
-        where = function(rows, persist=FALSE) {
+        where = function(rows, persist=FALSE) {#browser()
             if (missing(rows)) rows <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             private$i <- private$parse_i(substitute(rows), parent.frame())
@@ -460,13 +460,15 @@ DataFrame <- R6::R6Class(
             # when a name evaluates to a vector (int, dbl, log, chr), the evaluated expr. should be kept unless it is a column nam
             # if e is of length 1 it can be either a name, an atomic vector of length one, a function without arguments
 
+            # add check for rows like private$tbl[0][a > 1e+05 & b < 14]?
             if (is.null(e)) return(NULL)
             if (is.atomic(e)) return(e)
             if (is.name(e)) {
                 col_check <- try(eval(e, private$tbl, emptyenv()), silent=TRUE)
                 if (!inherits(col_check, "try-error")) return(e)
 
-                ev <- eval(e, env) # note: if name is not found it will throw an error here
+                ev <- try(eval(e, env), silent=TRUE) # note: if name is not found it will throw an error here
+                if (inherits(ev, "try-error")) stop(attr(ev, "condition")$message, call.=FALSE)
                 if (is.atomic(ev)) return(ev)
                 if (is.primitive(ev)) {
                     enq <- base::enquote(ev)
