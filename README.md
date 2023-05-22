@@ -8,6 +8,8 @@ DataFrame:
 
 - can this be done in Cpp? str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
 
+- sort by group: x <- data.table(c(3,2,1,2,1), c("a", "a", "a", "b", "b")); x[order(-V1), .SD, by = "V2"]
+
 StatFrame:
 
 - Add correlations.
