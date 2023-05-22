@@ -500,13 +500,28 @@ DataFrame <- R6::R6Class(
         },
 
         eval = function(e, reset=TRUE) {
-            result <- eval(e)
+            env <- private$build_eval_env()
+            result <- eval(e, envir=env, enclos=env)
             if (reset) {
                 if (!private$i_persist) private$reset_i()
                 if (!private$sdcols_persist) private$reset_sdcols()
                 if (!private$by_persist) private$reset_by()
             }
             result
+        },
+
+        build_eval_env = function() {
+          env <- private$caller_env()
+          env$private <- private
+          env
+        },
+
+        caller_env = function() {
+            i <- 2L
+            while (identical(parent.env(parent.frame(i)), self$.__enclos_env__)) {
+                i <- i + 1L
+            }
+            return(parent.frame(i))
         },
 
         call = function(i, j, by, keyby, .SDcols) {
