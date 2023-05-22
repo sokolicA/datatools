@@ -265,6 +265,26 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Transform columns with function
+        #'
+        #' @param fun A function that is applied to the selected columns.
+        #' @param ... Optional arguments that are passed to `fun`.
+        #'#'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #'    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+        #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
+        #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
+        transform = function(fun, ...) {
+            cols <- names(private$tbl_eval(i=0,j=quote(.SD),.SDcols=private$sdcols, reset=FALSE))
+            if (length(cols) == 0) {
+                warning("No columns matching the select criteria!")
+            } else {
+                cols_sub <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
+                j <- substitute(`:=` (cols_sub, lapply(.SD, fun, ...)))
+                private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+            }
             invisible(self)
         },
 
