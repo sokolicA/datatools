@@ -256,8 +256,15 @@ DataFrame <- R6::R6Class(
             } else {
                 cols <- names(private$tbl_eval(i=0,j=quote(.SD),.SDcols=private$sdcols, reset=FALSE))
             }
-            j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
-            private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+            if (length(cols) == 0) {
+                warning("No columns matching the select criteria!")
+            } else {
+                j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
+                private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+            }
+            invisible(self)
+        },
+
             invisible(self)
         },
 
