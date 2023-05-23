@@ -277,12 +277,12 @@ DataFrame <- R6::R6Class(
         #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
         #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
         transform = function(fun, ...) {
-            cols <- names(private$tbl_eval(i=0,j=quote(.SD),.SDcols=private$sdcols, reset=FALSE))
+            cols <- names(private$tbl_eval(i=0, j=quote(.SD), .SDcols=private$sdcols, reset=FALSE))
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
-                cols_sub <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
-                j <- substitute(`:=` (cols_sub, lapply(.SD, fun, ...)))
+                cols_call <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
+                j <- substitute(`:=` (cols_call, lapply(.SD, fun, ...)))
                 private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
             }
             invisible(self)
