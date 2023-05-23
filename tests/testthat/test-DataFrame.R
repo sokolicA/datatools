@@ -237,7 +237,7 @@ TestPrivateDF <- R6::R6Class(
     "TestPrivateDF",
     inherit=DataFrame,
     public=list(
-        t_keyby = function() return(private$keyby),
+        t_by = function() return(private$by),
         t_parse_i = function(e, env=parent.frame()) {
             private$parse_expr(substitute(e), env)
         }
@@ -260,18 +260,18 @@ test_that("group_by works", {
     expect_error(x$group_by("c"))
     x <- TestPrivateDF$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
     x$group_by(x)
-    expect_equal(x$t_keyby(), quote(list(x)))
+    expect_equal(x$t_by(), quote(list(x)))
     x$group_by(NULL)
-    expect_null(x$t_keyby())
+    expect_null(x$t_by())
     x$group_by("x")
-    expect_equal(x$t_keyby(), quote(list(x)))
+    expect_equal(x$t_by(), quote(list(x)))
     x$group_by(x, x >2, grepl("a", g))
-    expect_equal(x$t_keyby(), quote(list(x, x>2, grepl("a", g))))
+    expect_equal(x$t_by(), quote(list(x, x>2, grepl("a", g))))
 
     grping <- "x"
     expect_error(df$group_by(grping))
     x$group_by(c(grping))
-    expect_equal(x$t_keyby(), quote(list(x)))
+    expect_equal(x$t_by(), quote(list(x)))
 })
 
 test_that("find_group_col works", {

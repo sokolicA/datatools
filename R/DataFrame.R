@@ -26,7 +26,7 @@ DataFrame <- R6::R6Class(
         print = function() {
             d <- dim(private$tbl)
             cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$keyby)), "\n")
+            if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
             if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
             if (!is.null(private$sdcols)) cat("Columns subset using:", private$sdcols_txt, "\n")
             print(private$tbl_subset())
@@ -100,7 +100,7 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            result <- private$tbl_eval(i=private$i,j=quote(list(.N)), keyby=private$keyby)
+            result <- private$tbl_eval(i=private$i,j=quote(list(.N)), keyby=private$by)
             DataFrame$new(result)
         },
 
@@ -175,11 +175,11 @@ DataFrame <- R6::R6Class(
         group_by = function(..., persist=FALSE) {
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(alist(...))[-1L]
-            result <- private$parse_keyby(e)
+            result <- private$parse_by(e)
             check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
-            private$keyby <- result
-            private$keyby_persist <- persist
+            private$by <- result
+            private$by_persist <- persist
             invisible(self)
         },
 
@@ -260,7 +260,7 @@ DataFrame <- R6::R6Class(
                 warning("No columns matching the select criteria!")
             } else {
                 j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
-                private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+                private$tbl_eval(i=private$i, j=j, by=private$by, .SDcols=private$sdcols)
             }
             invisible(self)
         },
@@ -283,7 +283,7 @@ DataFrame <- R6::R6Class(
             } else {
                 cols_call <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
                 j <- substitute(`:=` (cols_call, lapply(.SD, fun, ...)))
-                private$tbl_eval(i=private$i, j=j, keyby=private$keyby, .SDcols=private$sdcols)
+                private$tbl_eval(i=private$i, j=j, by=private$by, .SDcols=private$sdcols)
             }
             invisible(self)
         },
@@ -297,7 +297,7 @@ DataFrame <- R6::R6Class(
         #' df$is_grouped()
         #' df$group(a)$is_grouped()
         is_grouped = function() {
-            !is.null(private$keyby)
+            !is.null(private$by)
         },
 
         #' @description Remove specified rows from the table in place.
@@ -424,9 +424,9 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        keyby = NULL,
-        keyby_cols = NULL,
-        keyby_persist = FALSE,
+        by = NULL,
+        by_cols = NULL,
+        by_persist = FALSE,
 
         i = NULL,
         i_txt = NULL,
@@ -444,8 +444,8 @@ DataFrame <- R6::R6Class(
             eval(e)
         },
 
-        tbl_eval = function(i, j, keyby, .SDcols, reset=TRUE) {
-            private$eval(private$call(i, j, keyby, .SDcols), reset)
+        tbl_eval = function(i, j, by, keyby, .SDcols, reset=TRUE) {
+            private$eval(private$call(i, j, by, keyby, .SDcols), reset)
         },
 
         reset_i = function() {
@@ -456,8 +456,8 @@ DataFrame <- R6::R6Class(
             private$sdcols  <- private$sdcols_txt <- private$sdcols_env <-  NULL
         },
 
-        reset_keyby = function() {
-            private$keyby  <- private$keyby_cols <- NULL
+        reset_by = function() {
+            private$by  <- private$by_cols <- NULL
         },
 
         eval = function(e, reset=TRUE) {
@@ -465,15 +465,16 @@ DataFrame <- R6::R6Class(
             if (reset) {
                 if (!private$i_persist) private$reset_i()
                 if (!private$sdcols_persist) private$reset_sdcols()
-                if (!private$keyby_persist) private$reset_keyby()
+                if (!private$by_persist) private$reset_by()
             }
             result
         },
 
-        call = function(i, j, keyby, .SDcols) {
+        call = function(i, j, by, keyby, .SDcols) {
             e <- quote(`[`(private$tbl))
             if (!missing(i) && !is.null(i)) e[["i"]] <- i
             if (!missing(j) && !is.null(j)) e[["j"]] <- j
+            if (!missing(by) && !is.null(by)) e[["by"]] <- by
             if (!missing(keyby) && !is.null(keyby)) e[["keyby"]] <- keyby
             if (!missing(.SDcols) && !is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
             e
@@ -559,7 +560,7 @@ DataFrame <- R6::R6Class(
 
         },
 
-        parse_keyby = function(e) {
+        parse_by = function(e) {
             result <- quote(list())
             idx <- 2L
             for(i in seq_along(e)) {
