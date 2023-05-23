@@ -118,6 +118,14 @@ df$select(is.numeric)$set(NA); df
    df$where(b>3)$select("c")$transform(mean, na.rm=T)
 
 ## ------------------------------------------------
+## Method `DataFrame$update`
+## ------------------------------------------------
+
+   df <- DF(data.frame(a=1:5, b=1:5))
+   df$update(a = 2)
+   df$update(g = a, dd = ifelse(a==2, b, 0))
+
+## ------------------------------------------------
 ## Method `DataFrame$is_grouped`
 ## ------------------------------------------------
 
@@ -183,6 +191,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-select}{\code{DataFrame$select()}}
 \item \href{#method-DataFrame-set}{\code{DataFrame$set()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
+\item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
@@ -613,6 +622,36 @@ Invisibly returns itself.
 \preformatted{   df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
    df$where(b>3)$select("a")$transform(function(x) x + 50)
    df$where(b>3)$select("c")$transform(mean, na.rm=T)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-update"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-update}{}}}
+\subsection{Method \code{update()}}{
+Update table columns by reference.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Columns to update and the corresponding calculation.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
+   df$update(a = 2)
+   df$update(g = a, dd = ifelse(a==2, b, 0))
 }
 \if{html}{\out{</div>}}
 
