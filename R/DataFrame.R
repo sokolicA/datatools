@@ -288,6 +288,22 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Update table columns by reference.
+        #'
+        #' @param columns A list of columns to update or add and the corresponding calculation.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
+        #'    df$update(a = 2)
+        #'    df$update(g = a, dd = ifelse(a==2, b, 0))
+        update = function(...) {browser()
+            j <- substitute(alist(...))
+            j[[1]] <- quote(`:=`)
+            private$tbl_eval(i=private$i, j=j, keyby=private$keyby)
+        },
+
         #' @description Check whether the data is grouped.
         #'
         #' @return TRUE or FALSE.
