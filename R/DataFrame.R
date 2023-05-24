@@ -461,8 +461,9 @@ DataFrame <- R6::R6Class(
             eval(e)
         },
 
-        tbl_eval = function(i, j, by, keyby, .SDcols, reset=TRUE) {
-            private$eval(private$call(i, j, by, keyby, .SDcols), reset)
+        tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
+                            .SDcols=NULL, on=NULL, reset=TRUE) {
+            private$eval(private$call(i=i, j=j, by=by, keyby=keyby, .SDcols=.SDcols, on=on), reset)
         },
 
         reset_i = function() {
@@ -487,13 +488,17 @@ DataFrame <- R6::R6Class(
             result
         },
 
-        call = function(i, j, by, keyby, .SDcols) {
-            e <- quote(`[`(private$tbl))
-            if (!missing(i) && !is.null(i)) e[["i"]] <- i
-            if (!missing(j) && !is.null(j)) e[["j"]] <- j
-            if (!missing(by) && !is.null(by)) e[["by"]] <- by
-            if (!missing(keyby) && !is.null(keyby)) e[["keyby"]] <- keyby
-            if (!missing(.SDcols) && !is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
+        call = function(
+            e=quote(`[`(private$tbl)), i=NULL, j=NULL,
+            by=NULL, keyby=NULL,
+            .SDcols=NULL, on=NULL
+        ) {
+            if (!is.null(i)) e[["i"]] <- i
+            if (!is.null(j)) e[["j"]] <- j
+            if (!is.null(by)) e[["by"]] <- by
+            if (!is.null(keyby)) e[["keyby"]] <- keyby
+            if (!is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
+            if (!is.null(on)) e[["on"]] <- on
             e
         },
 
