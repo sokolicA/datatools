@@ -672,7 +672,7 @@ DataFrame <- R6::R6Class(
             result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
             missing <- which(result == "")[-1L]
             if (any(missing)) {
-                for (i in missing) result[i] <- if(grepl(">|<|!", e[[i]])) "" else e[[i]]
+                for (i in missing) result[i] <- sub("(=|!|>|<).*", "", e[[i]])
                 names(e) <- result
             }
             e
