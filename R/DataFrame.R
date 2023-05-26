@@ -635,6 +635,73 @@ DataFrame <- R6::R6Class(
             return(result)
         },
 
+        parse_on = function(e) {
+            # an unnamed character vector, c("a", "b"), used when columns a and b are common to both X and Y.
+            # a named character vector, c(x1="y1", x2="y2"), used when join columns have different names (Foreign key joins).
+            # string with a binary operator is also possible: c("x1==y1", "x2==y2")
+            # a list (or it's dot alias): list(a, b), list(x1=y1, x2=y2)
+            # non-equi joins are also possible: c("x>=a", "y<=b"), .(x>=a, y<=b)
+
+            # CHECK .parse_on https://github.com/Rdatatable/data.table/blob/master/R/data.table.R
+            if (is.null(e)) return(NULL)
+
+            if (is.character(e)) {
+                result <- call("c", e)
+                names(result) <- c("", e)
+                return(result)
+            }
+
+            if (e[[1L]] == quote(list) || e[[1L]] == quote(.)) {
+                e <- private$convert_on_call(e)
+            }
+
+            if (e[[1L]] != quote(c)) stop("Unable to parse expression!")
+            private$add_missing_on_expr_names(e)
+        },
+
+        convert_on_call = function(e) {
+            ops <- c("==", "<=", "<", ">=", ">", "!=")
+            pat <- paste0("(", ops, ")", collapse="|")
+            spat <- paste0("[ ]+(", pat, ")[ ]+")
+            # remove spaces around ==, >=,..
+            e <- lapply(as.list(e)[-1L], function(x) gsub(spat, "\\1", deparse(x, width.cutoff=500L)))
+            as.call(c(quote(c), e))
+        },
+
+        add_missing_on_expr_names = function(e) {
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            missing <- which(result == "")[-1L]
+            if (any(missing)) {
+                for (i in missing) result[i] <- if(grepl(">|<|!", e[[i]])) "" else e[[i]]
+                names(e) <- result
+            }
+            e
+        },
+
+        reverse_on_expr = function(e) {
+            result <- e
+            new_names <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+
+            before <- c(">=", "<=", ">", "<", "!=")
+            after <- c( "<", ">", "<=", ">=", "!=")
+
+            for (i in seq_along(result)[-1L]) {
+                val <- result[[i]]
+                special <- sapply(before, grepl, val)
+                if (any(special)) {
+                    idx <- which.max(special)
+                    res <- unlist(strsplit(val, before[idx]))
+                    res <- paste0(res[2], after[idx], res[1])
+                    new_names[i] <- res
+                    val <- ""
+                }
+                result[[i]] <- new_names[i]
+                new_names[i] <- val
+            }
+            names(result) <- new_names
+            result
+        },
+
         rm_na_int = remove_na_integer,
 
         deep_clone = function(name, value) {
