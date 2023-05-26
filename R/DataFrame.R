@@ -680,7 +680,7 @@ DataFrame <- R6::R6Class(
 
         reverse_on_expr = function(e) {
             result <- e
-            new_names <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            result_names <- names(e)
 
             before <- c(">=", "<=", ">", "<", "!=")
             after <- c( "<", ">", "<=", ">=", "!=")
@@ -691,14 +691,14 @@ DataFrame <- R6::R6Class(
                 if (any(special)) {
                     idx <- which.max(special)
                     res <- unlist(strsplit(val, before[idx]))
+                    val <- res[2]
                     res <- paste0(res[2], after[idx], res[1])
-                    new_names[i] <- res
-                    val <- ""
+                    result_names[i] <- res
                 }
-                result[[i]] <- new_names[i]
-                new_names[i] <- val
+                result[[i]] <- result_names[i]
+                result_names[i] <- val
             }
-            names(result) <- new_names
+            names(result) <- result_names
             result
         },
 
