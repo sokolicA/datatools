@@ -347,6 +347,28 @@ DataFrame <- R6::R6Class(
             return(removed)
         },
 
+        #' @description Insert columns to the `DataFrame`.
+        #'
+        #' Experimental. Considerations:
+        #' This method will insert new columns by reference.
+        #'
+        #' @param ... Columns to add.
+        #'
+        #' @details
+        #'  #'TO ADD
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' TODO
+        insert = function(...) {#browser()
+            e <- substitute(alist(...))
+            if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
+            if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
+            e[[1L]] <- quote(`:=`)
+            private$tbl_eval(i=private$i, j=e, keyby=private$keyby)
+            invisible(self)
+        },
+
         #' @description Create a key the table.
         #'
         #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
@@ -479,7 +501,8 @@ DataFrame <- R6::R6Class(
         },
 
         eval = function(e, reset=TRUE) {
-            result <- eval(e)
+            env <- private$build_eval_env()
+            result <- eval(e, envir=env, enclos=env)
             if (reset) {
                 if (!private$i_persist) private$reset_i()
                 if (!private$sdcols_persist) private$reset_sdcols()
@@ -500,6 +523,20 @@ DataFrame <- R6::R6Class(
             if (!is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
             if (!is.null(on)) e[["on"]] <- on
             e
+        },
+
+        build_eval_env = function() {
+          env <- private$caller_env()
+          env$private <- private
+          env
+        },
+
+        caller_env = function() {
+            i <- 2L
+            while (identical(parent.env(parent.frame(i)), self$.__enclos_env__)) {
+                i <- i + 1L
+            }
+            return(parent.frame(i))
         },
 
         parse_i = function(e, env) {#browser()

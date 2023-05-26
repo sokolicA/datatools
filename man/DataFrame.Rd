@@ -194,6 +194,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
+\item \href{#method-DataFrame-insert}{\code{DataFrame$insert()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
 \item \href{#method-DataFrame-append_}{\code{DataFrame$append_()}}
@@ -721,6 +722,29 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-insert"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-insert}{}}}
+\subsection{Method \code{insert()}}{
+Insert columns to the \code{DataFrame}.
+
+Experimental. Considerations:
+This method will insert new columns by reference.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$insert(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Columns to add.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
