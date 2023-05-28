@@ -305,6 +305,77 @@ DataFrame <- R6::R6Class(
             private$tbl_eval(i=private$i, j=j, keyby=private$keyby)
         },
 
+        #' @description Perform an update join.
+        #'
+        #' To allow data.tables or only DataFrames?
+        #' Add new or update current table rows on matching positions.
+        #'
+        #' @param right The right (other) table. See details.
+        #' @param on The condition to join the tables on. Either a...
+        #' @param update List of column names to update and/or add. Defaults to `NULL` which adds all columns from the right table. See details for more information.
+        #'
+        #' @return Invisibly returns the updated itself.
+        #'
+        #' Returns an error if there are multiple matches found in the `right` table.
+        #'
+        #' @details
+        #'
+        #' Using columns from the `left` (current) table in calculations provided in `update` can be done by
+        #' prefixing the column names of the left table with **`i.`**. See examples.
+        #'
+        #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
+        #'
+        #' The join will not be performed if there are multiple matches found in the `right` table.
+        #' In such cases use either `left_join` or delete duplicated foreign keys in the `right` table.
+        #'
+        #' update: Can also be transformations of columns.
+        #'
+        #' @examples
+        #' df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
+        #' y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
+        #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
+        #' df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
+        #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
+        update_join = function(right, on, update=NULL) {#browser()
+            # REFACTOR
+            ON <- private$parse_on(substitute(on))
+            ON_REV <- private$reverse_on_expr(ON)
+            update <- substitute(update)
+
+            if (is.null(update)) {# add all columns
+                SDCOLS <- setdiff(names(right), names(ON_REV))
+                J <- if (length(SDCOLS) > 1) quote(.SD) else quote(unlist(.SD, recursive = FALSE)) # a one dimensional list goes through the join without errors (when multiple matches), creating a multi-column column
+                dupl <- SDCOLS %in% names(private$tbl)
+                new_cols <- SDCOLS
+                new_cols[dupl] <- paste0(new_cols[dupl], "_y") #TODO? this will override existing b_y
+                inner_j <- private$call(
+                    substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
+                    j=J, .SDcols=SDCOLS, on = ON_REV
+                )
+            } else {
+                J <- update
+                J <- private$add_missing_join_j_expr_names(J)
+                inner_j <- private$call(
+                    substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
+                    j=J, on = ON_REV
+                )
+                new_cols <- names(J)[-1L]
+            }
+
+            tryCatch(
+                private$tbl_eval(i=private$i, j = substitute(`:=` (new_cols, inner_j))),
+                error = function(e) {
+                    if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
+                        stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
+                    }
+                    stop(e)
+                }
+            )
+
+            return(invisible(self))
+        },
+
+
         #' @description Check whether the data is grouped.
         #'
         #' @return TRUE or FALSE.
@@ -710,6 +781,23 @@ DataFrame <- R6::R6Class(
             missing <- which(result == "")[-1L]
             if (any(missing)) {
                 for (i in missing) result[i] <- sub("(=|!|>|<).*", "", e[[i]])
+                names(e) <- result
+            }
+            e
+        },
+
+        add_missing_join_j_expr_names = function(e) {
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            missing <- which(result == "")[-1L]
+            if (any(missing)) {
+                for (i in missing) {
+                    result[i] <- as.character(e[[i]])
+                    e[[i]] <- as.name(paste0("x.", e[[i]]))
+                }
+                dupl <- intersect(result[missing], names(private$tbl))
+                if (length(dupl)>0) {
+                    warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the right table."), call. = FALSE)
+                }
                 names(e) <- result
             }
             e
