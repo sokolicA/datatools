@@ -145,6 +145,12 @@ df <- DF(data.frame(a=1:3, b=1:3))
 df$remove(c(TRUE, NA, FALSE))
 
 ## ------------------------------------------------
+## Method `DataFrame$insert`
+## ------------------------------------------------
+
+TODO
+
+## ------------------------------------------------
 ## Method `DataFrame$append`
 ## ------------------------------------------------
 
@@ -192,6 +198,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-set}{\code{DataFrame$set()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
+\item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
 \item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-insert}{\code{DataFrame$insert()}}
@@ -660,6 +667,42 @@ Invisibly returns itself.
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-update_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
+\subsection{Method \code{update_join()}}{
+Perform an update join.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(right, on, update = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{right}}{The right (other) \code{data.table}.}
+
+\item{\code{on}}{The condition to join the tables on. Either a...}
+
+\item{\code{update}}{Optional list specifying which columns to add. Can also update existing columns. By default adds all columns from the right table. See details for more information.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Using columns from the wrapped \code{data.table} table in calculations provided in \code{update} can be done by
+prefixing the column names of the left table with \strong{\code{i.}}. See examples.
+
+Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
+
+The join will not be performed if there are multiple matches found in the \code{right} table.
+In such cases use either \code{left_join} or delete duplicated foreign keys in the \code{right} table.
+}
+
+\subsection{Returns}{
+Invisibly returns the updated itself.
+
+Returns an error if there are multiple matches found in the \code{right} table.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-is_grouped"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-is_grouped}{}}}
 \subsection{Method \code{is_grouped()}}{
@@ -742,9 +785,21 @@ This method will insert new columns by reference.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+#'TO ADD
+}
+
 \subsection{Returns}{
 Invisibly returns itself.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{TODO
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
