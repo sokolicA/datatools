@@ -331,11 +331,6 @@ DataFrame <- R6::R6Class(
         #' update: Can also be transformations of columns.
         #'
         #' @examples
-        #' df <- DF(data.frame(x = 1:3, y = LETTERS[1:3], z = LETTERS[9:11], v=1:3))
-        #' y <- data.frame(x = LETTERS[3:4], y = c(1, 2), z = LETTERS[6:7])
-        #' rel <- Rel(right=y)$on(x = y) # same as Relationship$new(right=y)$on(x = y)
-        #' df$update_join(rel, columns=list(a=3, c=ifelse(i.x == 1, 3, 2), z)) #i.x is from the table stored in df
-        #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
         update_join = function(right, on, update=NULL) {#browser()
             # REFACTOR
             if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
