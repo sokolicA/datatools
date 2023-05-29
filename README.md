@@ -4,6 +4,8 @@
 
 DataFrame:
 
+- merge columns class to original DataFRame
+
 - add number of last updated rows after eval .Last.updated ?
 
 - can this be done in Cpp? str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
