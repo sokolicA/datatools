@@ -433,3 +433,120 @@ test_that("insert works", {
     expect_equal(df$insert(c=a, g=a+b)$unwrap(), data.table(a=1:3, b=1:3, c=1:3, g=2*1:3))
 })
 
+
+test_that("On argument parser works", {
+
+    Test <- R6::R6Class(
+        "Test",
+        inherit=DataFrame,
+        public=list(
+            t_parse_on = function(on) {
+                # browser()
+                e <- substitute(on)
+                private$parse_on(e)
+            }
+        )
+    )
+
+
+    df <- Test$new(data.table(a=1:3, b=1:3))
+
+    # EQUI JOINS
+    expect_equal(df$t_parse_on("a"), quote(c(a = "a")))
+    expect_equal(df$t_parse_on(c("a", "b")), quote(c(a="a", b="b")))
+    expect_equal(df$t_parse_on(c(a="b", b="a")), quote(c(a="b", b="a")))
+    expect_equal(df$t_parse_on(c(a="b", "b")), quote(c(a="b", b="b")))
+    expect_equal(df$t_parse_on(list(a, b)), quote(c(a="a", b="b")))
+    expect_equal(df$t_parse_on(.(a, b)), quote(c(a="a", b="b")))
+    expect_equal(df$t_parse_on(list(a=b, b=a)), quote(c(a="b", b="a")))
+    expect_equal(df$t_parse_on(list(a=b, b)), quote(c(a="b", b="b")))
+    #df$t_parse_on(c("a==b", "b")) # maybe in the future
+
+    # NON-EQUI JOINS
+    expect_equal(df$t_parse_on(list(a>b)), quote(c(a = "a>b")))
+    expect_equal(df$t_parse_on(list(a>b, b)), quote(c(a = "a>b", b="b")))
+    expect_equal(df$t_parse_on(.(a>b)), quote(c(a = "a>b")))
+    expect_equal(df$t_parse_on(.(a>b, b)), quote(c(a = "a>b", b="b")))
+    expect_equal(df$t_parse_on(c("a>b")), quote(c(a = "a>b")))
+    expect_equal(df$t_parse_on(c("a>b", "b")), quote(c(a = "a>b", b="b")))
+})
+
+test_that("reversing the on expression works", {
+
+    Test <- R6::R6Class(
+        "Test",
+        inherit=DataFrame,
+        public=list(
+            t_reverse_on_expr = function(e) {
+                #browser()
+                private$reverse_on_expr(e)
+            }
+        )
+    )
+
+    df <- Test$new(data.table(a=1:3, b=1:3))
+    # EQUI JOINS
+    expect_equal(df$t_reverse_on_expr(quote(c(a = "a"))), quote(c(a = "a")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a="a", b="b"))), quote(c(a="a", b="b")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a="b", b="a"))), quote(c(b="a", a="b")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a="b", b="b"))), quote(c(b="a", b="b")))
+
+    # NON-EQUI JOINS
+    expect_equal(df$t_reverse_on_expr(quote(c(b = "b!=a"))), quote(c(a = "a!=b")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a = "a>b"))), quote(c(b = "b<=a")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a = "a<=b"))), quote(c(b = "b>a")))
+    expect_equal(df$t_reverse_on_expr(quote(c(a = "a>b", b="a"))), quote(c(b = "b<=a", a="b")))
+})
+
+
+test_that("update join does not work for 1-many relationships", {
+
+    x <- data.table(a=1:3, b = c("a", "b", "a"))
+    y <- data.table(a=c("b", "b", "a"), b = 5:7)
+
+    df <- DF(x)
+    expect_error(df$update_join(y, .(b=a)))
+})
+
+
+test_that("update join add all columns works", {
+
+    x <- data.table(a=1:3, b = c("a", "b", "a"))
+    y <- data.table(a=c("b", "c", "a"), b = 5:7)
+    z <- data.table(a=c("c", "a", "d"), b = 5:7, d=1)
+
+    df <- DF(x)
+    df$update_join(y, .(b=a))
+    expect_equal(df$unwrap(), data.table(a=1:3, b = c("a", "b", "a"), b_y = c(7, 5, 7)))
+    df$update_join(z, .(b=a))
+    expect_equal(df$unwrap(), data.table(a=1:3, b = c("a", "b", "a"), b_y = c(7, 5, 7), b_y_y = c(6, NA, 6), d=c(1, NA, 1)))
+})
+
+
+test_that("update join add specific columns works", {
+
+    x <- data.table(a=1:3, b = c("a", "b", "a"))
+    y <- data.table(a=c("b", "c", "a"), b = 5:7)
+    z <- data.table(a=c("c", "a", "d"), b = 5:7, d=1)
+
+    df <- DF(x)
+    df$update_join(y, .(b=a), update = .(g = b))
+    expect_equal(df$unwrap(), data.table(a=1:3, b = c("a", "b", "a"), g = c(7, 5, 7)))
+    expect_warning(df$update_join(y, .(b=a), update = .(b)))
+    expect_equal(df$unwrap(), data.table(a=1:3, b = c(7, 5, 7), g = c(7, 5, 7)))
+})
+
+test_that("update join takes correct columns from left and right table", {
+
+    x <- data.table(a=1:3, b = c("a", "b", "a"))
+    y <- data.table(a=c("b", "c", "a"), b = 5:7, d = 1)
+
+    df <- DF(x)
+    expect_error(df$update_join(y, .(b=a), update = .(bx = i.b, d=i.d)))
+
+    df$update_join(y, .(b=a), update = .(bx = i.b, by=b, by2=x.b))
+    expect_equal(df$unwrap(), data.table(a=1:3, b = c("a", "b", "a"),
+                                         bx= c("a", "b", "a"),
+                                         by = c(7,5,7), by2=c(7,5,7)))
+})
+
