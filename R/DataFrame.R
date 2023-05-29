@@ -345,9 +345,8 @@ DataFrame <- R6::R6Class(
             if (is.null(update)) {# add all columns
                 SDCOLS <- setdiff(names(right), names(ON_REV))
                 J <- if (length(SDCOLS) > 1) quote(.SD) else quote(unlist(.SD, recursive = FALSE)) # a one dimensional list goes through the join without errors (when multiple matches), creating a multi-column column
-                dupl <- SDCOLS %in% names(private$tbl)
                 new_cols <- SDCOLS
-                new_cols[dupl] <- paste0(new_cols[dupl], "_y") #TODO? this will override existing b_y
+                new_cols <- private$rename_duplicated_cols(new_cols)
                 inner_j <- private$call(
                     substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
                     j=J, .SDcols=SDCOLS, on = ON_REV
@@ -825,6 +824,13 @@ DataFrame <- R6::R6Class(
             }
             names(result) <- result_names
             result
+        },
+
+        rename_duplicated_cols = function(new_cols) {
+            while (any(dupl <- new_cols %in% names(private$tbl))) {
+                new_cols[dupl] <- paste0(new_cols[dupl], "_y")
+            }
+            new_cols
         },
 
         rm_na_int = remove_na_integer,
