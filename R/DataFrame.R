@@ -759,7 +759,7 @@ DataFrame <- R6::R6Class(
                 e <- private$convert_on_call(e)
             }
 
-            if (e[[1L]] != quote(c)) stop("Unable to parse expression!")
+            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in right.", call.=FALSE)
             private$add_missing_on_expr_names(e)
         },
 
