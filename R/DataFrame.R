@@ -310,7 +310,7 @@ DataFrame <- R6::R6Class(
         #' To allow data.tables or only DataFrames?
         #' Add new or update current table rows on matching positions.
         #'
-        #' @param right The right (other) table. See details.
+        #' @param right The right (other) `data.table`.
         #' @param on The condition to join the tables on. Either a...
         #' @param update List of column names to update and/or add. Defaults to `NULL` which adds all columns from the right table. See details for more information.
         #'
@@ -338,6 +338,8 @@ DataFrame <- R6::R6Class(
         #' df$update_join(rel, columns=list(g=c**2), where=x %in% 1:2)
         update_join = function(right, on, update=NULL) {#browser()
             # REFACTOR
+            if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
+
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
             update <- substitute(update)
