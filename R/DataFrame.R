@@ -364,6 +364,12 @@ DataFrame <- R6::R6Class(
                     if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
                         stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
                     }
+                    if (grepl("argument specifying columns specify non existing column\\(s\\)", e)) {
+                        col_name <- gsub(".*=", "", e$message)
+                        param <- gsub(".*unname\\((.*)\\),.*", "\\1", deparse1(e$call))
+                        msg <- paste0("Can not find column ", col_name, " provided in the '", param, "' argument.")
+                        stop (msg, call.=FALSE)
+                    }
                     stop(e)
                 }
             )
