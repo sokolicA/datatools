@@ -307,12 +307,9 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform an update join.
         #'
-        #' To allow data.tables or only DataFrames?
-        #' Add new or update current table rows on matching positions.
-        #'
         #' @param right The right (other) `data.table`.
         #' @param on The condition to join the tables on. Either a...
-        #' @param update List of column names to update and/or add. Defaults to `NULL` which adds all columns from the right table. See details for more information.
+        #' @param update Optional list specifying which columns to add. Can also update existing columns. By default adds all columns from the right table. See details for more information.
         #'
         #' @return Invisibly returns the updated itself.
         #'
@@ -320,7 +317,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @details
         #'
-        #' Using columns from the `left` (current) table in calculations provided in `update` can be done by
+        #' Using columns from the wrapped `data.table` table in calculations provided in `update` can be done by
         #' prefixing the column names of the left table with **`i.`**. See examples.
         #'
         #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
@@ -328,11 +325,10 @@ DataFrame <- R6::R6Class(
         #' The join will not be performed if there are multiple matches found in the `right` table.
         #' In such cases use either `left_join` or delete duplicated foreign keys in the `right` table.
         #'
-        #' update: Can also be transformations of columns.
-        #'
         #' @examples
         update_join = function(right, on, update=NULL) {#browser()
-            # REFACTOR
+            #CONSIDER To allow data.tables or only DataFrames or both?
+            #REFACTOR
             if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
 
             ON <- private$parse_on(substitute(on))
@@ -368,6 +364,11 @@ DataFrame <- R6::R6Class(
                         col_name <- gsub(".*=", "", e$message)
                         param <- gsub(".*unname\\((.*)\\),.*", "\\1", deparse1(e$call))
                         msg <- paste0("Can not find column ", col_name, " provided in the '", param, "' argument.")
+                        stop (msg, call.=FALSE)
+                    }
+                    if (identical(e$call, quote(eval(jsub, SDenv, parent.frame())))) {
+                        col_name <- gsub(".*'(.*)'.*", "\\1", e$message)
+                        msg <- paste0("Cannot find column '", col_name, "'.")
                         stop (msg, call.=FALSE)
                     }
                     stop(e)
