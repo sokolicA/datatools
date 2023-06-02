@@ -335,6 +335,10 @@ DataFrame <- R6::R6Class(
         #' In such cases use either `left_join` or delete duplicated foreign keys in the `right` table.
         #'
         #' @examples
+        #' x <- data.table(a=1:3, b = c("a", "b", "a"))
+        #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
+        #' df <- DF(x)
+        #' df$update_join(y, .(b=a))
         update_join = function(right, on, update=NULL) {#browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
             #CONSIDER split update into insert and update. insert for new columns and update for existing.
