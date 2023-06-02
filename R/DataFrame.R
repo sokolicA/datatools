@@ -258,6 +258,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @return Invisibly returns itself.
         set = function(value) {#browser()
+            #CONSIDER renaming the method due to it overriding the default $set (method) method.
             value <- substitute(function(x) value)
             if (is.null(private$sdcols)) {
                 cols <- names(private$tbl)
