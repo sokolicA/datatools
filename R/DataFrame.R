@@ -33,7 +33,7 @@ DataFrame <- R6::R6Class(
         print = function() {
             d <- dim(private$tbl)
             cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            if (self$is_grouped()) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
+            if (!is.null(private$by)) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
             if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
             if (!is.null(private$sdcols)) cat("Columns subset using:", private$sdcols_txt, "\n")
             print(private$tbl_subset())
@@ -416,18 +416,6 @@ DataFrame <- R6::R6Class(
             )
             setcolorder(result, names(private$tbl))
             DF(result)
-        },
-
-        #' @description Check whether the data is grouped.
-        #'
-        #' @return TRUE or FALSE.
-        #'
-        #' @examples
-        #' df <- DF(data.table(a=1:5, b=3))
-        #' df$is_grouped()
-        #' df$group(a)$is_grouped()
-        is_grouped = function() {
-            !is.null(private$by)
         },
 
         #' @description Remove specified rows from the table in place.
