@@ -16,6 +16,7 @@ DataFrame <- R6::R6Class(
         #' @details The table is not copied by default which improves speed and memory performance.
         #' Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
         initialize = function(tbl, copy=FALSE) {
+            stopifnot("tbl must be a data.frame" = inherits(tbl, "data.frame"))
             if (copy) {
                 private$tbl <- data.table::as.data.table(tbl)
             } else {
