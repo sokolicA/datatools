@@ -616,9 +616,9 @@ DataFrame <- R6::R6Class(
         },
 
         call = function(
-            e=quote(`[`(private$tbl)), i=NULL, j=NULL,
-            by=NULL, keyby=NULL,
-            .SDcols=NULL, on=NULL
+        e=quote(`[`(private$tbl)), i=NULL, j=NULL,
+        by=NULL, keyby=NULL,
+        .SDcols=NULL, on=NULL
         ) {
             if (!is.null(i)) e[["i"]] <- i
             if (!is.null(j)) e[["j"]] <- j
@@ -630,9 +630,9 @@ DataFrame <- R6::R6Class(
         },
 
         build_eval_env = function() {
-          env <- private$caller_env()
-          env$private <- private
-          env
+            env <- private$caller_env()
+            env$private <- private
+            env
         },
 
         caller_env = function() {
