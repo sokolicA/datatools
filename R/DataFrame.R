@@ -495,8 +495,8 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' res <- df$concat(y, x, y, df)
         concat = function(..., fill=FALSE) {
-            concat <- list(private$tbl, ...)
-            tbls <- lapply(concat, function(x) {
+            to_concat <- list(private$tbl, ...)
+            tbls <- lapply(to_concat, function(x) {
                 if(inherits(x, "DataFrame")) return(x$unwrap())
                 return(x)
             })
@@ -523,18 +523,8 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' df$concat_(y, x, y, df)
         #'
-        concat_ = function(..., fill=FALSE) {
-            concat <- list(private$tbl, ...)
-            tbls <- lapply(concat, function(x) {
-                if(inherits(x, "DataFrame")) return(x$unwrap())
-                return(x)
-            })
-
-            private$tbl <- rbindlist(
-                tbls,
-                use.names = TRUE,
-                fill = fill
-            )
+        concat_ = function(..., fill=FALSE) {browser()
+            private$tbl <- self$concat(..., fill=fill)$unwrap()
             invisible(self)
         },
 
