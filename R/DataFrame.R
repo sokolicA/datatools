@@ -11,12 +11,17 @@ DataFrame <- R6::R6Class(
         #' @description `DataFrame` Constructor
         #'
         #' @param tbl An object of class `data.frame`.
-        #' @param key Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.
+        #' @param copy Optional argument specifying whether to wrap a copy of the passed object. Defaults to `FALSE`.
         #'
-        initialize = function(tbl, key=NULL) {
-            data.table::setDT(tbl)
-            private$tbl <- tbl
-            if (!is.null(key)) self$set_key(key)
+        #' @details The table is not copied by default which improves speed and memory performance.
+        #' Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
+        initialize = function(tbl, copy=FALSE) {
+            if (copy) {
+                private$tbl <- data.table::as.data.table(tbl)
+            } else {
+                private$tbl <- data.table::setDT(tbl)
+            }
+            invisible(self)
         },
 
         #' @description Print the table object.
@@ -510,7 +515,7 @@ DataFrame <- R6::R6Class(
                 use.names = TRUE,
                 fill = fill
             )
-            return(DF(result, key=NULL))
+            DF(result)
         },
 
         #' @description Append tables to the `DataFrame`.

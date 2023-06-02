@@ -1,3 +1,20 @@
+test_that("$new does not copy the table object by default ", {
+    x <- data.table(a=1:5, b=1:5)
+    df <- DataFrame$new(x)
+    expect_equal(address(x), address(df$unwrap()))
+})
+
+test_that("$new copies the table object if copy=TRUE", {
+    dataframe <- data.frame(a=1:5, b=1:5)
+    datatable <- data.table(a=1:5, b=1:5)
+    tibble <- dplyr::tibble(a=1:5, b=1:5)
+
+    expect_false(address(DF(dataframe, copy=TRUE)$unwrap())==address(dataframe))
+    expect_false(address(DF(tibble, copy=TRUE)$unwrap())==address(tibble))
+    expect_false(address(DF(datatable, copy=TRUE)$unwrap())==address(datatable))
+})
+
+
 test_that("deep clone creates an entirely new object and table", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
@@ -12,12 +29,6 @@ test_that("deep clone creates an entirely new object and table", {
 
 })
 
-test_that("data does not copy the object", {
-    x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x)
-    expect_equal(address(x), address(df$unwrap()))
-})
-
 test_that("count returns a DataFrame with count of the number of rows", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
@@ -25,7 +36,7 @@ test_that("count returns a DataFrame with count of the number of rows", {
 
     df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
     expect_equal(df$count(), DF(data.table(N=5)))
-    expect_equal(df$group_by(g)$count(), DF(data.table(g=c("a", "b", "c"), N=c(2,1,2)), key="g"))
+    expect_equal(df$group_by(g)$count()$unwrap(), data.table(g=c("a", "b", "c"), N=c(2,1,2), key="g"))
 })
 
 
@@ -77,7 +88,7 @@ test_that("columns$rename_with changes column names in place", {
 
 test_that("columns$reorder changes column order in place", {
     x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x, key = "b")
+    df <- DataFrame$new(x)$set_key("b")
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
     df$columns$reorder()
@@ -103,7 +114,7 @@ test_that("sort changes row order in place", {
 
 test_that("sort does not work with keyed data", {
     x <- data.table(a=1:5, b=5:1)
-    df <- DataFrame$new(x, key = "b")
+    df <- DataFrame$new(x)$set_key("b")
     expect_error(df$sort(b))
 })
 
@@ -118,7 +129,7 @@ test_that("append appends the table if data.frame is passed", {
 
 test_that("is_key_unique returns TRUE when key is unique", {
     x <- data.table(a=1:5, b=1:5)
-    df <- DataFrame$new(x, key = c("a"))
+    df <- DataFrame$new(x)$set_key("a")
     expect_true(df$is_key_unique())
 })
 
