@@ -328,6 +328,7 @@ DataFrame <- R6::R6Class(
         #' @examples
         update_join = function(right, on, update=NULL) {#browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
+            #CONSIDER split update into insert and update. insert for new columns and update for existing.
             #REFACTOR
             if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
 
@@ -378,6 +379,35 @@ DataFrame <- R6::R6Class(
             return(invisible(self))
         },
 
+        left_join = function(right, on) {#browser()
+            ON <- private$parse_on(substitute(on))
+            ON_REV <- private$reverse_on_expr(ON)
+            call <- private$call(
+                e=substitute(`[`(right, mult = "all", nomatch = NA)),
+                i=quote(private$tbl), on=ON_REV
+            )
+            result <- private$eval(call)
+            # x[y, on...]
+            # if on column names differ, the column from y is not returned
+            # duplicated columns in y are prefixed with i.
+            # if y has a column of the same name of one of the on columns for x (but is not used in the join), it is also added and prefixed with i.
+            on_x <- names(ON)[-1L]
+            on_y <- names(ON_REV)[-1L]
+            new_x <- old_x <- setdiff(names(private$tbl), on_x)
+            new_y <- old_y <- setdiff(names(right), on_y)
+            dupl <- new_x %in% names(right)
+            dupl_y <- old_y %in% c(old_x[dupl], on_x)
+            old_x[dupl] <- paste0("i.", old_x[dupl])
+            new_y[dupl_y] <- paste0(old_y[dupl_y], "_y")
+
+            data.table::setnames(
+                result,
+                c(on_y, old_y, old_x),
+                c(on_x, new_y, new_x)
+            )
+            setcolorder(result, names(private$tbl))
+            DF(result)
+        },
 
         #' @description Check whether the data is grouped.
         #'
