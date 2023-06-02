@@ -493,10 +493,10 @@ DataFrame <- R6::R6Class(
         #' x <- data.frame(a=1:5, b=1:5)
         #' y <- data.frame(a=1:5, b=1:5)
         #' df <- DF(x)
-        #' res <- df$append(y, x, y, df)
-        append = function(..., fill=FALSE) {
-            append <- list(private$tbl, ...)
-            tbls <- lapply(append, function(x) {
+        #' res <- df$concat(y, x, y, df)
+        concat = function(..., fill=FALSE) {
+            concat <- list(private$tbl, ...)
+            tbls <- lapply(concat, function(x) {
                 if(inherits(x, "DataFrame")) return(x$unwrap())
                 return(x)
             })
@@ -509,8 +509,8 @@ DataFrame <- R6::R6Class(
             DF(result)
         },
 
-        #' @description Append tables to the `DataFrame`.
-        #' Same as the `$append` method but without creating a new object.
+        #' @description Concatenate the rows of the `DataFrame`.
+        #' Same as the `$concat` method but without creating a new object.
         #'
         #' @param ... Objects of class `data.frame` or `DataFrame`.
         #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
@@ -521,11 +521,11 @@ DataFrame <- R6::R6Class(
         #' x <- data.frame(a=1:5, b=1:5)
         #' y <- data.frame(a=1:5, b=1:5)
         #' df <- DF(x)
-        #' df$append_(y, x, y, df)
+        #' df$concat_(y, x, y, df)
         #'
-        append_ = function(..., fill=FALSE) {
-            append <- list(private$tbl, ...)
-            tbls <- lapply(append, function(x) {
+        concat_ = function(..., fill=FALSE) {
+            concat <- list(private$tbl, ...)
+            tbls <- lapply(concat, function(x) {
                 if(inherits(x, "DataFrame")) return(x$unwrap())
                 return(x)
             })

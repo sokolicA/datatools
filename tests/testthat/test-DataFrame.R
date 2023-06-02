@@ -119,11 +119,11 @@ test_that("sort does not work with keyed data", {
 })
 
 
-test_that("append appends the table if data.frame is passed", {
+test_that("concat appends the table if data.frame is passed", {
     x <- data.table(a=1:5, b=1:5)
     y <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    res <- df$append(y)
+    res <- df$concat(y)
     expect_equal(res$unwrap(), data.table(a=rep(1:5, 2), b=rep(1:5, 2)))
 })
 
