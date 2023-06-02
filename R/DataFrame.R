@@ -30,6 +30,7 @@ DataFrame <- R6::R6Class(
             if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
             if (!is.null(private$sdcols)) cat("Columns subset using:", private$sdcols_txt, "\n")
             print(private$tbl_subset())
+            invisible(self)
         },
 
         #' @description Return the first n rows.
