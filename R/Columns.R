@@ -4,6 +4,7 @@
 #'
 #' @import data.table
 Columns <- R6::R6Class(
+    #CONSIDER merging the class into the main class.
     "Columns",
 
     public = list(
