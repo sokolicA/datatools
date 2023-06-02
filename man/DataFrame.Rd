@@ -5,21 +5,18 @@
 \alias{DF}
 \title{DataFrame Class}
 \usage{
-DF(tbl, key = NULL)
+DF(tbl, copy = FALSE)
 }
 \arguments{
 \item{tbl}{An object of class \code{data.frame}.}
 
-\item{key}{Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.}
+\item{copy}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
 }
 \value{
 A \code{DataFrame} object.
 }
 \description{
 A wrapper class for tabular data objects of class \code{data.frame}.
-}
-\details{
-The key parameter is passed to \code{data.table::setkey(key)}. If the parameter is not passed, the existing keys of \code{x} (if any) will be kept.
 }
 \section{Functions}{
 \itemize{
@@ -126,12 +123,22 @@ df$select(is.numeric)$set(NA); df
    df$update(g = a, dd = ifelse(a==2, b, 0))
 
 ## ------------------------------------------------
-## Method `DataFrame$is_grouped`
+## Method `DataFrame$update_join`
 ## ------------------------------------------------
 
-df <- DF(data.table(a=1:5, b=3))
-df$is_grouped()
-df$group(a)$is_grouped()
+x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$update_join(y, .(b=a))
+
+## ------------------------------------------------
+## Method `DataFrame$left_join`
+## ------------------------------------------------
+
+x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$left_join(y, .(b=a))
 
 ## ------------------------------------------------
 ## Method `DataFrame$remove`
@@ -151,24 +158,24 @@ df$remove(c(TRUE, NA, FALSE))
 TODO
 
 ## ------------------------------------------------
-## Method `DataFrame$append`
+## Method `DataFrame$concat`
 ## ------------------------------------------------
 
 x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-res <- df$append(y, x, y, df)
+res <- df$concat(y, x, y, df)
 
 ## ------------------------------------------------
-## Method `DataFrame$append_`
+## Method `DataFrame$concat_`
 ## ------------------------------------------------
 
 x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-df$append_(y, x, y, df)
+df$concat_(y, x, y, df)
 
-df <- DF(data.table(a=1, b=2), key="a")
+df <- DF(data.table(a=1, b=2))
 
 }
 \section{Active bindings}{
@@ -199,12 +206,12 @@ df <- DF(data.table(a=1, b=2), key="a")
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
-\item \href{#method-DataFrame-is_grouped}{\code{DataFrame$is_grouped()}}
+\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
 \item \href{#method-DataFrame-insert}{\code{DataFrame$insert()}}
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
-\item \href{#method-DataFrame-append}{\code{DataFrame$append()}}
-\item \href{#method-DataFrame-append_}{\code{DataFrame$append_()}}
+\item \href{#method-DataFrame-concat}{\code{DataFrame$concat()}}
+\item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
@@ -215,7 +222,7 @@ df <- DF(data.table(a=1, b=2), key="a")
 \subsection{Method \code{new()}}{
 \code{DataFrame} Constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, key = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, copy = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -223,10 +230,15 @@ df <- DF(data.table(a=1, b=2), key="a")
 \describe{
 \item{\code{tbl}}{An object of class \code{data.frame}.}
 
-\item{\code{key}}{Optional vector of column names. Setting a key sorts the table in RAM using the values of the key column(s). See Details.}
+\item{\code{copy}}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+The table is not copied by default which improves speed and memory performance.
+Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-print"></a>}}
@@ -701,24 +713,49 @@ Invisibly returns the updated itself.
 
 Returns an error if there are multiple matches found in the \code{right} table.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$update_join(y, .(b=a))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-is_grouped"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-is_grouped}{}}}
-\subsection{Method \code{is_grouped()}}{
-Check whether the data is grouped.
+\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
+\subsection{Method \code{left_join()}}{
+Perform a left (outer) join.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$is_grouped()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(right, on)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{right}}{The right (other) \code{data.table}.}
+
+\item{\code{on}}{The condition to join the tables on. Either a...}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
 }
 
 \subsection{Returns}{
-TRUE or FALSE.
+A new \code{DataFrame} extended with columns from the right table.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(a=1:5, b=3))
-df$is_grouped()
-df$group(a)$is_grouped()
+\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$left_join(y, .(b=a))
 }
 \if{html}{\out{</div>}}
 
@@ -824,12 +861,12 @@ Invisibly returns itself.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-append"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-append}{}}}
-\subsection{Method \code{append()}}{
+\if{html}{\out{<a id="method-DataFrame-concat"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-concat}{}}}
+\subsection{Method \code{concat()}}{
 Create a new \code{DataFrame} by appending tables using column names.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append(..., fill = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$concat(..., fill = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -849,7 +886,7 @@ A new unkeyed \code{DataFrame} object with rows appended.
 \preformatted{x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-res <- df$append(y, x, y, df)
+res <- df$concat(y, x, y, df)
 }
 \if{html}{\out{</div>}}
 
@@ -857,13 +894,13 @@ res <- df$append(y, x, y, df)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-append_"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-append_}{}}}
-\subsection{Method \code{append_()}}{
-Append tables to the \code{DataFrame}.
-Same as the \verb{$append} method but without creating a new object.
+\if{html}{\out{<a id="method-DataFrame-concat_"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-concat_}{}}}
+\subsection{Method \code{concat_()}}{
+Concatenate the rows of the \code{DataFrame}.
+Same as the \verb{$concat} method but without creating a new object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$append_(..., fill = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$concat_(..., fill = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -883,7 +920,7 @@ Invisibly returns itself.
 \preformatted{x <- data.frame(a=1:5, b=1:5)
 y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
-df$append_(y, x, y, df)
+df$concat_(y, x, y, df)
 
 }
 \if{html}{\out{</div>}}

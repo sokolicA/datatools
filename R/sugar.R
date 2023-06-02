@@ -3,7 +3,6 @@
 #' @param tbl An object of class `data.frame`.
 #' @param copy Optional argument specifying whether to wrap a copy of the passed object. Defaults to `FALSE`.
 #'
-#' @details
 #'
 #' @examples
 #' df <- DF(data.table(a=1, b=2))
