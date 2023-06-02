@@ -392,6 +392,24 @@ DataFrame <- R6::R6Class(
             return(invisible(self))
         },
 
+        #' @description Perform a left (outer) join.
+        #'
+        #' @param right The right (other) `data.table`.
+        #' @param on The condition to join the tables on. Either a...
+        #'
+        #' @return A new `DataFrame` extended with columns from the right table.
+        #'
+        #'
+        #' @details
+        #'
+        #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
+        #'
+        #'
+        #' @examples
+        #' x <- data.table(a=1:3, b = c("a", "b", "a"))
+        #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
+        #' df <- DF(x)
+        #' df$left_join(y, .(b=a))
         left_join = function(right, on) {#browser()
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
