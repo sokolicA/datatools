@@ -550,3 +550,19 @@ test_that("update join takes correct columns from left and right table", {
                                          by = c(7,5,7), by2=c(7,5,7)))
 })
 
+
+test_that("left_join correctly renames and reorders columns", {
+
+    x <- data.table(a=1:3, b = c("a", "b", "a"), c = "left", d = "left")
+    y <- data.table(a=1:3, c =c("a", "b", "a"), b = "right", d = "right", e = "right")
+
+    df <- DF(x)
+
+    expect_equal(
+        df$left_join(y, .(a, b=c))$unwrap(),
+        data.table(a=1:3, b = c("a", "b", "a"), c = "left", d = "left",
+                   b_y = "right", d_y = "right", e = "right")
+    )
+})
+
+
