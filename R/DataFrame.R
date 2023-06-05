@@ -203,7 +203,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         where = function(rows, persist=FALSE) {#browser()
             if (missing(rows)) rows <- NULL
-            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
+            if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
             private$i <- private$parse_i(substitute(rows), parent.frame())
             private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist

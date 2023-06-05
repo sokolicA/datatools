@@ -32,12 +32,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // is_true_or_false
-Rcpp::LogicalVector is_true_or_false(Rcpp::IntegerVector& x);
+bool is_true_or_false(SEXP& x);
 RcppExport SEXP _datatools_is_true_or_false(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< SEXP& >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(is_true_or_false(x));
     return rcpp_result_gen;
 END_RCPP

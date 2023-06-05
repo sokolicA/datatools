@@ -16,6 +16,6 @@ Rcpp::IntegerVector remove_na_integer(Rcpp::IntegerVector& x) {
 
 
 // [[Rcpp::export]]
-Rcpp::LogicalVector is_true_or_false(Rcpp::IntegerVector& x) {
-    return (x[0] == 0 || x[0] == 1) && x.size() == 1;
+bool is_true_or_false(SEXP& x) {
+    return (TYPEOF(x)==LGLSXP && LENGTH(x)==1 && LOGICAL(x)[0]!=NA_LOGICAL);
 }
