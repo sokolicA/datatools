@@ -17,6 +17,7 @@ DataFrame <- R6::R6Class(
         #' Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
         initialize = function(tbl, copy=FALSE) {
             #CONSIDER adding ... as argument which will allow to create a DataFrame by passing vectors of same length: DF(1:5, LETTERS[1:5]).
+            #CONSIDER allowing lists as in data.table construction
             stopifnot("tbl must be a data.frame" = inherits(tbl, "data.frame"))
             if (copy) {
                 private$tbl <- data.table::as.data.table(tbl)
@@ -31,12 +32,8 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function() {
-            d <- dim(private$tbl)
-            cat("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            if (!is.null(private$by)) cat("Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
-            if (!is.null(private$i)) cat("Using rows where:", private$i_txt, "\n")
-            if (!is.null(private$sdcols)) cat("Columns subset using:", private$sdcols_txt, "\n")
-            print(private$tbl_subset())
+            private$print_header()
+            print(private$tbl_subset(), class=TRUE)
             invisible(self)
         },
 
@@ -881,6 +878,28 @@ DataFrame <- R6::R6Class(
         deep_clone = function(name, value) {
             if (name == "tbl") return(data.table::copy(value))
             value
+        },
+
+        print_header = function() {
+            d <- dim(private$tbl)
+            title <- paste("Wrapping a", d[1], "x", d[2], "data.table.\n")
+            group <- if (!is.null(private$by)) {
+                paste("  Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
+            } else NULL
+            i <- if (!is.null(private$i)) {
+                paste("  Using rows where:", private$i_txt, "\n")
+            } else NULL
+            sdcols <- if (!is.null(private$sdcols)) {
+                paste("  Columns subset using:", private$sdcols_txt, "\n")
+            } else NULL
+            length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
+            divisor <- paste0(rep("-", times = length), collapse="")
+            cat(title)
+            cat(i)
+            cat(sdcols)
+            cat(group)
+            cat(divisor, "\n")
         }
+
     )
 )
