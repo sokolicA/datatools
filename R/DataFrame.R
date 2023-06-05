@@ -519,13 +519,7 @@ DataFrame <- R6::R6Class(
                 if(inherits(x, "DataFrame")) return(x$unwrap())
                 return(x)
             })
-
-            result <- rbindlist(
-                tbls,
-                use.names = TRUE,
-                fill = fill
-            )
-            DF(result)
+            DF(rbindlist(tbls, use.names = TRUE, fill = fill))
         },
 
         #' @description Concatenate the rows of the `DataFrame`.
