@@ -37,7 +37,7 @@ DataFrame <- R6::R6Class(
         #'
         print = function() {
             private$print_header()
-            print(private$tbl_subset(), class=TRUE)
+            print(private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols), class=TRUE)
             invisible(self)
         },
 
@@ -52,7 +52,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            result <- private$tbl_subset()
+            result <- private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
             DataFrame$new(head(result, n))
         },
 
@@ -67,7 +67,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            result <- private$tbl_subset()
+            result <- private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
             DataFrame$new(tail(result, n))
         },
 
@@ -595,11 +595,6 @@ DataFrame <- R6::R6Class(
         sdcols_env = NULL,
         sdcols_persist = FALSE,
 
-
-        tbl_subset = function() {
-            e <- private$call(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
-            eval(e)
-        },
 
         tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
                             .SDcols=NULL, on=NULL, reset=TRUE) {
