@@ -461,7 +461,7 @@ DataFrame <- R6::R6Class(
                 stop("Logical vectors must be of equal length as the number of table rows.")
             }
             idx_remove <- eval(substitute(private$tbl[, .I[where]]))
-            idx_remove <- private$rm_na_int(idx_remove)
+            idx_remove <- int_remove_na(idx_remove)
             removed <- DataFrame$new(private$tbl[idx_remove])
             private$tbl <- private$tbl[!idx_remove]
             return(removed)
@@ -872,8 +872,6 @@ DataFrame <- R6::R6Class(
             }
             new_cols
         },
-
-        rm_na_int = remove_na_integer,
 
         deep_clone = function(name, value) {
             if (name == "tbl") return(data.table::copy(value))

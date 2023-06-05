@@ -5,8 +5,8 @@ replace_na_false <- function(x) {
     invisible(.Call(`_datatools_replace_na_false`, x))
 }
 
-remove_na_integer <- function(x) {
-    .Call(`_datatools_remove_na_integer`, x)
+int_remove_na <- function(x) {
+    .Call(`_datatools_int_remove_na`, x)
 }
 
 is_true_or_false <- function(x) {

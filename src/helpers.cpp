@@ -10,7 +10,7 @@ void replace_na_false(Rcpp::LogicalVector& x) {
 
 
 // [[Rcpp::export]]
-Rcpp::IntegerVector remove_na_integer(Rcpp::IntegerVector& x) {
+Rcpp::IntegerVector int_remove_na(Rcpp::IntegerVector& x) {
     return Rcpp::na_omit(x);
 }
 
