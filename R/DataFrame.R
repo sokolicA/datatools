@@ -154,7 +154,7 @@ DataFrame <- R6::R6Class(
         #' df
         filter_ = function(keep) {
             private$tbl <- eval(substitute(private$tbl[keep]))
-            self
+            invisible(self)
         },
 
         #' @description Group or un-group the data.
