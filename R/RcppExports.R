@@ -13,3 +13,7 @@ is_true_or_false <- function(x) {
     .Call(`_datatools_is_true_or_false`, x)
 }
 
+is_string <- function(x) {
+    .Call(`_datatools_is_string`, x)
+}
+
