@@ -5,6 +5,7 @@
 #' @import data.table
 #' @import R6
 #' @include RcppExports.R
+#' @include StaticEnv.R
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
@@ -12,18 +13,21 @@ DataFrame <- R6::R6Class(
         #'
         #' @param tbl An object of class `data.frame`.
         #' @param copy Optional argument specifying whether to wrap a copy of the passed object. Defaults to `FALSE`.
+        #' @param alias Optional alias of the DataFrame.
         #'
         #' @details The table is not copied by default which improves speed and memory performance.
         #' Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
-        initialize = function(tbl, copy=FALSE) {
+        initialize = function(tbl, copy=FALSE, alias=NULL) {
             #CONSIDER adding ... as argument which will allow to create a DataFrame by passing vectors of same length: DF(1:5, LETTERS[1:5]).
             #CONSIDER allowing lists as in data.table construction
+            #TODO add alias as suffix in joins
             stopifnot("tbl must be a data.frame" = inherits(tbl, "data.frame"))
             if (copy) {
                 private$tbl <- data.table::as.data.table(tbl)
             } else {
                 private$tbl <- data.table::setDT(tbl)
             }
+            private$alias <- private$static_env$add(alias)
             invisible(self)
         },
 
@@ -560,10 +564,20 @@ DataFrame <- R6::R6Class(
         #' @field key Key getter.
         key = function() {
             data.table::key(private$tbl)
+        },
+
+        #' @field static Static Information
+        static = function() {
+            invisible(gc())
+            private$static_env$info()
         }
     ),
 
     private = list(
+
+        static_env = StaticEnv$new(),
+
+        alias = NULL,
 
         tbl = NULL,
 
@@ -891,6 +905,10 @@ DataFrame <- R6::R6Class(
             cat(sdcols)
             cat(group)
             cat(divisor, "\n")
+        },
+
+        finalize = function() {
+            private$static_env$remove(private$alias)
         }
 
     )

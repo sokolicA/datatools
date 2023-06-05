@@ -2,26 +2,32 @@ StaticEnv <- R6::R6Class(
     "StaticEnv",
 
     public = list(
-        add = function(name) {
-            if (exists(name, private$names, inherits=FALSE)) stop("DataFrame with this name already exists!")
-            private$names[[name]] <- 1
+        add = function(alias) {
+            if (is.null(alias)) alias <- as.character(sample.int(1e8, 1))
+            if (!is_string(alias)) stop("Alias must be a string!", call.=FALSE)
+            if (exists(alias, private$env, inherits=FALSE)) stop("DataFrame with this alias already exists!", call.=FALSE)
+            private$env[[alias]] <- 1
             private$count <- private$count + 1L
-            TRUE
+            alias
         },
 
-        remove = function(name) {
-            if (!exists(name, private$names, inherits=FALSE)) stop("DataFrame with this name does not exist!")
-            rm(name, envir=private$names)
+        remove = function(alias) {
+            if (!exists(alias, private$env, inherits=FALSE)) stop("DataFrame with this alias does not exist!", call.=FALSE)
+            rm(list=alias, envir=private$env)
             private$count <- private$count - 1L
             TRUE
         },
 
+        exists = function(alias) {
+           exists(alias, envir=private$env, inherits=FALSE)
+        },
+
         info = function() {
-            list(count=private$count, names=names(private$names))
+            list(count=private$count, list=names(private$env))
         }
     ),
     private = list(
         count = 0L,
-        names = new.env()
+        env = new.env()
     )
 )
