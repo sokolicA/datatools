@@ -340,34 +340,39 @@ DataFrame <- R6::R6Class(
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
         #' df$update_join(y, .(b=a))
-        update_join = function(right, on, update=NULL) {#browser()
+        update_join = function(right, on, insert=NULL, update=NULL) {browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
-            #CONSIDER split update into insert and update. insert for new columns and update for existing.
             #REFACTOR
+            #CONTINUE How to set default arguments..
             if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
 
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
+            insert <- substitute(insert)
             update <- substitute(update)
 
-            if (is.null(update)) {# add all columns
+            if (is.null(insert)) {# add all columns
                 SDCOLS <- setdiff(names(right), names(ON_REV))
-                J <- if (length(SDCOLS) > 1) quote(.SD) else quote(unlist(.SD, recursive = FALSE)) # a one dimensional list goes through the join without errors (when multiple matches), creating a multi-column column
-                new_cols <- SDCOLS
-                new_cols <- private$rename_duplicated_cols(new_cols)
-                inner_j <- private$call(
-                    substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
-                    j=J, .SDcols=SDCOLS, on = ON_REV
-                )
+                new_cols <- private$rename_duplicated_cols(SDCOLS)
+                #CONTINUE must add check if update is null.. build J expression from insert and update. remove SDCOLS here and create a list expression of all colnames
+                J <- str2lang(paste0(".(", paste(SDCOLS, collapse = ","), ")"))
             } else {
-                J <- update
-                J <- private$add_missing_join_j_expr_names(J)
-                inner_j <- private$call(
-                    substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
-                    j=J, on = ON_REV
-                )
+                if (any(names(insert)[-1L] %in% names(private$tbl))) stop("Some columns already exist! Use the update method to update existing columns", call.=FALSE)
+                J <- private$add_missing_join_j_expr_names(insert)
                 new_cols <- names(J)[-1L]
             }
+
+            if (!is.null(update)) {
+                if (is.null(names(update)) || any(names(update)[-1L] == "")) stop("Must provide column names to update!")
+                if (!all(names(update)[-1L] %in% names(private$tbl))) stop("New columns must be provided to the insert argument!")
+                J <- merge_calls(J, update)
+                new_cols <- c(new_cols, names(update)[-1L])
+            }
+
+            inner_j <- private$call(
+                substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
+                j=J, on = ON_REV
+            )
 
             tryCatch(
                 private$tbl_eval(i=private$i, j = substitute(`:=` (new_cols, inner_j))),
