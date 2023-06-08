@@ -318,8 +318,9 @@ DataFrame <- R6::R6Class(
         #' @description Perform an update join.
         #'
         #' @param right The right (other) `data.table`.
-        #' @param on The condition to join the tables on. Either a...
-        #' @param update Optional list specifying which columns to add. Can also update existing columns. By default adds all columns from the right table. See details for more information.
+        #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
+        #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'add'` to insert all columns from the right table that are not used for joining.
+        #' @param update Optional list specifying updates of existing columns. No updates are performed by default.
         #'
         #' @return Invisibly returns the updated itself.
         #'
@@ -339,26 +340,31 @@ DataFrame <- R6::R6Class(
         #' x <- data.table(a=1:3, b = c("a", "b", "a"))
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
-        #' df$update_join(y, .(b=a))
-        update_join = function(right, on, insert=NULL, update=NULL) {browser()
+        #' df$update_join(y, .(b=a), insert="all")
+        update_join = function(right, on, insert=NULL, update=NULL) {#browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
             #REFACTOR
-            #CONTINUE How to set default arguments..
+            insert <- substitute(insert)
+            update <- substitute(update)
             if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
+            if (is.null(insert) && is.null(update)) {
+                warning("Provide either insert or update!");
+                return(invisible(self))
+            }
 
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
-            insert <- substitute(insert)
-            update <- substitute(update)
+            J <- NULL
 
-            if (is.null(insert)) {# add all columns
+            if (is.null(insert)) {
+              #Do nothing
+            } else if (insert=="all") {# add all columns
                 SDCOLS <- setdiff(names(right), names(ON_REV))
                 new_cols <- private$rename_duplicated_cols(SDCOLS)
-                #CONTINUE must add check if update is null.. build J expression from insert and update. remove SDCOLS here and create a list expression of all colnames
                 J <- str2lang(paste0(".(", paste(SDCOLS, collapse = ","), ")"))
             } else {
-                if (any(names(insert)[-1L] %in% names(private$tbl))) stop("Some columns already exist! Use the update method to update existing columns", call.=FALSE)
                 J <- private$add_missing_join_j_expr_names(insert)
+                if (any(names(J)[-1L] %in% names(private$tbl))) stop("Some columns already exist! Provide new column names or use the update argument to update existing columns.", call.=FALSE)
                 new_cols <- names(J)[-1L]
             }
 
@@ -842,9 +848,9 @@ DataFrame <- R6::R6Class(
                     e[[i]] <- as.name(paste0("x.", e[[i]]))
                 }
                 dupl <- intersect(result[missing], names(private$tbl))
-                if (length(dupl)>0) {
-                    warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the right table."), call. = FALSE)
-                }
+                # if (length(dupl)>0) {
+                #     warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the right table."), call. = FALSE)
+                # }
                 names(e) <- result
             }
             e
