@@ -317,14 +317,14 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform an update join.
         #'
-        #' @param right The right (other) `data.table`.
+        #' @param other The other (right) `data.table`.
         #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
-        #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'add'` to insert all columns from the right table that are not used for joining.
+        #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'add'` to insert all columns from the other table that are not used for joining.
         #' @param update Optional list specifying updates of existing columns. No updates are performed by default.
         #'
         #' @return Invisibly returns the updated itself.
         #'
-        #' Returns an error if there are multiple matches found in the `right` table.
+        #' Returns an error if there are multiple matches found in the `other` table.
         #'
         #' @details
         #'
@@ -333,20 +333,20 @@ DataFrame <- R6::R6Class(
         #'
         #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
         #'
-        #' The join will not be performed if there are multiple matches found in the `right` table.
-        #' In such cases use either `left_join` or delete duplicated foreign keys in the `right` table.
+        #' The join will not be performed if there are multiple matches found in the `other` table.
+        #' In such cases use either `left_join` or delete duplicated foreign keys in the `other` table.
         #'
         #' @examples
         #' x <- data.table(a=1:3, b = c("a", "b", "a"))
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
         #' df$update_join(y, .(b=a), insert="all")
-        update_join = function(right, on, insert=NULL, update=NULL) {#browser()
+        update_join = function(other, on, insert=NULL, update=NULL) {#browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
             #REFACTOR
             insert <- substitute(insert)
             update <- substitute(update)
-            if (!inherits(right, "data.table")) stop("Must provide a data.table object.")
+            if (!inherits(other, "data.table")) stop("Must provide a data.table object.")
             if (is.null(insert) && is.null(update)) {
                 warning("Provide either insert or update!");
                 return(invisible(self))
@@ -359,7 +359,7 @@ DataFrame <- R6::R6Class(
             if (is.null(insert)) {
               #Do nothing
             } else if (insert=="all") {# add all columns
-                SDCOLS <- setdiff(names(right), names(ON_REV))
+                SDCOLS <- setdiff(names(other), names(ON_REV))
                 new_cols <- private$rename_duplicated_cols(SDCOLS)
                 J <- str2lang(paste0(".(", paste(SDCOLS, collapse = ","), ")"))
             } else {
@@ -376,7 +376,7 @@ DataFrame <- R6::R6Class(
             }
 
             inner_j <- private$call(
-                substitute(`[`(right, i=.SD, mult="all", nomatch=NA)),
+                substitute(`[`(other, i=.SD, mult="all", nomatch=NA)),
                 j=J, on = ON_REV
             )
 
@@ -406,10 +406,10 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform a left (outer) join.
         #'
-        #' @param right The right (other) `data.table`.
+        #' @param other The other (right) `data.table`.
         #' @param on The condition to join the tables on. Either a...
         #'
-        #' @return A new `DataFrame` extended with columns from the right table.
+        #' @return A new `DataFrame` extended with columns from the other table.
         #'
         #'
         #' @details
@@ -422,11 +422,11 @@ DataFrame <- R6::R6Class(
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
         #' df$left_join(y, .(b=a))
-        left_join = function(right, on) {#browser()
+        left_join = function(other, on) {#browser()
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
             call <- private$call(
-                e=substitute(`[`(right, mult = "all", nomatch = NA)),
+                e=substitute(`[`(other, mult = "all", nomatch = NA)),
                 i=quote(private$tbl), on=ON_REV
             )
             result <- private$eval(call)
@@ -437,8 +437,8 @@ DataFrame <- R6::R6Class(
             on_x <- names(ON)[-1L]
             on_y <- names(ON_REV)[-1L]
             new_x <- old_x <- setdiff(names(private$tbl), on_x)
-            new_y <- old_y <- setdiff(names(right), on_y)
-            dupl <- new_x %in% names(right)
+            new_y <- old_y <- setdiff(names(other), on_y)
+            dupl <- new_x %in% names(other)
             dupl_y <- old_y %in% c(old_x[dupl], on_x)
             old_x[dupl] <- paste0("i.", old_x[dupl])
             new_y[dupl_y] <- paste0(old_y[dupl_y], "_y")
@@ -816,7 +816,7 @@ DataFrame <- R6::R6Class(
                 e <- private$convert_on_call(e)
             }
 
-            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in right.", call.=FALSE)
+            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in other.", call.=FALSE)
             private$add_missing_on_expr_names(e)
         },
 
@@ -849,7 +849,7 @@ DataFrame <- R6::R6Class(
                 }
                 dupl <- intersect(result[missing], names(private$tbl))
                 # if (length(dupl)>0) {
-                #     warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the right table."), call. = FALSE)
+                #     warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the other table."), call. = FALSE)
                 # }
                 names(e) <- result
             }
