@@ -20,7 +20,7 @@ DataFrame <- R6::R6Class(
         initialize = function(tbl, copy=FALSE, alias=NULL) {
             #CONSIDER adding ... as argument which will allow to create a DataFrame by passing vectors of same length: DF(1:5, LETTERS[1:5]).
             #CONSIDER allowing lists as in data.table construction
-            #TODO add alias as suffix in joins
+            #CONSIDER add alias as suffix in joins
             stopifnot("tbl must be a data.frame" = inherits(tbl, "data.frame"))
             if (copy) {
                 private$tbl <- data.table::as.data.table(tbl)
