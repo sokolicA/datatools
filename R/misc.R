@@ -21,3 +21,8 @@ as.data.frame.DataFrame <- function(x, row.names=NULL, optional=NULL,...) {
 as.data.table.DataFrame <- function(x) {
     x$unwrap()
 }
+
+
+merge_calls = function(c1, c2) {
+    as.call(c(as.list(c1), as.list(c2)[-1L]))
+}
