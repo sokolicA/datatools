@@ -5,12 +5,14 @@
 \alias{DF}
 \title{DataFrame Class}
 \usage{
-DF(tbl, copy = FALSE)
+DF(tbl, copy = FALSE, alias = NULL)
 }
 \arguments{
 \item{tbl}{An object of class \code{data.frame}.}
 
 \item{copy}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
+
+\item{alias}{Optional alias of the DataFrame.}
 }
 \value{
 A \code{DataFrame} object.
@@ -129,7 +131,7 @@ df$select(is.numeric)$set(NA); df
 x <- data.table(a=1:3, b = c("a", "b", "a"))
 y <- data.table(a=c("b", "c", "a"), b = 5:7)
 df <- DF(x)
-df$update_join(y, .(b=a))
+df$update_join(y, .(b=a), insert="all")
 
 ## ------------------------------------------------
 ## Method `DataFrame$left_join`
@@ -224,7 +226,7 @@ df <- DF(data.table(a=1, b=2))
 \subsection{Method \code{new()}}{
 \code{DataFrame} Constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, alias = NULL, copy = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, copy = FALSE, alias = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -232,9 +234,9 @@ df <- DF(data.table(a=1, b=2))
 \describe{
 \item{\code{tbl}}{An object of class \code{data.frame}.}
 
-\item{\code{alias}}{Optional alias of the DataFrame.}
-
 \item{\code{copy}}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
+
+\item{\code{alias}}{Optional alias of the DataFrame.}
 }
 \if{html}{\out{</div>}}
 }
@@ -688,17 +690,19 @@ Invisibly returns itself.
 \subsection{Method \code{update_join()}}{
 Perform an update join.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(right, on, update = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(other, on, insert = NULL, update = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{right}}{The right (other) \code{data.table}.}
+\item{\code{other}}{The other (right) \code{data.table}.}
 
-\item{\code{on}}{The condition to join the tables on. Either a...}
+\item{\code{on}}{The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).}
 
-\item{\code{update}}{Optional list specifying which columns to add. Can also update existing columns. By default adds all columns from the right table. See details for more information.}
+\item{\code{insert}}{Optional list specifying which columns to add. \code{NULL} (default) does not insert any. Use \code{'add'} to insert all columns from the other table that are not used for joining.}
+
+\item{\code{update}}{Optional list specifying updates of existing columns. No updates are performed by default.}
 }
 \if{html}{\out{</div>}}
 }
@@ -708,21 +712,21 @@ prefixing the column names of the left table with \strong{\code{i.}}. See exampl
 
 Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
 
-The join will not be performed if there are multiple matches found in the \code{right} table.
-In such cases use either \code{left_join} or delete duplicated foreign keys in the \code{right} table.
+The join will not be performed if there are multiple matches found in the \code{other} table.
+In such cases use either \code{left_join} or delete duplicated foreign keys in the \code{other} table.
 }
 
 \subsection{Returns}{
 Invisibly returns the updated itself.
 
-Returns an error if there are multiple matches found in the \code{right} table.
+Returns an error if there are multiple matches found in the \code{other} table.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
 y <- data.table(a=c("b", "c", "a"), b = 5:7)
 df <- DF(x)
-df$update_join(y, .(b=a))
+df$update_join(y, .(b=a), insert="all")
 }
 \if{html}{\out{</div>}}
 
@@ -735,13 +739,13 @@ df$update_join(y, .(b=a))
 \subsection{Method \code{left_join()}}{
 Perform a left (outer) join.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(right, on)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(other, on)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{right}}{The right (other) \code{data.table}.}
+\item{\code{other}}{The other (right) \code{data.table}.}
 
 \item{\code{on}}{The condition to join the tables on. Either a...}
 }
@@ -752,7 +756,7 @@ Note that \code{list(...)} can be aliased with \code{.(...)} due to the backgrou
 }
 
 \subsection{Returns}{
-A new \code{DataFrame} extended with columns from the right table.
+A new \code{DataFrame} extended with columns from the other table.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
