@@ -312,7 +312,7 @@ DataFrame <- R6::R6Class(
             j <- substitute(alist(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) stop("Use the insert method to add new columns!")
             j[[1]] <- quote(`:=`)
-            private$tbl_eval(i=private$i, j=j, keyby=private$keyby)
+            private$tbl_eval(i=private$i, j=j, by=private$by)
         },
 
         #' @description Perform an update join.
@@ -500,7 +500,7 @@ DataFrame <- R6::R6Class(
             if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
             e[[1L]] <- quote(`:=`)
-            private$tbl_eval(i=private$i, j=e, keyby=private$keyby)
+            private$tbl_eval(i=private$i, j=e, by=private$by)
             invisible(self)
         },
 
