@@ -575,6 +575,7 @@ DataFrame <- R6::R6Class(
         #' df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
         aggregate = function(...) {#browser()
             fexpr <- substitute(list(...))
+            if (grepl("function\\(", deparse(fexpr))) stop("Anonymous functions are not supported!")
             by <- private$by
             J <- substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist))
             result <- private$tbl_eval(i=private$i, j=J, keyby=private$by, .SDcols = private$sdcols)

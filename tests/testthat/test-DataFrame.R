@@ -632,13 +632,13 @@ test_that("Aggregate works with grouping and filtering", {
 })
 
 
-#
-#
-# test_that("Aggregate currently does not work anonymous functions", {
-#     df <- DataFrame$new(data.table(a=1:5, b=6:10))
-#     expect_error(df$aggregate(list(mean(x), function(x) sum(x**2))))
-# })
-#
+
+
+test_that("Aggregate currently does not work anonymous functions", {
+    df <- DataFrame$new(data.table(a=1:5, b=6:10))
+    expect_error(df$aggregate(mean(x), function(x) sum(x**2)))
+})
+
 
 
 
