@@ -131,7 +131,8 @@ DataFrame <- R6::R6Class(
         #' df$filter(c(1, 3, 5))
         #' df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
         filter = function(keep) {
-            DataFrame$new(eval(substitute(private$tbl[keep])))
+            result <- private$.filter(substitute(keep))
+            DataFrame$new(result)
         },
 
         #' @description Filter the table in place.
@@ -153,7 +154,7 @@ DataFrame <- R6::R6Class(
         #' df$filter_(a > 2)
         #' df
         filter_ = function(keep) {
-            private$tbl <- eval(substitute(private$tbl[keep]))
+            private$tbl <- private$.filter(substitute(keep))
             invisible(self)
         },
 
@@ -357,7 +358,7 @@ DataFrame <- R6::R6Class(
             J <- NULL
 
             if (is.null(insert)) {
-              #Do nothing
+                #Do nothing
             } else if (insert=="all") {# add all columns
                 SDCOLS <- setdiff(names(other), names(ON_REV))
                 new_cols <- private$rename_duplicated_cols(SDCOLS)
@@ -968,6 +969,17 @@ DataFrame <- R6::R6Class(
             missing <- which(result=="")
             for (i in missing) result[i] <- deparse(e[[i]])
             result
+        },
+
+        .filter = function(i) {
+            if (is.null(private$by)) {
+                private$i <- i
+            } else {
+                BY <- private$by
+                private$i <- substitute(private$tbl[, .I[i], by=BY]$V1)
+            }
+            private$i_persist <- FALSE
+            private$tbl_eval(i=private$i, reset = TRUE)
         }
 
     )
