@@ -156,3 +156,13 @@ res_mean <- bench::mark(
     min_iterations = 10
 )
 ggplot2::autoplot(res_mean, "violin")
+
+
+
+## filter by group
+res_filt_by_group <- bench::mark(
+    A[, .SD[a==max(a)], by=b]$a,
+    A[A[, .I[a==max(a)], by=b]$V1]$a,
+    A[A[, .I[a==max(a)], by=b][, V1]]$a
+)
+ggplot2::autoplot(res_filt_by_group, "violin")
