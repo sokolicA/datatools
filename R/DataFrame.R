@@ -494,7 +494,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         #' @examples
-        #' TODO
+        #' #TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
         insert = function(...) {#browser()
             e <- substitute(list(...))
             if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")

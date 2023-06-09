@@ -444,6 +444,27 @@ test_that("insert works", {
     expect_equal(df$insert(c=a, g=a+b)$unwrap(), data.table(a=1:3, b=1:3, c=1:3, g=2*1:3))
 })
 
+test_that("insert works with subset/filter on columns (J)", {
+    # Taken from https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate
+    # when you use the first argument of [, you are subsetting; the operations in the second argument are only done for the subsetted data.table.
+    # -> to insert values on all rows you should subset on J using column[...]
+    df <- DF(data.table(plate = paste0("plate",rep(1:2,each=5)),
+                        id = rep(c("CTRL","CTRL","ID1","ID2","ID3"),2),
+                        val = 1:10))
+
+    expected <- data.table(plate = paste0("plate",rep(1:2,each=5)),
+                           id = rep(c("CTRL","CTRL","ID1","ID2","ID3"),2),
+                           val = 1:10,
+                           test_1 = c(rep(1.5, 5), rep(6.5, 5)))
+    df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
+    expect_equal(df$unwrap(), expected)
+
+    expected[, test_2 := 4L]
+
+    df$insert(test_2=mean(val[id=="CTRL"]))
+    expect_equal(df$unwrap(), expected)
+})
+
 
 test_that("On argument parser works", {
 
