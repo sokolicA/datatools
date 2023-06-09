@@ -558,22 +558,23 @@ DataFrame <- R6::R6Class(
 
         #' @description Data aggregation
         #'
-        #' @param funs A single function or a list of functions used to create an aggregate summary. See details.
+        #' @param ... Functions used to create an aggregate summary. See details.
         #'
         #' @details
-        #' Passing a named list of functions will result in using the names in the output. See examples.
+        #' An additional column with the name of the function is added to the table.
+        #' Passing named arguments will result in using the names in the output. See examples.
         #'
         #'
-        #' @return A `data.table`.
+        #' @return A `DataFrame`.
         #'
         #' @examples
         #' df <- DF(mtcars, copy=TRUE)
         #' sum_squares <- function(x) sum(x**2)
-        #' df$aggregate(list(sum_squares(x), mean(x), sd(x)))
-        #' df$aggregate(list(max(x), mean(x)))
-        #' df$aggregate(list(mean(x), mean_na_rm = mean(x, na.rm=T)))
-        aggregate = function(funs) {#browser()
-            fexpr <- substitute(funs)
+        #' df$aggregate(sum_squares(x), mean(x), sd(x))
+        #' df$aggregate(max(x), mean(x))
+        #' df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
+        aggregate = function(...) {#browser()
+            fexpr <- substitute(list(...))
             by <- private$by
             J <- substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist))
             result <- private$tbl_eval(i=private$i, j=J, keyby=private$by, .SDcols = private$sdcols)
