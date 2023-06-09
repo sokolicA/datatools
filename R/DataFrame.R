@@ -556,6 +556,31 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Data aggregation
+        #'
+        #' @param funs A single function or a list of functions used to create an aggregate summary. See details.
+        #'
+        #' @details
+        #' Passing a named list of functions will result in using the names in the output. See examples.
+        #'
+        #'
+        #' @return A `data.table`.
+        #'
+        #' @examples
+        #' df <- DF(mtcars, copy=TRUE)
+        #' sum_squares <- function(x) sum(x**2)
+        #' df$aggregate(list(sum_squares(x), mean(x), sd(x)))
+        #' df$aggregate(list(max(x), mean(x)))
+        #' df$aggregate(list(mean(x), mean_na_rm = mean(x, na.rm=T)))
+        aggregate = function(funs) {#browser()
+            fexpr <- substitute(funs)
+            by <- private$by
+            J <- substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist))
+            result <- private$tbl_eval(i=private$i, j=J, keyby=private$by, .SDcols = private$sdcols)
+            private$finalize_aggregate(result, fexpr, by)
+            DF(result)
+        },
+
         #' @description Get the underlying data.
         #'
         #' @return The underlying `data.table` object.
@@ -915,6 +940,32 @@ DataFrame <- R6::R6Class(
 
         finalize = function() {
             private$static_env$remove(private$alias)
+        },
+
+        finalize_aggregate = function(result, f_expr, by_expr) {
+            if (f_expr[[1]] == quote(list)) {
+                f_expr <- f_expr[-1L]
+                f_names <- if (!is.null(names(f_expr))) names(f_expr) else vector("character", length=length(f_expr))
+                missing <- which(f_names=="")
+                if (length(missing) > 0) {
+                    for (i in missing) f_names[i] <- deparse(f_expr[[i]][[1]])
+                }
+            } else {f_names <- deparse(f_expr[[1]])}
+            result[, fun := rep(f_names, times=dim(result)[1L] %/% length(f_names))]
+
+            groups <- private$add_names_by(by_expr)
+            if (!is.null(groups)) {data.table::setnames(result, seq_along(groups), groups)}
+            data.table::setcolorder(result, c(groups, "fun"))
+        },
+
+        add_names_by = function(e) {
+            if (is.null(e)) return(NULL)
+            e <- e[-1L]
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            if (all(result!="")) return(result)
+            missing <- which(result=="")
+            for (i in missing) result[i] <- deparse(e[[i]])
+            result
         }
 
     )
