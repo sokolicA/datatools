@@ -23,5 +23,6 @@ Collate:
     'RcppExports.R'
     'DataFrame.R'
     'datatools-package.R'
+    'ideas.R'
     'misc.R'
     'sugar.R'

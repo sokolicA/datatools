@@ -157,7 +157,7 @@ df$remove(c(TRUE, NA, FALSE))
 ## Method `DataFrame$insert`
 ## ------------------------------------------------
 
-TODO
+#TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
 
 ## ------------------------------------------------
 ## Method `DataFrame$concat`
@@ -177,6 +177,16 @@ y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
 df$concat_(y, x, y, df)
 
+
+## ------------------------------------------------
+## Method `DataFrame$aggregate`
+## ------------------------------------------------
+
+df <- DF(mtcars, copy=TRUE)
+sum_squares <- function(x) sum(x**2)
+df$aggregate(sum_squares(x), mean(x), sd(x))
+df$aggregate(max(x), mean(x))
+df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
 df <- DF(data.table(a=1, b=2))
 
 }
@@ -216,6 +226,7 @@ df <- DF(data.table(a=1, b=2))
 \item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
 \item \href{#method-DataFrame-concat}{\code{DataFrame$concat()}}
 \item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
+\item \href{#method-DataFrame-aggregate}{\code{DataFrame$aggregate()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
@@ -839,7 +850,7 @@ Invisibly returns itself.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{TODO
+\preformatted{#TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
 }
 \if{html}{\out{</div>}}
 
@@ -930,6 +941,43 @@ y <- data.frame(a=1:5, b=1:5)
 df <- DF(x)
 df$concat_(y, x, y, df)
 
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-aggregate"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-aggregate}{}}}
+\subsection{Method \code{aggregate()}}{
+Data aggregation
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$aggregate(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Functions used to create an aggregate summary. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+An additional column with the name of the function is added to the table.
+Passing named arguments will result in using the names in the output. See examples.
+}
+
+\subsection{Returns}{
+A \code{DataFrame}.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(mtcars, copy=TRUE)
+sum_squares <- function(x) sum(x**2)
+df$aggregate(sum_squares(x), mean(x), sd(x))
+df$aggregate(max(x), mean(x))
+df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
 }
 \if{html}{\out{</div>}}
 
