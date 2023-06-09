@@ -590,4 +590,57 @@ test_that("left_join correctly renames and reorders columns", {
     )
 })
 
+test_that("Aggregate works with locally defined functions", {
+    df <- DF(data.table(a=1:5, b=6:10))
+    sum_squares <- function(x) sum(x**2)
+    expect_equal(df$aggregate(sum_squares(x))$unwrap(), data.table(fun=c("sum_squares"), a=c(55), b=c(330)))
+})
+
+
+test_that("Aggregate works with grouping and filtering", {
+    df <- DataFrame$new(data.table(a=1:5, b=6:10, c = c("a", "bb", "c", "dd", "eee"), g = c(TRUE, FALSE, FALSE, TRUE, TRUE)))
+
+    expect_equal(df$select(is.numeric)$aggregate(mean(x), sum(x))$unwrap(), data.table(fun=c("mean", "sum"), a=c(3,15), b=c(8,40)))
+
+    expect_equal(df$select("a")$group_by(cond = !b %in% c(6, 7))$aggregate(max(x), mean(x))$unwrap(),
+                 data.table(cond=c(FALSE, FALSE, TRUE, TRUE),
+                            fun = c("max", "mean", "max", "mean"),
+                            a = c(2.0, 1.5, 5.0, 4.0),
+                            key = "cond")
+    )
+
+    expect_equal(df$select(is.numeric)$group_by(cond = !b %in% c(6, 7))$aggregate(max(x), mean(x))$unwrap(),
+                 data.table(cond=c(FALSE, FALSE, TRUE, TRUE),
+                            fun = c("max", "mean", "max", "mean"),
+                            a = c(2.0, 1.5, 5.0, 4.0),
+                            b = c(7.0, 6.5, 10.0, 9.0),
+                            key = "cond")
+    )
+
+    expect_equal(df$filter(a!=2)$group_by(a==2)$select("b")$aggregate(mean(x), sum(x))$unwrap(),
+                 data.table(
+                     `a == 2`=c(FALSE, FALSE),
+                     fun=c("mean", "sum"), b=c(8.25, 33), key="a == 2")
+    )
+
+    expect_equal(df$filter(!a%in%2)$group_by(a%in%2)$select(is.logical)$aggregate(mean(x), sum(x))$unwrap(),
+                 data.table(
+                     `a %in% 2`=c(FALSE, FALSE),
+                     fun=c("mean", "sum"), g=c(0.75, 3.00), key="a %in% 2")
+    )
+
+})
+
+
+#
+#
+# test_that("Aggregate currently does not work anonymous functions", {
+#     df <- DataFrame$new(data.table(a=1:5, b=6:10))
+#     expect_error(df$aggregate(list(mean(x), function(x) sum(x**2))))
+# })
+#
+
+
+
+
 
