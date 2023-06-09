@@ -496,7 +496,7 @@ DataFrame <- R6::R6Class(
         #' @examples
         #' TODO
         insert = function(...) {#browser()
-            e <- substitute(alist(...))
+            e <- substitute(list(...))
             if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
             e[[1L]] <- quote(`:=`)
