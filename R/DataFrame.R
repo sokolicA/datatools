@@ -158,41 +158,6 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Group or un-group the data.
-        #' Used in calculation of statistics.
-        #'
-        #' @param ... An expression specifying by what to group the data. See details.
-        #' @param persist Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.
-        #'
-        #' @details Setting by Will override existing grouping without warning.
-        #' Pass a character vector of groups `vec` using `c(vec)`.
-        #' Set to `NULL` to remove any existing grouping.
-        #'
-        #' @return Invisibly returns itself.
-        #'
-        #' @examples
-        #' df <- DF(data.table(a=1:5, b=3))
-        #' df$group_by(a)
-        #' df$group_by("a")
-        #' df$group_by(a, b)
-        #' df$group_by(c("a", "b"))
-        #' df$group_by(a > 2)
-        #' df$group_by(s = a > 2) # will name the grouping column with s
-        #' a <- "b"
-        #' df$group_by(a) #will group by a
-        #' df$group_by(c(a)) # will group by b
-        #' df$group_by(NULL) # will remove grouping
-        group_by = function(..., persist=FALSE) {
-            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
-            e <- substitute(alist(...))[-1L]
-            result <- private$parse_by(e)
-            check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
-            if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
-            private$by <- result
-            private$by_persist <- persist
-            invisible(self)
-        },
-
         #' @description Work (operate?) on a subset of rows.
         #' Experimental. #TODO define how certain methods use the persist option
         #' This method will not remove the rows from the data.
@@ -241,6 +206,41 @@ DataFrame <- R6::R6Class(
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
+            invisible(self)
+        },
+
+        #' @description Group or un-group the data.
+        #' Used in calculation of statistics.
+        #'
+        #' @param ... An expression specifying by what to group the data. See details.
+        #' @param persist Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.
+        #'
+        #' @details Setting by Will override existing grouping without warning.
+        #' Pass a character vector of groups `vec` using `c(vec)`.
+        #' Set to `NULL` to remove any existing grouping.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' df <- DF(data.table(a=1:5, b=3))
+        #' df$group_by(a)
+        #' df$group_by("a")
+        #' df$group_by(a, b)
+        #' df$group_by(c("a", "b"))
+        #' df$group_by(a > 2)
+        #' df$group_by(s = a > 2) # will name the grouping column with s
+        #' a <- "b"
+        #' df$group_by(a) #will group by a
+        #' df$group_by(c(a)) # will group by b
+        #' df$group_by(NULL) # will remove grouping
+        group_by = function(..., persist=FALSE) {
+            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
+            e <- substitute(alist(...))[-1L]
+            result <- private$parse_by(e)
+            check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
+            if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
+            private$by <- result
+            private$by_persist <- persist
             invisible(self)
         },
 
