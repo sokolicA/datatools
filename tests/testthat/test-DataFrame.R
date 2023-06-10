@@ -243,6 +243,12 @@ test_that("filter does not work with character vector", {
     expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter("a"))
 })
 
+test_that("filter works with group_by to filter by group", {
+    df <- DataFrame$new(mtcars, copy=TRUE)
+    df$group_by(cyl)$filter_(mpg==max(mpg))
+    expect_equal(df$unwrap()$mpg, c(21.4, 33.9, 19.2))
+})
+
 
 TestPrivateDF <- R6::R6Class(
     "TestPrivateDF",

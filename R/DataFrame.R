@@ -976,7 +976,8 @@ DataFrame <- R6::R6Class(
                 private$i <- i
             } else {
                 BY <- private$by
-                private$i <- substitute(private$tbl[, .I[i], by=BY]$V1)
+                tmp <- i
+                private$i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
             }
             private$i_persist <- FALSE
             private$tbl_eval(i=private$i, reset = TRUE)
