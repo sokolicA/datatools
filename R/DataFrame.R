@@ -679,9 +679,9 @@ DataFrame <- R6::R6Class(
         },
 
         build_eval_env = function() {
-            env <- private$caller_env()
-            env$private <- private
-            env
+            result <- new.env(parent = private$caller_env())
+            result$private <- private
+            result
         },
 
         caller_env = function() {
