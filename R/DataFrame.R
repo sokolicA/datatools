@@ -431,7 +431,7 @@ DataFrame <- R6::R6Class(
                 e=substitute(`[`(other, mult = "all", nomatch = NA)),
                 i=quote(private$tbl), on=ON_REV
             )
-            result <- private$old_eval(call)
+            result <- private$eval(call)
             # x[y, on...]
             # if on column names differ, the column from y is not returned
             # duplicated columns in y are prefixed with i.
@@ -638,7 +638,7 @@ DataFrame <- R6::R6Class(
 
         tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
                             .SDcols=NULL, on=NULL, reset=TRUE) {
-            private$old_eval(private$call(i=i, j=j, by=by, keyby=keyby, .SDcols=.SDcols, on=on), reset)
+            private$eval(private$call(i=i, j=j, by=by, keyby=keyby, .SDcols=.SDcols, on=on), reset)
         },
 
         reset_i = function() {
@@ -651,6 +651,15 @@ DataFrame <- R6::R6Class(
 
         reset_by = function() {
             private$by  <- private$by_cols <- NULL
+        },
+
+        eval = function(e, reset=TRUE) {
+            private$old_eval(e, reset)
+            # e <- private$new_call$call()
+            # env <- private$build_eval_env()
+            # result <- eval(e, envir=env, enclos=env)
+            # if (reset) private$new_call <- DTCall$new(private$tbl)
+            # result
         },
 
         old_eval = function(e, reset=TRUE) {
