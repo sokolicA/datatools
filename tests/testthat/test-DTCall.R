@@ -25,3 +25,16 @@ test_that("removing and overriding arguments in DTCall works",
               e$set(i = NULL, j = quote(`:=` (y = x)))
               expect_equal(e$call(), quote(`[`(x= tbl, j = `:=`(y = x))))
           })
+
+
+test_that("getting arguments in DTCall works",
+          {
+              e <- DTCall$new(tbl)
+              e$set(i = quote(a==3), j = quote(.SD))
+
+              expect_error(e$get(c("i", "j")))
+
+              expect_null(e$get(c("by")))
+
+              expect_equal(e$get("i"), quote(a == 3))
+          })

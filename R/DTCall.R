@@ -45,6 +45,17 @@ DTCall <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Get the value of the argument in the `data.table` call.
+        #'
+        #' @param arg Name of the argument passed as a string.
+        #'
+        #' @return Value of the argument. Returns NULL if the argument is not set.
+        #'
+        get = function(arg) {
+            if (!is_string(arg)) stop("'arg' must be a string!")
+            private$expr[[arg]]
+        },
+
         #' @description Get the call object.
         #'
         #' @param ... Named language (or symbol) arguments that are used in the `data.table` call.
