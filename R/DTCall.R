@@ -4,7 +4,7 @@
 #'
 #' @import R6
 DTCall <- R6::R6Class(
-    "DTExpr",
+    "DTCall",
     cloneable = FALSE,
 
     public = list(
