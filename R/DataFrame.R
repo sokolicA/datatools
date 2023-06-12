@@ -6,6 +6,7 @@
 #' @import R6
 #' @include RcppExports.R
 #' @include StaticEnv.R
+#' @include DTCall.R
 DataFrame <- R6::R6Class(
     "DataFrame",
     public = list(
