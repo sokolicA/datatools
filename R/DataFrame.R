@@ -640,8 +640,11 @@ DataFrame <- R6::R6Class(
 
 
         tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
-                            .SDcols=NULL, on=NULL, reset=TRUE) {
-            private$eval(private$call(i=i, j=j, by=by, keyby=keyby, .SDcols=.SDcols, on=on), reset)
+                            .SDcols=NULL, on=NULL, reset=TRUE) {#browser()
+            private$new_call$set(i=i, j=j, by=by, keyby=keyby,
+                                       .SDcols=.SDcols, on=on)
+
+            private$new_eval(private$new_call$call(), reset)
         },
 
         reset_i = function() {
@@ -656,13 +659,20 @@ DataFrame <- R6::R6Class(
             private$by  <- private$by_cols <- NULL
         },
 
+        new_eval = function(e, reset=TRUE) {
+            env <- private$build_eval_env()
+            result <- eval(e, envir=env, enclos=env)
+            if (reset) {
+                if (!private$i_persist) private$reset_i()
+                if (!private$sdcols_persist) private$reset_sdcols()
+                if (!private$by_persist) private$reset_by()
+                private$new_call <- DTCall$new(private$tbl)
+            }
+            result
+        },
+
         eval = function(e, reset=TRUE) {
             private$old_eval(e, reset)
-            # e <- private$new_call$call()
-            # env <- private$build_eval_env()
-            # result <- eval(e, envir=env, enclos=env)
-            # if (reset) private$new_call <- DTCall$new(private$tbl)
-            # result
         },
 
         old_eval = function(e, reset=TRUE) {
