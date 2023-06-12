@@ -615,6 +615,9 @@ DataFrame <- R6::R6Class(
 
     private = list(
 
+
+        new_call = DTCall$new(private$tbl),
+
         static_env = StaticEnv$new(),
 
         alias = NULL,
