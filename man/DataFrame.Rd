@@ -213,9 +213,9 @@ df <- DF(data.table(a=1, b=2))
 \item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
 \item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-filter_}{\code{DataFrame$filter_()}}
-\item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
 \item \href{#method-DataFrame-where}{\code{DataFrame$where()}}
 \item \href{#method-DataFrame-select}{\code{DataFrame$select()}}
+\item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
 \item \href{#method-DataFrame-set}{\code{DataFrame$set()}}
 \item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
@@ -228,6 +228,7 @@ df <- DF(data.table(a=1, b=2))
 \item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
 \item \href{#method-DataFrame-aggregate}{\code{DataFrame$aggregate()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
+\item \href{#method-DataFrame-new_eval}{\code{DataFrame$new_eval()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
 }
@@ -487,53 +488,6 @@ df
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-group_by"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-group_by}{}}}
-\subsection{Method \code{group_by()}}{
-Group or un-group the data.
-Used in calculation of statistics.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., persist = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{An expression specifying by what to group the data. See details.}
-
-\item{\code{persist}}{Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-Setting by Will override existing grouping without warning.
-Pass a character vector of groups \code{vec} using \code{c(vec)}.
-Set to \code{NULL} to remove any existing grouping.
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(a=1:5, b=3))
-df$group_by(a)
-df$group_by("a")
-df$group_by(a, b)
-df$group_by(c("a", "b"))
-df$group_by(a > 2)
-df$group_by(s = a > 2) # will name the grouping column with s
-a <- "b"
-df$group_by(a) #will group by a
-df$group_by(c(a)) # will group by b
-df$group_by(NULL) # will remove grouping
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-where"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-where}{}}}
 \subsection{Method \code{where()}}{
@@ -594,6 +548,53 @@ See documentation of \code{.SDcols} in \code{?data.table::data.table} for more p
 \subsection{Returns}{
 Invisibly returns itself.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-group_by"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-group_by}{}}}
+\subsection{Method \code{group_by()}}{
+Group or un-group the data.
+Used in calculation of statistics.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., persist = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{An expression specifying by what to group the data. See details.}
+
+\item{\code{persist}}{Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Setting by Will override existing grouping without warning.
+Pass a character vector of groups \code{vec} using \code{c(vec)}.
+Set to \code{NULL} to remove any existing grouping.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(a=1:5, b=3))
+df$group_by(a)
+df$group_by("a")
+df$group_by(a, b)
+df$group_by(c("a", "b"))
+df$group_by(a > 2)
+df$group_by(s = a > 2) # will name the grouping column with s
+a <- "b"
+df$group_by(a) #will group by a
+df$group_by(c(a)) # will group by b
+df$group_by(NULL) # will remove grouping
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-set"></a>}}
@@ -996,6 +997,15 @@ Get the underlying data.
 \subsection{Returns}{
 The underlying \code{data.table} object.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-new_eval"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-new_eval}{}}}
+\subsection{Method \code{new_eval()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new_eval(reset = TRUE)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-clone"></a>}}
