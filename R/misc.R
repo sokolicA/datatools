@@ -23,6 +23,21 @@ as.data.table.DataFrame <- function(x) {
 }
 
 
+#' S3 print method of `DataFrame`
+#'
+#' @param x A `DataFrame` object.
+#' @param ... Not used.
+#'
+#' @return Invisibly returns the `DataFrame`.
+#' @export
+print.DataFrame <- function(x, ...) {
+    eval(x$print(), envir=parent.frame(2L))
+}
+
+
+
 merge_calls = function(c1, c2) {
     as.call(c(as.list(c1), as.list(c2)[-1L]))
 }
+
+
