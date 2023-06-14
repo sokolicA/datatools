@@ -38,3 +38,13 @@ test_that("getting arguments in DTCall works",
 
               expect_equal(e$get("i"), quote(a == 3))
           })
+
+
+test_that("call returns only x (the name of the table) if neither i nor j are specified - to prevent data.table warning",
+          {
+              e <- DTCall$new(tbl)
+
+              e$set(by=quote(a))
+
+              expect_equal(e$call(), quote(tbl))
+          })

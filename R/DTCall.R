@@ -63,7 +63,8 @@ DTCall <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         call = function() {
-            private$expr
+            if (any(names(private$expr) %in% c("i", "j"))) return(private$expr)
+            private$expr[["x"]]
         }
     ),
 
