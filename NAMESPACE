@@ -2,6 +2,7 @@
 
 S3method(as.data.frame,DataFrame)
 S3method(as.data.table,DataFrame)
+S3method(print,DataFrame)
 export(DF)
 import(R6)
 import(data.table)
