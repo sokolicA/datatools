@@ -383,13 +383,13 @@ DataFrame <- R6::R6Class(
                 new_cols <- c(new_cols, names(update)[-1L])
             }
 
-            inner_j <- private$call(
-                substitute(`[`(other, i=.SD, mult="all", nomatch=NA)),
-                j=J, on = ON_REV
-            )
+            inner_j <- DTCall$new()$set(x=substitute(other), i=quote(.SD), j=J, on = ON_REV,
+                                        mult="all", nomatch=NA)$call()
+
+            private$new_call$set(j = substitute(`:=` (new_cols, inner_j)))
 
             tryCatch(
-                private$tbl_eval(i=private$i, j = substitute(`:=` (new_cols, inner_j))),
+                private$tbl_eval(),
                 error = function(e) {
                     if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
                         stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
