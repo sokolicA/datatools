@@ -644,13 +644,13 @@ test_that("Aggregate works with grouping and filtering", {
                             key = "cond")
     )
 
-    expect_equal(df$filter(a!=2)$group_by(a==2)$select("b")$aggregate(mean(x), sum(x))$unwrap(),
+    expect_equal(df$where(a!=2)$group_by(a==2)$select("b")$aggregate(mean(x), sum(x))$unwrap(),
                  data.table(
                      `a == 2`=c(FALSE, FALSE),
                      fun=c("mean", "sum"), b=c(8.25, 33), key="a == 2")
     )
 
-    expect_equal(df$filter(!a%in%2)$group_by(a%in%2)$select(is.logical)$aggregate(mean(x), sum(x))$unwrap(),
+    expect_equal(df$where(!a%in%2)$group_by(a%in%2)$select(is.logical)$aggregate(mean(x), sum(x))$unwrap(),
                  data.table(
                      `a %in% 2`=c(FALSE, FALSE),
                      fun=c("mean", "sum"), g=c(0.75, 3.00), key="a %in% 2")
