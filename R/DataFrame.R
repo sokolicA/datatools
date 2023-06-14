@@ -29,6 +29,7 @@ DataFrame <- R6::R6Class(
                 private$tbl <- data.table::setDT(tbl)
             }
             private$alias <- private$static_env$add(alias)
+            private$new_call <- DTCall$new(private$tbl)
             invisible(self)
         },
 
@@ -176,6 +177,7 @@ DataFrame <- R6::R6Class(
             if (missing(rows)) rows <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
             private$i <- private$parse_i(substitute(rows), parent.frame())
+            private$new_call$set(i=private$i)
             private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist
             private$i_env = parent.frame()
@@ -204,6 +206,7 @@ DataFrame <- R6::R6Class(
             e <- substitute(columns)
             private$sdcols <- private$parse_sdcols(e, parent.frame())
             private$tbl_eval(i=0, j=quote(.SD), .SDcols=private$sdcols, reset=FALSE)
+            private$new_call$set(j=quote(.SD), .SDcols=private$sdcols)
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
@@ -242,6 +245,7 @@ DataFrame <- R6::R6Class(
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
             private$by <- result
             private$by_persist <- persist
+            private$new_call$set(by=private$by)
             invisible(self)
         },
 
@@ -616,7 +620,7 @@ DataFrame <- R6::R6Class(
     private = list(
 
 
-        new_call = DTCall$new(private$tbl),
+        new_call = NULL,
 
         static_env = StaticEnv$new(),
 
