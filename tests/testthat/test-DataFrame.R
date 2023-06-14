@@ -326,7 +326,7 @@ test_that("private$i works", {
         inherit=DataFrame,
         public=list(
             t_parse_i = function(e, env=parent.frame()) {
-                browser()
+                #browser()
                 private$parse_i(substitute(e), env)
             }
         )
@@ -399,7 +399,7 @@ test_that("private$parse_sdcols works", {
         inherit=DataFrame,
         public=list(
             t_parse_sdcols = function(e, env=parent.frame()) {
-                browser()
+                #browser()
                 private$parse_sdcols(substitute(e), env)
             }
         )
