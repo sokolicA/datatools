@@ -586,8 +586,8 @@ DataFrame <- R6::R6Class(
             fexpr <- substitute(list(...))
             if (grepl("function\\(", deparse(fexpr))) stop("Anonymous functions are not supported!")
             by <- private$by
-            J <- substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist))
-            result <- private$tbl_eval(i=private$i, j=J, keyby=private$by, .SDcols = private$sdcols)
+            private$new_call$set(j=substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist)))
+            result <- private$tbl_eval(keyby=private$by, .SDcols = private$sdcols)
             private$finalize_aggregate(result, fexpr, by)
             DF(result)
         },
