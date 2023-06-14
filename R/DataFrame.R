@@ -999,15 +999,14 @@ DataFrame <- R6::R6Class(
         },
 
         .filter = function(i) {
-            if (is.null(private$by)) {
-                private$i <- i
-            } else {
+            call <- DTCall$new()
+            if (!is.null(private$by)) {
                 BY <- private$by
                 tmp <- i
-                private$i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
+                i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
             }
-            private$i_persist <- FALSE
-            private$tbl_eval(i=private$i, reset = TRUE)
+            call$set(i=i)
+            private$new_eval(e=call$call(), reset = FALSE)
         }
 
     )
