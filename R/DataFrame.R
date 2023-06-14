@@ -272,7 +272,7 @@ DataFrame <- R6::R6Class(
                 cols <- names(private$tbl)
             } else {
                 tmp <- DTCall$new(private$tbl)$set(i=0, j=quote(.SD), .SDcols=private$sdcols)$call()
-                cols <- names(private$new_eval(tmp, reset=FALSE))
+                cols <- names(private$eval(tmp, reset=FALSE))
             }
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
@@ -648,7 +648,7 @@ DataFrame <- R6::R6Class(
 
         tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
                             .SDcols=NULL, on=NULL, reset=TRUE) {
-            private$new_eval(private$new_call$call(), reset)
+            private$eval(private$new_call$call(), reset)
         },
 
         reset_i = function() {
@@ -663,7 +663,7 @@ DataFrame <- R6::R6Class(
             private$by  <- private$by_cols <- NULL
         },
 
-        new_eval = function(e, reset=TRUE) {
+        eval = function(e, reset=TRUE) {
             env <- private$build_eval_env()
             result <- eval(e, envir=env, enclos=env)
             if (reset) {
@@ -673,10 +673,6 @@ DataFrame <- R6::R6Class(
                 private$new_call <- DTCall$new(private$tbl)
             }
             result
-        },
-
-        eval = function(e, reset=TRUE) {
-            private$old_eval(e, reset)
         },
 
         call = function(
@@ -995,7 +991,7 @@ DataFrame <- R6::R6Class(
                 i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
             }
             call$set(i=i)
-            private$new_eval(e=call$call(), reset = FALSE)
+            private$eval(e=call$call(), reset = FALSE)
         }
 
     )
