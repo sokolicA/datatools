@@ -271,13 +271,14 @@ DataFrame <- R6::R6Class(
             if (is.null(private$sdcols)) {
                 cols <- names(private$tbl)
             } else {
-                cols <- names(private$tbl_eval(i=0,j=quote(.SD),.SDcols=private$sdcols, reset=FALSE))
+                tmp <- DTCall$new(private$tbl)$set(i=0, j=quote(.SD), .SDcols=private$sdcols)$call()
+                cols <- names(private$new_eval(tmp, reset=FALSE))
             }
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
-                j <- substitute(`:=` (cols, lapply(.SD, FUN=value)))
-                private$tbl_eval(i=private$i, j=j, by=private$by, .SDcols=private$sdcols)
+                private$new_call$set(j = substitute(`:=` (cols, lapply(.SD, FUN=value))))
+                private$tbl_eval(.SDcols=private$sdcols)
             }
             invisible(self)
         },
