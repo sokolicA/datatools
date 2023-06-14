@@ -679,17 +679,6 @@ DataFrame <- R6::R6Class(
             private$old_eval(e, reset)
         },
 
-        old_eval = function(e, reset=TRUE) {
-            env <- private$build_eval_env()
-            result <- eval(e, envir=env, enclos=env)
-            if (reset) {
-                if (!private$i_persist) private$reset_i()
-                if (!private$sdcols_persist) private$reset_sdcols()
-                if (!private$by_persist) private$reset_by()
-            }
-            result
-        },
-
         call = function(
         e=quote(`[`(private$tbl)), i=NULL, j=NULL,
         by=NULL, keyby=NULL,
