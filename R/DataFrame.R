@@ -206,7 +206,8 @@ DataFrame <- R6::R6Class(
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(columns)
             private$sdcols <- private$parse_sdcols(e, parent.frame())
-            private$tbl_eval(i=0, j=quote(.SD), .SDcols=private$sdcols, reset=FALSE)
+            test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=private$sdcols)$call()
+            private$eval(test_call, reset=FALSE)
             private$new_call$set(j=quote(.SD), .SDcols=private$sdcols)
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
