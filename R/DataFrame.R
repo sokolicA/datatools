@@ -645,7 +645,7 @@ DataFrame <- R6::R6Class(
 
         tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
                             .SDcols=NULL, on=NULL, reset=TRUE) {#browser()
-            private$new_call$set(j=j, by=by, keyby=keyby,
+            private$new_call$set(by=by, keyby=keyby,
                                        .SDcols=.SDcols, on=on)
 
             private$new_eval(private$new_call$call(), reset)
