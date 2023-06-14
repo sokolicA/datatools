@@ -508,7 +508,8 @@ DataFrame <- R6::R6Class(
             if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
             e[[1L]] <- quote(`:=`)
-            private$tbl_eval(i=private$i, j=e, by=private$by)
+            private$new_call$set(j=e)
+            private$tbl_eval(by=private$by)
             invisible(self)
         },
 
