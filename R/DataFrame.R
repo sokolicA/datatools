@@ -238,7 +238,7 @@ DataFrame <- R6::R6Class(
         #' df$group_by(a) #will group by a
         #' df$group_by(c(a)) # will group by b
         #' df$group_by(NULL) # will remove grouping
-        group_by = function(..., persist=FALSE) {
+        group_by = function(..., persist=FALSE, .as_key=FALSE) {
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(alist(...))[-1L]
             result <- private$parse_by(e)
@@ -246,7 +246,7 @@ DataFrame <- R6::R6Class(
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
             private$by <- result
             private$by_persist <- persist
-            private$new_call$set(by=private$by)
+            if (.as_key) private$new_call$set(keyby=private$by) else private$new_call$set(by=private$by)
             invisible(self)
         },
 
