@@ -228,7 +228,7 @@ df <- DF(data.table(a=1, b=2))
 \item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
 \item \href{#method-DataFrame-aggregate}{\code{DataFrame$aggregate()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
-\item \href{#method-DataFrame-new_eval}{\code{DataFrame$new_eval()}}
+\item \href{#method-DataFrame-test_call}{\code{DataFrame$test_call()}}
 \item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
 }
 }
@@ -999,11 +999,11 @@ The underlying \code{data.table} object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-new_eval"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-new_eval}{}}}
-\subsection{Method \code{new_eval()}}{
+\if{html}{\out{<a id="method-DataFrame-test_call"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-test_call}{}}}
+\subsection{Method \code{test_call()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new_eval(reset = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$test_call()}\if{html}{\out{</div>}}
 }
 
 }
