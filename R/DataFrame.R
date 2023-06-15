@@ -649,27 +649,10 @@ DataFrame <- R6::R6Class(
         sdcols_env = NULL,
         sdcols_persist = FALSE,
 
-        reset_i = function() {
-            private$i  <- private$i_txt <- private$i_env <-  NULL
-        },
-
-        reset_sdcols = function() {
-            private$sdcols  <- private$sdcols_txt <- private$sdcols_env <-  NULL
-        },
-
-        reset_by = function() {
-            private$by  <- private$by_cols <- NULL
-        },
-
         eval = function(e, reset=TRUE) {
             env <- private$build_eval_env()
             result <- eval(e, envir=env, enclos=env)
-            if (reset) {
-                if (!private$i_persist) private$reset_i()
-                if (!private$sdcols_persist) private$reset_sdcols()
-                if (!private$by_persist) private$reset_by()
-                private$new_call <- DTCall$new(private$tbl)
-            }
+            if (reset) private$new_call <- DTCall$new(private$tbl)
             result
         },
 
