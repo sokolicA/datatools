@@ -79,6 +79,16 @@ DTCall <- R6::R6Class(
             call <- if (is.character(subset)) private$subset(subset) else private$expr
             assign("expr", call, envir=.subset2(result, ".__enclos_env__")$private)
             return(result)
+        },
+
+        #' @description Get the grouping argument in the call.
+        #'
+        #' @return Returns the value of the grouping argument.
+        #'
+        grouping = function() {
+            result <- self$get("by")
+            if (is.null(result)) result <- self$get("keyby")
+            result
         }
     ),
 
