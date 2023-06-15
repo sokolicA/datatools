@@ -36,6 +36,7 @@ DTCall <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         set = function(...) {
+            #TODO do not allow both by and keyby!
             args <- list(...)
             #private$expr[names(args)] <- unlist(args) # looks more concise but does not work for removing elements.
             for (arg in names(args)) {
