@@ -37,9 +37,10 @@ DataFrame <- R6::R6Class(
         #'
         #' @details The method used is `print.data.table`.
         #'
-        print = function() {
+        print = function() {#browser()
             private$print_header()
-            print(private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols), class=TRUE)
+            result <- private$eval(private$new_call$clone()$set(j=quote(.SD))$call(subset=c("i", "j", ".SDcols")), reset=FALSE)
+            print(result, class=TRUE)
             invisible(self)
         },
 
