@@ -181,7 +181,6 @@ DataFrame <- R6::R6Class(
             if (missing(rows)) rows <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
             private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
-            private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist
             private$i_env = parent.frame()
             invisible(self)
@@ -211,7 +210,6 @@ DataFrame <- R6::R6Class(
             test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
             private$eval(test_call, reset=FALSE)
             private$call$set(j=quote(.SD), .SDcols=sdcols)
-            private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
             invisible(self)
@@ -248,7 +246,6 @@ DataFrame <- R6::R6Class(
             check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
             private$by_persist <- persist
-            private$by_txt <- gsub("(^list\\()|(\\)$)", "", deparse1(result))
             if (.as_key) private$call$set(keyby=result) else private$call$set(by=result)
             invisible(self)
         },
@@ -900,14 +897,17 @@ DataFrame <- R6::R6Class(
         print_header = function() {
             d <- dim(private$tbl)
             title <- paste("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            group <- if (!is.null(private$by_txt)) {
-                paste("  Grouped by:", private$by_txt, "\n")
+            group <- if (!is.null(private$call$grouping())) {
+                txt <- gsub("(^list\\()|(\\)$)", "", deparse1(private$call$grouping()))
+                paste("  Grouped by:", txt, "\n")
             } else NULL
-            i <- if (!is.null(private$i_txt)) {
-                paste("  Using rows where:", private$i_txt, "\n")
+            i <- if (!is.null(private$call$get("i"))) {
+                txt <- deparse1(private$call$get("i"))
+                paste("  Using rows where:", txt, "\n")
             } else NULL
-            sdcols <- if (!is.null(private$sdcols_txt)) {
-                paste("  Columns subset using:", private$sdcols_txt, "\n")
+            sdcols <- if (!is.null(private$call$get(".SDcols"))) {
+                txt <- deparse1(private$call$get(".SDcols"))
+                paste("  Columns subset using:", txt, "\n")
             } else NULL
             length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
             divisor <- paste0(rep("-", times = length), collapse="")
