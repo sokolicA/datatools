@@ -432,11 +432,9 @@ DataFrame <- R6::R6Class(
         left_join = function(other, on) {#browser()
             ON <- private$parse_on(substitute(on))
             ON_REV <- private$reverse_on_expr(ON)
-            call <- private$call(
-                e=substitute(`[`(other, mult = "all", nomatch = NA)),
-                i=quote(private$tbl), on=ON_REV
-            )
-            result <- private$eval(call)
+
+            call <- DTCall$new()$set(x=substitute(other), i=quote(private$tbl), on=ON_REV, mult="all", nomatch=NA)
+            result <- private$eval(call$call(), reset=FALSE)
             # x[y, on...]
             # if on column names differ, the column from y is not returned
             # duplicated columns in y are prefixed with i.
