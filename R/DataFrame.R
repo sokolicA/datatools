@@ -180,8 +180,7 @@ DataFrame <- R6::R6Class(
         where = function(rows, persist=FALSE) {#browser()
             if (missing(rows)) rows <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
-            private$i <- private$parse_i(substitute(rows), parent.frame())
-            private$call$set(i=private$i)
+            private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
             private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist
             private$i_env = parent.frame()
@@ -639,7 +638,6 @@ DataFrame <- R6::R6Class(
         by_cols = NULL,
         by_persist = FALSE,
 
-        i = NULL,
         i_txt = NULL,
         i_env = NULL,
         i_persist = FALSE,
@@ -905,7 +903,7 @@ DataFrame <- R6::R6Class(
             group <- if (!is.null(private$by)) {
                 paste("  Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
             } else NULL
-            i <- if (!is.null(private$i)) {
+            i <- if (!is.null(private$i_txt)) {
                 paste("  Using rows where:", private$i_txt, "\n")
             } else NULL
             sdcols <- if (!is.null(private$sdcols)) {
