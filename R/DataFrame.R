@@ -624,6 +624,11 @@ DataFrame <- R6::R6Class(
 
     private = list(
 
+        .SD_colnames = function() {
+            tmp <- private$new_call$copy(c(".SDcols"))$set(i=0, j=quote(.SD))$call()
+            names(private$eval(tmp, reset=FALSE))
+        },
+
 
         new_call = NULL,
 
