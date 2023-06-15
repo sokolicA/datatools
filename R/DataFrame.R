@@ -165,23 +165,20 @@ DataFrame <- R6::R6Class(
         },
 
         #' @description Work (operate?) on a subset of rows.
-        #' Experimental. #TODO define how certain methods use the persist option
+        #' Experimental.
         #' This method will not remove the rows from the data.
         #' Selected data modifications or calculations will be based only on the selected subset of data.
         #'
         #'
         #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.
-        #' @param persist Optional parameter whether the subset should persist after evaluation.
         #'
         #' @details
         #' If `rows` is missing or `NULL` then all rows will be used.
         #'
         #' @return Invisibly returns itself.
-        where = function(rows, persist=FALSE) {#browser()
+        where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
-            if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
             private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
-            private$i_persist <- persist
             private$i_env = parent.frame()
             invisible(self)
         },
@@ -195,22 +192,19 @@ DataFrame <- R6::R6Class(
         #' $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
         #'
         #' @param columns May be character column names or numeric positions. See details.
-        #' @param persist Whether the subset should persist after  evaluation.
         #'
         #' @details
         #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        select = function(columns, persist=FALSE) {#browser()
+        select = function(columns) {#browser()
             if (missing(columns)) columns <- NULL
-            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(columns)
             sdcols <- private$parse_sdcols(e, parent.frame())
             test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
             private$eval(test_call, reset=FALSE)
             private$call$set(j=quote(.SD), .SDcols=sdcols)
-            private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
             invisible(self)
         },
@@ -219,7 +213,6 @@ DataFrame <- R6::R6Class(
         #' Used in calculation of statistics.
         #'
         #' @param ... An expression specifying by what to group the data. See details.
-        #' @param persist Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.
         #'
         #' @details Setting by Will override existing grouping without warning.
         #' Pass a character vector of groups `vec` using `c(vec)`.
@@ -239,13 +232,11 @@ DataFrame <- R6::R6Class(
         #' df$group_by(a) #will group by a
         #' df$group_by(c(a)) # will group by b
         #' df$group_by(NULL) # will remove grouping
-        group_by = function(..., persist=FALSE, .as_key=FALSE) {
-            if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
+        group_by = function(..., .as_key=FALSE) {
             e <- substitute(alist(...))[-1L]
             result <- private$parse_by(e)
             check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
-            private$by_persist <- persist
             if (.as_key) private$call$set(keyby=result) else private$call$set(by=result)
             invisible(self)
         },
@@ -631,18 +622,11 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        by = NULL,
-        by_txt = NULL,
         by_cols = NULL,
-        by_persist = FALSE,
 
-        i_txt = NULL,
         i_env = NULL,
-        i_persist = FALSE,
 
-        sdcols_txt = NULL,
         sdcols_env = NULL,
-        sdcols_persist = FALSE,
 
         eval = function(e, reset=TRUE) {
             env <- private$build_eval_env()
