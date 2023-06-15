@@ -388,7 +388,7 @@ DataFrame <- R6::R6Class(
             private$new_call$set(j = substitute(`:=` (new_cols, inner_j)))
 
             tryCatch(
-                private$tbl_eval(),
+                private$eval(private$new_call$call()),
                 error = function(e) {
                     if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
                         stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
