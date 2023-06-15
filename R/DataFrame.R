@@ -55,7 +55,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            result <- private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
+            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             DataFrame$new(head(result, n))
         },
 
@@ -70,7 +70,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            result <- private$tbl_eval(i=private$i, j=quote(.SD), .SDcols=private$sdcols)
+            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             DataFrame$new(tail(result, n))
         },
 
