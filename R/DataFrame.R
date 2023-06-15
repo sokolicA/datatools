@@ -315,10 +315,11 @@ DataFrame <- R6::R6Class(
         #'    df$update(a = 2)
         #'    df$update(g = a, dd = ifelse(a==2, b, 0))
         update = function(...) {#browser()
+            #TODO add tests
             j <- substitute(alist(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) stop("Use the insert method to add new columns!")
             j[[1]] <- quote(`:=`)
-            private$tbl_eval(i=private$i, j=j, by=private$by)
+            private$eval(private$new_call$set(j=j)$call())
         },
 
         #' @description Perform an update join.
