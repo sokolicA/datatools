@@ -207,10 +207,10 @@ DataFrame <- R6::R6Class(
             if (missing(columns)) columns <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either true (1) or false (0).")
             e <- substitute(columns)
-            private$sdcols <- private$parse_sdcols(e, parent.frame())
-            test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=private$sdcols)$call()
+            sdcols <- private$parse_sdcols(e, parent.frame())
+            test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
             private$eval(test_call, reset=FALSE)
-            private$call$set(j=quote(.SD), .SDcols=private$sdcols)
+            private$call$set(j=quote(.SD), .SDcols=sdcols)
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
@@ -642,7 +642,6 @@ DataFrame <- R6::R6Class(
         i_env = NULL,
         i_persist = FALSE,
 
-        sdcols = NULL,
         sdcols_txt = NULL,
         sdcols_env = NULL,
         sdcols_persist = FALSE,
@@ -906,7 +905,7 @@ DataFrame <- R6::R6Class(
             i <- if (!is.null(private$i_txt)) {
                 paste("  Using rows where:", private$i_txt, "\n")
             } else NULL
-            sdcols <- if (!is.null(private$sdcols)) {
+            sdcols <- if (!is.null(private$sdcols_txt)) {
                 paste("  Columns subset using:", private$sdcols_txt, "\n")
             } else NULL
             length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
