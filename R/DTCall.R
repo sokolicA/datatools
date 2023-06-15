@@ -5,7 +5,7 @@
 #' @import R6
 DTCall <- R6::R6Class(
     "DTCall",
-    cloneable = FALSE,
+    cloneable = TRUE,
 
     public = list(
 
