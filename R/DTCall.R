@@ -37,7 +37,7 @@ DTCall <- R6::R6Class(
         #'
         set = function(...) {
             args <- list(...)
-            #private$expr[names(args)] <- unlist(args) # looks nicer but does not work for removing elements.
+            #private$expr[names(args)] <- unlist(args) # looks more concise but does not work for removing elements.
             for (arg in names(args)) {
                 if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
                 private$expr[[arg]] <- args[[arg]]
