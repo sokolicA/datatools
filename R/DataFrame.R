@@ -594,7 +594,7 @@ DataFrame <- R6::R6Class(
         #' @return The underlying `data.table` object.
         #'
         unwrap = function() {
-            private$tbl
+            private$tbl[]
         }
     ),
 
