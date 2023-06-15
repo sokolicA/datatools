@@ -12,8 +12,8 @@ StaticEnv <- R6::R6Class(
         },
 
         remove = function(alias) {
-            if (!exists(alias, private$env, inherits=FALSE)) stop("DataFrame with this alias does not exist!", call.=FALSE)
-            rm(list=alias, envir=private$env)
+            #if (!exists(alias, private$env, inherits=FALSE)) stop("DataFrame with this alias does not exist!", call.=FALSE)
+            suppressWarnings(rm(list=alias, envir=private$env))
             private$count <- private$count - 1L
             TRUE
         },
