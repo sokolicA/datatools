@@ -31,7 +31,7 @@ DataFrame <- R6::R6Class(
                 private$tbl <- data.table::setDT(tbl)
             }
             private$alias <- private$static_env$add(alias)
-            private$new_call <- DTCall$new(private$tbl)
+            private$call <- DTCall$new(private$tbl)
             invisible(self)
         },
 
@@ -41,7 +41,7 @@ DataFrame <- R6::R6Class(
         #'
         print = function() {#browser()
             private$print_header()
-            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
+            result <- private$eval(private$call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             print(result, class=TRUE)
             invisible(self)
         },
@@ -57,7 +57,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
+            result <- private$eval(private$call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             DataFrame$new(head(result, n))
         },
 
@@ -72,7 +72,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$tail(1)
         tail = function(n=5L) {
-            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
+            result <- private$eval(private$call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             DataFrame$new(tail(result, n))
         },
 
@@ -114,8 +114,8 @@ DataFrame <- R6::R6Class(
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            private$new_call$set(j=quote(list(.N)))
-            result <- private$eval(private$new_call$call(c("i", "j", "by", "keyby")))
+            private$call$set(j=quote(list(.N)))
+            result <- private$eval(private$call$call(c("i", "j", "by", "keyby")))
             DataFrame$new(result)
         },
 
@@ -181,7 +181,7 @@ DataFrame <- R6::R6Class(
             if (missing(rows)) rows <- NULL
             if (!is_true_or_false(persist)) stop("Persist must be either TRUE or FALSE.")
             private$i <- private$parse_i(substitute(rows), parent.frame())
-            private$new_call$set(i=private$i)
+            private$call$set(i=private$i)
             private$i_txt <- deparse1(substitute(rows))
             private$i_persist <- persist
             private$i_env = parent.frame()
@@ -211,7 +211,7 @@ DataFrame <- R6::R6Class(
             private$sdcols <- private$parse_sdcols(e, parent.frame())
             test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=private$sdcols)$call()
             private$eval(test_call, reset=FALSE)
-            private$new_call$set(j=quote(.SD), .SDcols=private$sdcols)
+            private$call$set(j=quote(.SD), .SDcols=private$sdcols)
             private$sdcols_txt <- deparse1(e)
             private$sdcols_persist <- persist
             private$sdcols_env = parent.frame()
@@ -250,7 +250,7 @@ DataFrame <- R6::R6Class(
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
             private$by <- result
             private$by_persist <- persist
-            if (.as_key) private$new_call$set(keyby=private$by) else private$new_call$set(by=private$by)
+            if (.as_key) private$call$set(keyby=private$by) else private$call$set(by=private$by)
             invisible(self)
         },
 
@@ -272,13 +272,13 @@ DataFrame <- R6::R6Class(
         set = function(value) {#browser()
             #CONSIDER renaming the method due to it overriding the default $set (method) method.
             value <- substitute(function(x) value)
-            cols <- if (is.null(private$new_call$get(".SDcols"))) names(private$tbl) else private$.SD_colnames()
+            cols <- if (is.null(private$call$get(".SDcols"))) names(private$tbl) else private$.SD_colnames()
 
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
-                private$new_call$set(j = substitute(`:=` (cols, lapply(.SD, FUN=value))))
-                private$eval(private$new_call$call())
+                private$call$set(j = substitute(`:=` (cols, lapply(.SD, FUN=value))))
+                private$eval(private$call$call())
             }
             invisible(self)
         },
@@ -300,8 +300,8 @@ DataFrame <- R6::R6Class(
                 warning("No columns matching the select criteria!")
             } else {
                 cols_call <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
-                private$new_call$set(j = substitute(`:=` (cols_call, lapply(.SD, fun, ...))))
-                private$eval(private$new_call$call())
+                private$call$set(j = substitute(`:=` (cols_call, lapply(.SD, fun, ...))))
+                private$eval(private$call$call())
             }
             invisible(self)
         },
@@ -321,7 +321,7 @@ DataFrame <- R6::R6Class(
             j <- substitute(alist(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) stop("Use the insert method to add new columns!")
             j[[1]] <- quote(`:=`)
-            private$eval(private$new_call$set(j=j)$call())
+            private$eval(private$call$set(j=j)$call())
         },
 
         #' @description Perform an update join.
@@ -387,10 +387,10 @@ DataFrame <- R6::R6Class(
             inner_j <- DTCall$new()$set(x=substitute(other), i=quote(.SD), j=J, on = ON_REV,
                                         mult="all", nomatch=NA)$call()
 
-            private$new_call$set(j = substitute(`:=` (new_cols, inner_j)))
+            private$call$set(j = substitute(`:=` (new_cols, inner_j)))
 
             tryCatch(
-                private$eval(private$new_call$call()),
+                private$eval(private$call$call()),
                 error = function(e) {
                     if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
                         stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
@@ -507,8 +507,8 @@ DataFrame <- R6::R6Class(
             if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
             e[[1L]] <- quote(`:=`)
-            private$new_call$set(j=e)
-            private$eval(private$new_call$call())
+            private$call$set(j=e)
+            private$eval(private$call$call())
             invisible(self)
         },
 
@@ -584,9 +584,9 @@ DataFrame <- R6::R6Class(
         aggregate = function(...) {#browser()
             fexpr <- substitute(list(...))
             if (grepl("function\\(", deparse(fexpr))) stop("Anonymous functions are not supported!")
-            groups <- private$new_call$grouping()
-            private$new_call$set(j=substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist)))
-            result <- private$eval(private$new_call$call())
+            groups <- private$call$grouping()
+            private$call$set(j=substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist)))
+            result <- private$eval(private$call$call())
             private$finalize_aggregate(result, fexpr, groups)
             DF(result)
         },
@@ -622,12 +622,12 @@ DataFrame <- R6::R6Class(
     private = list(
 
         .SD_colnames = function() {
-            tmp <- private$new_call$copy(c(".SDcols"))$set(i=0, j=quote(.SD))$call()
+            tmp <- private$call$copy(c(".SDcols"))$set(i=0, j=quote(.SD))$call()
             names(private$eval(tmp, reset=FALSE))
         },
 
 
-        new_call = NULL,
+        call = NULL,
 
         static_env = StaticEnv$new(),
 
@@ -652,7 +652,7 @@ DataFrame <- R6::R6Class(
         eval = function(e, reset=TRUE) {
             env <- private$build_eval_env()
             result <- eval(e, envir=env, enclos=env)
-            if (reset) private$new_call <- DTCall$new(private$tbl)
+            if (reset) private$call <- DTCall$new(private$tbl)
             result
         },
 
@@ -952,7 +952,7 @@ DataFrame <- R6::R6Class(
 
         .filter = function(i) {
             call <- DTCall$new()
-            BY <- private$new_call$get("by")
+            BY <- private$call$get("by")
             if (!is.null(BY)) {
                 tmp <- i
                 i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
