@@ -35,7 +35,7 @@ Columns <- R6::R6Class(
         #' x$columns$names
         drop = function(columns) {
             if (!is.character(columns)) stop("Provide a vector of column names!")
-            if (any(columns %in% private$find_group_cols(private$df_env$by))) stop("Can not drop columns used in grouping!")
+            if (any(columns %in% private$find_group_cols(private$df_env$call$grouping()))) stop("Can not drop columns used in grouping!")
             private$df_env$tbl[, (c(columns)) := NULL]
         },
 
@@ -64,7 +64,7 @@ Columns <- R6::R6Class(
         #' x$columns$rename(c("a"="A", "b"="B"))
         rename = function(mapping) {
             if (!is.character(mapping) || is.null(names(mapping))) stop("Provide a named character vector!")
-            private$df_env$by <- private$rename_grouping(private$df_env$by, names(mapping), mapping)
+            private$df_env$call$set(by = private$rename_grouping(private$df_env$call$grouping(), names(mapping), mapping))
             data.table::setnames(private$df_env$tbl, old=names(mapping), new=mapping)
             return(invisible(self))
         },
@@ -80,7 +80,7 @@ Columns <- R6::R6Class(
         #' x$columns$rename_with(custom_mapper)
         rename_with = function(mapper) {
             if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
-            private$df_env$by <- private$rename_grouping(private$df_env$by, self$names, mapper(self$names))
+            private$df_env$call$set(by = private$rename_grouping(private$df_env$call$grouping(), self$names, mapper(self$names)))
             data.table::setnames(private$df_env$tbl, old=mapper)
             return(invisible(self))
         }
