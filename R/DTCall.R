@@ -5,7 +5,7 @@
 #' @import R6
 DTCall <- R6::R6Class(
     "DTCall",
-    cloneable = TRUE,
+    cloneable = FALSE,
 
     public = list(
 
@@ -67,6 +67,19 @@ DTCall <- R6::R6Class(
             if (is.character(subset)) result <- result[names(result) %in% c("", "x", subset)]
             if (any(names(result) %in% c("i", "j"))) return(result)
             result[["x"]]
+        },
+
+        #' @description Create a copy of the object.
+        #'
+        #' @param subset Optional subset of arguments to keep.
+        #'
+        #' @return Returns a new call object.
+        #'
+        copy = function(subset=NULL) {
+            result <- DTCall$new()
+            call <- self$call(subset)
+            assign("expr", call, envir=.subset2(result, ".__enclos_env__")$private)
+            return(result)
         }
     ),
 
