@@ -63,8 +63,7 @@ DTCall <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         call = function(subset=NULL) {
-            result <- private$expr
-            if (is.character(subset)) result <- result[names(result) %in% c("", "x", subset)]
+            result <- if (is.character(subset)) private$subset(subset) else private$expr
             if (any(names(result) %in% c("i", "j"))) return(result)
             result[["x"]]
         },
@@ -77,7 +76,7 @@ DTCall <- R6::R6Class(
         #'
         copy = function(subset=NULL) {
             result <- DTCall$new()
-            call <- self$call(subset)
+            call <- if (is.character(subset)) private$subset(subset) else private$expr
             assign("expr", call, envir=.subset2(result, ".__enclos_env__")$private)
             return(result)
         }
@@ -85,7 +84,11 @@ DTCall <- R6::R6Class(
 
     private = list(
 
-        expr = NULL
+        expr = NULL,
+
+        subset = function(args) {
+            private$expr[names(private$expr) %in% c("", "x", args)]
+        }
 
     )
 )
