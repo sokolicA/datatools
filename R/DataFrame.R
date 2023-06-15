@@ -205,7 +205,6 @@ DataFrame <- R6::R6Class(
             test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
             private$eval(test_call, reset=FALSE)
             private$call$set(j=quote(.SD), .SDcols=sdcols)
-            private$sdcols_env = parent.frame()
             invisible(self)
         },
 
@@ -625,8 +624,6 @@ DataFrame <- R6::R6Class(
         by_cols = NULL,
 
         i_env = NULL,
-
-        sdcols_env = NULL,
 
         eval = function(e, reset=TRUE) {
             env <- private$build_eval_env()
