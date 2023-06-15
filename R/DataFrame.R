@@ -270,12 +270,8 @@ DataFrame <- R6::R6Class(
         set = function(value) {#browser()
             #CONSIDER renaming the method due to it overriding the default $set (method) method.
             value <- substitute(function(x) value)
-            if (is.null(private$new_call$get(".SDcols"))) {
-                cols <- names(private$tbl)
-            } else {
-                tmp <- private$new_call$copy(c(".SDcols"))$set(i=0, j=quote(.SD))$call()
-                cols <- names(private$eval(tmp, reset=FALSE))
-            }
+            cols <- if (is.null(private$new_call$get(".SDcols"))) names(private$tbl) else private$.SD_colnames()
+
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
