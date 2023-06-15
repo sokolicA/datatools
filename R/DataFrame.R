@@ -113,7 +113,7 @@ DataFrame <- R6::R6Class(
         #' df$group_by(g)$count()
         count = function() {
             private$new_call$set(j=quote(list(.N)))
-            result <- private$tbl_eval(i=private$i,j=quote(list(.N)), keyby=private$by)
+            result <- private$eval(private$new_call$call(c("i", "j", "by", "keyby")))
             DataFrame$new(result)
         },
 
