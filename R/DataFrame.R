@@ -247,9 +247,9 @@ DataFrame <- R6::R6Class(
             result <- private$parse_by(e)
             check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
             if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
-            private$by <- result
             private$by_persist <- persist
-            if (.as_key) private$call$set(keyby=private$by) else private$call$set(by=private$by)
+            private$by_txt <- gsub("(^list\\()|(\\)$)", "", deparse1(result))
+            if (.as_key) private$call$set(keyby=result) else private$call$set(by=result)
             invisible(self)
         },
 
@@ -635,6 +635,7 @@ DataFrame <- R6::R6Class(
         tbl = NULL,
 
         by = NULL,
+        by_txt = NULL,
         by_cols = NULL,
         by_persist = FALSE,
 
@@ -899,8 +900,8 @@ DataFrame <- R6::R6Class(
         print_header = function() {
             d <- dim(private$tbl)
             title <- paste("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            group <- if (!is.null(private$by)) {
-                paste("  Grouped by:", gsub("(^list\\()|(\\)$)", "", deparse1(private$by)), "\n")
+            group <- if (!is.null(private$by_txt)) {
+                paste("  Grouped by:", private$by_txt, "\n")
             } else NULL
             i <- if (!is.null(private$i_txt)) {
                 paste("  Using rows where:", private$i_txt, "\n")
