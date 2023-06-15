@@ -987,8 +987,8 @@ DataFrame <- R6::R6Class(
 
         .filter = function(i) {
             call <- DTCall$new()
-            if (!is.null(private$by)) {
-                BY <- private$by
+            BY <- private$new_call$get("by")
+            if (!is.null(BY)) {
                 tmp <- i
                 i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
             }
