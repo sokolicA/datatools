@@ -656,20 +656,6 @@ DataFrame <- R6::R6Class(
             result
         },
 
-        call = function(
-        e=quote(`[`(private$tbl)), i=NULL, j=NULL,
-        by=NULL, keyby=NULL,
-        .SDcols=NULL, on=NULL
-        ) {
-            if (!is.null(i)) e[["i"]] <- i
-            if (!is.null(j)) e[["j"]] <- j
-            if (!is.null(by)) e[["by"]] <- by
-            if (!is.null(keyby)) e[["keyby"]] <- keyby
-            if (!is.null(.SDcols)) e[[".SDcols"]] <- .SDcols
-            if (!is.null(on)) e[["on"]] <- on
-            e
-        },
-
         build_eval_env = function() {
             result <- new.env(parent = private$caller_env())
             result$private <- private
