@@ -582,10 +582,10 @@ DataFrame <- R6::R6Class(
         aggregate = function(...) {#browser()
             fexpr <- substitute(list(...))
             if (grepl("function\\(", deparse(fexpr))) stop("Anonymous functions are not supported!")
-            by <- private$by
+            groups <- private$new_call$grouping()
             private$new_call$set(j=substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist)))
-            result <- private$tbl_eval(keyby=private$by, .SDcols = private$sdcols)
-            private$finalize_aggregate(result, fexpr, by)
+            result <- private$eval(private$new_call$call())
+            private$finalize_aggregate(result, fexpr, groups)
             DF(result)
         },
 
