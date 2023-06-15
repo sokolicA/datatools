@@ -56,9 +56,9 @@ DTCall <- R6::R6Class(
             private$expr[[arg]]
         },
 
-        #' @description Get the call object.
+        #' @description Get the `data.table` call.
         #'
-        #' @param ... Named language (or symbol) arguments that are used in the `data.table` call.
+        #' @param subset Optional subset of arguments to keep.
         #'
         #' @return Invisibly returns itself.
         #'
