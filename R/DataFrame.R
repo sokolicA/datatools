@@ -39,7 +39,7 @@ DataFrame <- R6::R6Class(
         #'
         print = function() {#browser()
             private$print_header()
-            result <- private$eval(private$new_call$clone()$set(j=quote(.SD))$call(subset=c("i", "j", ".SDcols")), reset=FALSE)
+            result <- private$eval(private$new_call$copy(c("i",".SDcols"))$set(j=quote(.SD))$call(), reset=FALSE)
             print(result, class=TRUE)
             invisible(self)
         },
