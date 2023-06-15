@@ -649,12 +649,6 @@ DataFrame <- R6::R6Class(
         sdcols_env = NULL,
         sdcols_persist = FALSE,
 
-
-        tbl_eval = function(i=NULL, j=NULL, by=NULL, keyby=NULL,
-                            .SDcols=NULL, on=NULL, reset=TRUE) {
-            private$eval(private$new_call$call(), reset)
-        },
-
         reset_i = function() {
             private$i  <- private$i_txt <- private$i_env <-  NULL
         },
