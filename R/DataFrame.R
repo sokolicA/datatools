@@ -10,7 +10,11 @@
 #' @include StaticEnv.R
 #' @include DTCall.R
 DataFrame <- R6::R6Class(
+
     "DataFrame",
+
+    cloneable=FALSE,
+
     public = list(
         #' @description `DataFrame` Constructor
         #'
@@ -583,6 +587,16 @@ DataFrame <- R6::R6Class(
         #'
         unwrap = function() {
             private$tbl[]
+        },
+
+        #' @description Create a deep copy of the `DataFrame` object.
+        #'
+        #' @return A new `DataFrame` object.
+        #'
+        copy = function() {#browser()
+            result <- DataFrame$new(tbl=private$tbl, copy=TRUE)
+            assign("call", private$call$copy(), .subset2(result, ".__enclos_env__")$private)
+            result
         }
     ),
 
@@ -866,11 +880,6 @@ DataFrame <- R6::R6Class(
                 new_cols[dupl] <- paste0(new_cols[dupl], "_y")
             }
             new_cols
-        },
-
-        deep_clone = function(name, value) {
-            if (name == "tbl") return(data.table::copy(value))
-            value
         },
 
         print_header = function() {
