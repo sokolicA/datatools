@@ -15,18 +15,19 @@ test_that("$new copies the table object if copy=TRUE", {
 })
 
 
-test_that("deep clone creates an entirely new object and table", {
+test_that("copy creates an entirely new object and table", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df_shallow_clone <- df$clone(deep=FALSE)
-    df_deep_clone <- df$clone(deep=TRUE)
+    df_copy <- df$copy()
 
     expect_true(address(x) == address(df$unwrap()))
-    expect_true(address(x) == address(df_shallow_clone$unwrap()))
-    expect_true(address(x) != address(df_deep_clone$unwrap()))
-    expect_true(address(df) != address(df_deep_clone))
+    expect_true(address(x) != address(df_copy$unwrap()))
+    expect_true(address(df) != address(df_copy))
 
+    df_call <- .subset2(df, ".__enclos_env__")$private$call
+    df_copy_call <- .subset2(df_copy, ".__enclos_env__")$private$call
+    expect_true(address(df_call) != address(df_copy_call))
 })
 
 test_that("count returns a DataFrame with count of the number of rows", {
