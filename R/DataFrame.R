@@ -621,8 +621,6 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        by_cols = NULL,
-
         i_env = NULL,
 
         eval = function(e, reset=TRUE) {
