@@ -1,5 +1,3 @@
-#TODO CLONE BEHAVIOUR OF DTcall.. if not deep it is kept between clones??
-
 #' @title DataFrame Class
 #'
 #' @description A wrapper class for tabular data objects of class `data.frame`.
