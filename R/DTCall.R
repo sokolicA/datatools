@@ -36,11 +36,19 @@ DTCall <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         set = function(...) {
-            #TODO do not allow both by and keyby!
             args <- list(...)
             #private$expr[names(args)] <- unlist(args) # looks more concise but does not work for removing elements.
-            for (arg in names(args)) {
-                if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
+            for (arg in names(args)) {#browser()
+                arg_is_not_set_and_new_is_null <- is.null(private$expr[[arg]]) && is.null(args[[arg]])
+                if (arg_is_not_set_and_new_is_null) next;
+                if (arg=="by" && !is.null(private$expr[["keyby"]])) {
+                    warning("Overriding previous group by key specification!")
+                    private$expr[["keyby"]] <- NULL
+                }
+                if (arg=="keyby" && !is.null(private$expr[["by"]])) {
+                    warning("Overriding previous group by specification!")
+                    private$expr[["by"]] <- NULL
+                }
                 private$expr[[arg]] <- args[[arg]]
             }
             invisible(self)
