@@ -17,3 +17,7 @@ is_string <- function(x) {
     .Call(`_datatools_is_string`, x)
 }
 
+enquo <- function(expr, enclos) {
+    .Call(`_datatools_enquo`, expr, enclos)
+}
+

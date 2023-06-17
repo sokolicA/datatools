@@ -14,7 +14,6 @@ Rcpp::IntegerVector int_remove_na(Rcpp::IntegerVector& x) {
     return Rcpp::na_omit(x);
 }
 
-
 // [[Rcpp::export]]
 bool is_true_or_false(SEXP& x) {
     return (TYPEOF(x)==LGLSXP && LENGTH(x)==1 && LOGICAL(x)[0]!=NA_LOGICAL);
@@ -23,4 +22,12 @@ bool is_true_or_false(SEXP& x) {
 // [[Rcpp::export]]
 bool is_string(SEXP& x) {
     return TYPEOF(x)==STRSXP && LENGTH(x)==1 && STRING_ELT(x, 0)!=NA_STRING;
+}
+
+// [[Rcpp::export]]
+SEXP enquo(SEXP expr, SEXP enclos) {
+    SEXP result = PROTECT(R_NewEnv(enclos, 1, 1));
+    Rf_defineVar(Rf_install("expr"), expr, result);
+    UNPROTECT(1);
+    return result;
 }
