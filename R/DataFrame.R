@@ -180,7 +180,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
-            private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
+            private$call$set(i=substitute(rows))
             private$i_env = parent.frame()
             invisible(self)
         },
