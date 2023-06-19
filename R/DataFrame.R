@@ -180,7 +180,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
-            private$call$set(i=substitute(rows))
+            private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
             private$i_env = parent.frame()
             invisible(self)
         },
@@ -659,47 +659,47 @@ DataFrame <- R6::R6Class(
         parse_i = function(e, env) {#browser()
             # e can be:
             # 1. name/symbol - is.name
-            # 2. single character / string is.character, typeof = character
-            # 3. a primitive/builtin - is.primitive `==`, `|`ˇ, c,... typeof == builtin
+            # 2. atomic - null, character, integer,...
+            # 3. a primitive: builtin (is.integer) or special (&)
             # 3. a direct function call (e.g. grepl("a", b)) typeof closure, is.function
             # 4. a non built-in comparison (%in%,..) - syntactic sugar over function calls..typeof == closure
-            # a combination of the above.
-
-            # when a name evaluates to a vector (int, dbl, log, chr), the evaluated expr. should be kept unless it is a column nam
-            # if e is of length 1 it can be either a name, an atomic vector of length one, a function without arguments
-
-            # add check for rows like private$tbl[0][a > 1e+05 & b < 14]?
-            if (is.null(e)) return(NULL)
+            # 5. a combination of the above.
             if (is.atomic(e)) return(e)
-            if (is.name(e)) {
-                col_check <- try(eval(e, private$tbl, emptyenv()), silent=TRUE)
-                if (!inherits(col_check, "try-error")) return(e)
+            if (is.symbol(e)) {
+                is_column <- !inherits(try(eval(e, private$tbl, emptyenv()), silent=TRUE), "try-error")
+                if (is_column) return(e)
 
                 ev <- try(eval(e, env), silent=TRUE) # note: if name is not found it will throw an error here
                 if (inherits(ev, "try-error")) stop(attr(ev, "condition")$message, call.=FALSE)
                 if (is.atomic(ev)) return(ev)
-                if (is.primitive(ev)) {
-                    enq <- base::enquote(ev)
-                    str <- paste0("`", sub('.*?\\"(.*)\\".*', "\\1", as.character(enq)[[2]]), "`")
-                    return(str2lang(str))
-                }
+                if (is.function(ev)) stop("Error. When can this happen? Function without arguments")
 
-                e_chr <- as.character(e)
+                e_chr <- deparse1(e)
+                e_env <- find_obj_env(e_chr, env)
+                if (identical(e_env, globalenv()) || isNamespace(e_env)) return(e)
+                warning("Using locally defined functions or variables!", call. = FALSE)
                 return(substitute(get(e_chr, envir=private$i_env)))
             }
 
-            if (length(e) < 2) stop("Error.")
+            if (length(e) < 2) stop("Unable to parse expression. Empty function call?")
 
             if (e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)) {
-                e[[2]] <-  private$parse_expr(e[[2]], env)
+                e[[2]] <-  private$parse_i(e[[2]], env)
                 #TODO  the 3rd element should be evaluated inside the second element
                 return(e)
             }
 
-            fun <- eval(e[[1]])
-            if (!is.function(fun)) stop("First element of expression must be a function!")
-            fun_chr <- as.character(e[[1]])
-            if (!is.primitive(fun)) e[[1]] <- substitute(get(fun_chr, envir=private$i_env))
+            f <- eval(e[[1]], env)
+            if (!is.function(f)) stop("First element of expression must be a function!", call.=FALSE)
+            if (length(e[[1]]) > 1) stop("Currently unable to parse functions inside other objects.", call. = FALSE)
+
+
+            if (!any(is.primitive(f), isNamespace(environment(f)), identical(environment(f), globalenv()))) {
+                warning("Using locally defined functions or variables!", call. = FALSE)
+                fun_chr <- deparse1(e[[1]])
+                e[[1]] <- substitute(get(fun_chr, envir=private$i_env))
+            }
+
 
             for (i in seq_along(e)[-1L]) {
                 e[[i]] <- private$parse_i(e[[i]], env)
