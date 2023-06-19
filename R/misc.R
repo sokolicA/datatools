@@ -41,3 +41,16 @@ merge_calls = function(c1, c2) {
 }
 
 
+find_obj_env <- function(name, start=parent.frame()) {
+    stopifnot(is_string(name))
+
+    if (identical(start, emptyenv())) {
+        stop("Can't find ", name, call. = FALSE)
+    }
+
+    if (exists(name, start, inherits = FALSE)) {
+        start
+    } else {
+        find_obj_env(name, parent.env(start))
+    }
+}
