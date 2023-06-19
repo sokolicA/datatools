@@ -895,12 +895,12 @@ DataFrame <- R6::R6Class(
             } else {f_names <- deparse(f_expr[[1]])}
             result[, fun := rep(f_names, times=dim(result)[1L] %/% length(f_names))]
 
-            groups <- private$add_names_by(by_expr)
+            groups <- private$aggregate_add_names_by(by_expr)
             if (!is.null(groups)) {data.table::setnames(result, seq_along(groups), groups)}
             data.table::setcolorder(result, c(groups, "fun"))
         },
 
-        add_names_by = function(e) {
+        aggregate_add_names_by = function(e) {
             if (is.null(e)) return(NULL)
             e <- e[-1L]
             result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
