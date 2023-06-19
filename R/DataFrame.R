@@ -350,7 +350,7 @@ DataFrame <- R6::R6Class(
             }
 
             ON <- private$parse_on(substitute(on))
-            ON_REV <- private$reverse_on_expr(ON)
+            ON_REV <- private$call$reverse_on(ON)
             J <- NULL
 
             if (is.null(insert)) {
@@ -421,7 +421,7 @@ DataFrame <- R6::R6Class(
         #' df$left_join(y, .(b=a))
         left_join = function(other, on) {#browser()
             ON <- private$parse_on(substitute(on))
-            ON_REV <- private$reverse_on_expr(ON)
+            ON_REV <- private$call$reverse_on(ON)
 
             call <- DTCall$new()$set(x=substitute(other), i=quote(private$tbl), on=ON_REV, mult="all", nomatch=NA)
             result <- private$eval(call$call(), reset=FALSE)
@@ -847,30 +847,6 @@ DataFrame <- R6::R6Class(
                 names(e) <- result
             }
             e
-        },
-
-        reverse_on_expr = function(e) {
-            result <- e
-            result_names <- names(e)
-
-            before <- c(">=", "<=", ">", "<", "!=")
-            after <- c( "<", ">", "<=", ">=", "!=")
-
-            for (i in seq_along(result)[-1L]) {
-                val <- result[[i]]
-                special <- sapply(before, grepl, val)
-                if (any(special)) {
-                    idx <- which.max(special)
-                    res <- unlist(strsplit(val, before[idx]))
-                    val <- res[2]
-                    res <- paste0(res[2], after[idx], res[1])
-                    result_names[i] <- res
-                }
-                result[[i]] <- result_names[i]
-                result_names[i] <- val
-            }
-            names(result) <- result_names
-            result
         },
 
         rename_duplicated_cols = function(new_cols) {

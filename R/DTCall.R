@@ -98,6 +98,30 @@ DTCall <- R6::R6Class(
             result <- self$get("by")
             if (is.null(result)) result <- self$get("keyby")
             result
+        },
+
+        reverse_on = function(e) {
+            result <- e
+            result_names <- names(e)
+
+            before <- c(">=", "<=", ">", "<", "!=")
+            after <- c( "<", ">", "<=", ">=", "!=")
+
+            for (i in seq_along(result)[-1L]) {
+                val <- result[[i]]
+                special <- sapply(before, grepl, val)
+                if (any(special)) {
+                    idx <- which.max(special)
+                    res <- unlist(strsplit(val, before[idx]))
+                    val <- res[2]
+                    res <- paste0(res[2], after[idx], res[1])
+                    result_names[i] <- res
+                }
+                result[[i]] <- result_names[i]
+                result_names[i] <- val
+            }
+            names(result) <- result_names
+            result
         }
     ),
 
