@@ -349,8 +349,9 @@ DataFrame <- R6::R6Class(
                 return(invisible(self))
             }
 
-            ON <- private$parse_on(substitute(on))
-            ON_REV <- private$call$reverse_on(ON)
+            inner_j <- DTCall$new()$set(on=substitute(on))
+            inner_j$reverse_on()
+            ON_REV <- inner_j$get("on")
             J <- NULL
 
             if (is.null(insert)) {
@@ -420,10 +421,11 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' df$left_join(y, .(b=a))
         left_join = function(other, on) {#browser()
-            ON <- private$parse_on(substitute(on))
-            ON_REV <- private$call$reverse_on(ON)
+            call <- DTCall$new()$set(x=substitute(other), i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA)
+            ON <- call$get("on")
+            call$reverse_on()
+            ON_REV <- call$get("on")
 
-            call <- DTCall$new()$set(x=substitute(other), i=quote(private$tbl), on=ON_REV, mult="all", nomatch=NA)
             result <- private$eval(call$call(), reset=FALSE)
             # x[y, on...]
             # if on column names differ, the column from y is not returned
@@ -787,49 +789,6 @@ DataFrame <- R6::R6Class(
                 stop("Do not know how to interpret given grouping: ", as.character(el), ".")
             }
             return(result)
-        },
-
-        parse_on = function(e) {
-            # an unnamed character vector, c("a", "b"), used when columns a and b are common to both X and Y.
-            # a named character vector, c(x1="y1", x2="y2"), used when join columns have different names (Foreign key joins).
-            # string with a binary operator is also possible: c("x1==y1", "x2==y2")
-            # a list (or it's dot alias): list(a, b), list(x1=y1, x2=y2)
-            # non-equi joins are also possible: c("x>=a", "y<=b"), .(x>=a, y<=b)
-
-            # CHECK .parse_on https://github.com/Rdatatable/data.table/blob/master/R/data.table.R
-            if (is.null(e)) return(NULL)
-
-            if (is.character(e)) {
-                result <- call("c", e)
-                names(result) <- c("", e)
-                return(result)
-            }
-
-            if (e[[1L]] == quote(list) || e[[1L]] == quote(.)) {
-                e <- private$convert_on_call(e)
-            }
-
-            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in other.", call.=FALSE)
-            private$add_missing_on_expr_names(e)
-        },
-
-        convert_on_call = function(e) {
-            ops <- c("==", "<=", "<", ">=", ">", "!=")
-            pat <- paste0("(", ops, ")", collapse="|")
-            spat <- paste0("[ ]+(", pat, ")[ ]+")
-            # remove spaces around ==, >=,..
-            e <- lapply(as.list(e)[-1L], function(x) gsub(spat, "\\1", deparse(x, width.cutoff=500L)))
-            as.call(c(quote(c), e))
-        },
-
-        add_missing_on_expr_names = function(e) {
-            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
-            missing <- which(result == "")[-1L]
-            if (any(missing)) {
-                for (i in missing) result[i] <- sub("(=|!|>|<).*", "", e[[i]])
-                names(e) <- result
-            }
-            e
         },
 
         add_missing_join_j_expr_names = function(e) {

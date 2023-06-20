@@ -49,7 +49,13 @@ DTCall <- R6::R6Class(
                     warning("Overriding previous group by specification!")
                     private$expr[["by"]] <- NULL
                 }
-                private$expr[[arg]] <- args[[arg]]
+
+                if (arg=="on") {
+                    private$expr[[arg]] <- private$parse_on(args[[arg]])
+                } else {
+                    private$expr[[arg]] <- args[[arg]]
+
+                }
             }
             invisible(self)
         },
@@ -100,9 +106,65 @@ DTCall <- R6::R6Class(
             result
         },
 
-        reverse_on = function(e) {
+        reverse_on = function() {
+            private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
+        }
+    ),
+
+    private = list(
+
+        expr = NULL,
+
+        subset = function(args) {
+            private$expr[names(private$expr) %in% c("", "x", args)]
+        },
+
+        parse_on = function(e) {
+            # an unnamed character vector, c("a", "b"), used when columns a and b are common to both X and Y.
+            # a named character vector, c(x1="y1", x2="y2"), used when join columns have different names (Foreign key joins).
+            # string with a binary operator is also possible: c("x1==y1", "x2==y2")
+            # a list (or it's dot alias): list(a, b), list(x1=y1, x2=y2)
+            # non-equi joins are also possible: c("x>=a", "y<=b"), .(x>=a, y<=b)
+
+            # CHECK .parse_on https://github.com/Rdatatable/data.table/blob/master/R/data.table.R
+            if (is.null(e)) return(NULL)
+
+            if (is.character(e)) {
+                result <- call("c", e)
+                names(result) <- c("", e)
+                return(result)
+            }
+
+            if (e[[1L]] == quote(list) || e[[1L]] == quote(.)) {
+                e <- private$convert_on_call(e)
+            }
+
+            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in other.", call.=FALSE)
+            private$add_missing_on_expr_names(e)
+        },
+
+        convert_on_call = function(e) {
+            ops <- c("==", "<=", "<", ">=", ">", "!=")
+            pat <- paste0("(", ops, ")", collapse="|")
+            spat <- paste0("[ ]+(", pat, ")[ ]+")
+            # remove spaces around ==, >=,..
+            e <- lapply(as.list(e)[-1L], function(x) gsub(spat, "\\1", deparse(x, width.cutoff=500L)))
+            as.call(c(quote(c), e))
+        },
+
+        add_missing_on_expr_names = function(e) {
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            missing <- which(result == "")[-1L]
+            if (any(missing)) {
+                for (i in missing) result[i] <- sub("(=|!|>|<).*", "", e[[i]])
+                names(e) <- result
+            }
+            e
+        },
+
+        .reverse_on = function(e) {
             result <- e
-            result_names <- names(e)
+            result_names <- names(result)
 
             before <- c(">=", "<=", ">", "<", "!=")
             after <- c( "<", ">", "<=", ">=", "!=")
@@ -123,16 +185,6 @@ DTCall <- R6::R6Class(
             names(result) <- result_names
             result
         }
-    ),
-
-    private = list(
-
-        expr = NULL,
-
-        subset = function(args) {
-            private$expr[names(private$expr) %in% c("", "x", args)]
-        }
-
     )
 )
 
