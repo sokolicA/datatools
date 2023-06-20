@@ -35,26 +35,29 @@ DTCall <- R6::R6Class(
         #'
         #' @return Invisibly returns itself.
         #'
-        set = function(...) {
+        set = function(...) {#browser()
             args <- list(...)
             #private$expr[names(args)] <- unlist(args) # looks more concise but does not work for removing elements.
             for (arg in names(args)) {#browser()
                 arg_is_not_set_and_new_is_null <- is.null(private$expr[[arg]]) && is.null(args[[arg]])
                 if (arg_is_not_set_and_new_is_null) next;
-                if (arg=="by" && !is.null(private$expr[["keyby"]])) {
-                    warning("Overriding previous group by key specification!")
-                    private$expr[["keyby"]] <- NULL
-                }
-                if (arg=="keyby" && !is.null(private$expr[["by"]])) {
-                    warning("Overriding previous group by specification!")
-                    private$expr[["by"]] <- NULL
-                }
 
-                if (arg=="on") {
+                if (arg=="by") {
+                    if (!is.null(private$expr[["keyby"]])) {
+                        warning("Overriding previous group by key specification!")
+                        private$expr[["keyby"]] <- NULL
+                    }
+                    private$expr[[arg]] <- private$parse_by(args[[arg]])
+                } else if (arg=="keyby") {
+                    if(!is.null(private$expr[["by"]])) {
+                        warning("Overriding previous group by specification!")
+                        private$expr[["by"]] <- NULL
+                    }
+                    private$expr[[arg]] <- private$parse_by(args[[arg]])
+                } else if (arg=="on") {
                     private$expr[[arg]] <- private$parse_on(args[[arg]])
                 } else {
                     private$expr[[arg]] <- args[[arg]]
-
                 }
             }
             invisible(self)
@@ -117,6 +120,62 @@ DTCall <- R6::R6Class(
 
         subset = function(args) {
             private$expr[names(private$expr) %in% c("", "x", args)]
+        },
+
+        parse_by = function(e) {#browser()
+            #TODO add check for validity?
+            # check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
+            # if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
+            result <- quote(list())
+            idx <- 2L
+            for(i in seq_along(e)[-1L]) {
+                el <- e[[i]]
+                if (is.name(el)) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                if (is.null(el)) {
+                    result <- NULL
+                    break
+                }
+                if (is.character(el)) {
+                    result[[idx]] <- as.name(el)
+                    idx <- idx + 1L
+                    next
+                }
+                if (!is.name(el) && el[[1]] == quote(c)) {
+                    N <- 2L
+                    while(TRUE) {
+                        cols <- try(eval(el, parent.frame(n=N)), silent=TRUE)
+                        if (!inherits(cols, "try-error")) break
+                        if (identical(globalenv(), parent.frame(n=N))) {
+                            stop(attr(cols, "condition")$message)
+                        }
+                        N <- N+1L
+                    }
+                    for (col in cols) {
+                        result[[idx]] <- as.name(col)
+                        idx <- idx + 1L
+                    }
+                    next
+                }
+                if (is.call(el) &&  grepl("!|>|<|=|%",  as.character(el[[1]]))) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                if (is.call(el)) {
+                    result[[idx]] <- el
+                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
+                    idx <- idx + 1L
+                    next
+                }
+                stop("Do not know how to interpret given grouping: ", as.character(el), ".")
+            }
+            return(result)
         },
 
         parse_on = function(e) {

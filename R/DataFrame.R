@@ -234,11 +234,8 @@ DataFrame <- R6::R6Class(
         #' df$group_by(c(a)) # will group by b
         #' df$group_by(NULL) # will remove grouping
         group_by = function(..., .as_key=FALSE) {
-            e <- substitute(alist(...))[-1L]
-            result <- private$parse_by(e)
-            check <- try(eval(substitute(private$tbl[0][, .N, by = result])), silent=TRUE)
-            if (inherits(check, "try-error")) stop(attr(check, "condition")$message)
-            if (.as_key) private$call$set(keyby=result) else private$call$set(by=result)
+            e <- substitute(list(...))
+            if (.as_key) private$call$set(keyby=e) else private$call$set(by=e)
             invisible(self)
         },
 
@@ -736,59 +733,6 @@ DataFrame <- R6::R6Class(
 
             stop("Do not know?")
 
-        },
-
-        parse_by = function(e) {
-            result <- quote(list())
-            idx <- 2L
-            for(i in seq_along(e)) {
-                el <- e[[i]]
-                if (is.name(el)) {
-                    result[[idx]] <- el
-                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
-                    idx <- idx + 1L
-                    next
-                }
-                if (is.null(el)) {
-                    result <- NULL
-                    break
-                }
-                if (is.character(el)) {
-                    result[[idx]] <- as.name(el)
-                    idx <- idx + 1L
-                    next
-                }
-                if (!is.name(el) && el[[1]] == quote(c)) {
-                    N <- 2L
-                    while(TRUE) {
-                        cols <- try(eval(el, parent.frame(n=N)), silent=TRUE)
-                        if (!inherits(cols, "try-error")) break
-                        if (identical(globalenv(), parent.frame(n=N))) {
-                            stop(attr(cols, "condition")$message)
-                        }
-                        N <- N+1L
-                    }
-                    for (col in cols) {
-                        result[[idx]] <- as.name(col)
-                        idx <- idx + 1L
-                    }
-                    next
-                }
-                if (is.call(el) &&  grepl("!|>|<|=|%",  as.character(el[[1]]))) {
-                    result[[idx]] <- el
-                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
-                    idx <- idx + 1L
-                    next
-                }
-                if (is.call(el)) {
-                    result[[idx]] <- el
-                    if (!is.null(names(e))) names(result)[[idx]] <- names(e)[i]
-                    idx <- idx + 1L
-                    next
-                }
-                stop("Do not know how to interpret given grouping: ", as.character(el), ".")
-            }
-            return(result)
         },
 
         add_missing_join_j_expr_names = function(e) {
