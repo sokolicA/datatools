@@ -56,6 +56,8 @@ DTCall <- R6::R6Class(
                     private$expr[[arg]] <- private$parse_by(args[[arg]])
                 } else if (arg=="on") {
                     private$expr[[arg]] <- private$parse_on(args[[arg]])
+                } else if (arg==".SDcols") {
+                    private$expr[[arg]] <- private$parse_sdcols(args[[arg]]$expr, parent.env(args[[arg]]))
                 } else {
                     private$expr[[arg]] <- args[[arg]]
                 }
@@ -120,6 +122,37 @@ DTCall <- R6::R6Class(
 
         subset = function(args) {
             private$expr[names(private$expr) %in% c("", "x", args)]
+        },
+
+        parse_sdcols = function(e, env) {#browser() #TODO
+            # e can be:
+            # 1. character column names or numeric positions - is.character, is.numeric
+            # 2. startcol:endcol
+            # 3. .SDcols=patterns(r5egex1, regex2, ...) - evaluated on names
+            # 3. .SDcols=is.numeric - evaluated on columns
+            # 4. Inversion (column dropping instead of keeping) can be accomplished be prepending the argument with ! or -
+
+            #TODO
+            # sdcols <- private$parse_sdcols(e, parent.frame())
+            # test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
+            # private$eval(test_call, reset=FALSE)
+            if (is.character(e) || is.integer(e) || is.null(e)) return(e)
+            if (length(e) == 3 && e[[1]] == quote(`:`)) return(e)
+            ev <- try(eval(e, env), silent=TRUE)
+            if (!inherits(ev, "try-error")) {
+                if (is.function(ev)) return(e)
+                if (is.character(ev) || is.integer(ev)) return(ev)
+            }
+
+            if (length(e) < 2) stop("Unable to parse select!", call.=FALSE)
+            if (e[[1]] ==  quote(patterns)) return(e)
+            if (e[[1]] == quote(`!`) || e[[1]] == quote(`-`)) {
+                e[[2]] <- private$parse_sdcols(e[[2]], env)
+                return(e)
+            }
+
+            stop("Do not know?")
+
         },
 
         parse_by = function(e) {#browser()

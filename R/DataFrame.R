@@ -203,10 +203,7 @@ DataFrame <- R6::R6Class(
         select = function(columns) {#browser()
             if (missing(columns)) columns <- NULL
             e <- substitute(columns)
-            sdcols <- private$parse_sdcols(e, parent.frame())
-            test_call <- DTCall$new()$set(i=0, j=quote(.SD), .SDcols=sdcols)$call()
-            private$eval(test_call, reset=FALSE)
-            private$call$set(j=quote(.SD), .SDcols=sdcols)
+            private$call$set(j=quote(.SD), .SDcols=enquo(e, parent.frame()))
             invisible(self)
         },
 
@@ -705,33 +702,6 @@ DataFrame <- R6::R6Class(
             }
 
             e
-
-        },
-
-        parse_sdcols = function(e, env) {#browser() #TODO
-            # e can be:
-            # 1. character column names or numeric positions - is.character, is.numeric
-            # 2. startcol:endcol
-            # 3. .SDcols=patterns(regex1, regex2, ...) - evaluated on names
-            # 3. .SDcols=is.numeric - evaluated on columns
-            # 4. Inversion (column dropping instead of keeping) can be accomplished be prepending the argument with ! or -
-
-            if (is.null(e)) return(NULL)
-            if (length(e) == 3 && e[[1]] == quote(`:`)) return(e)
-            ev <- try(eval(e, env), silent=TRUE)
-            if (!inherits(ev, "try-error")) {
-                if (is.function(ev)) return(ev)
-                if (is.character(ev) || is.numeric(ev)) return(ev)
-            }
-
-            if (length(e) < 2) stop("What now?")
-            if (e[[1]] ==  quote(patterns)) return(e)
-            if (e[[1]] == quote(`!`) || e[[1]] == quote(`-`)) {
-                e[[2]] <- private$parse_sdcols(e[[2]], env)
-                return(e)
-            }
-
-            stop("Do not know?")
 
         },
 
