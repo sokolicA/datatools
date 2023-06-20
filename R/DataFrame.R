@@ -1,3 +1,7 @@
+#CONTINUE: always catch the caller env in the DF method. make a private member with the env address
+# couple DTCall with DF - accept env as init
+# for now do not allow sets from different environments!
+
 #' @title DataFrame Class
 #'
 #' @description A wrapper class for tabular data objects of class `data.frame`.
@@ -180,7 +184,7 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
-            private$call$set(i=private$parse_i(substitute(rows), parent.frame()))
+            private$call$set(i=private$parse_i(substitute(rows), parent.frame()), env=parent.frame())
             private$i_env = parent.frame()
             invisible(self)
         },
@@ -203,7 +207,7 @@ DataFrame <- R6::R6Class(
         select = function(columns) {#browser()
             if (missing(columns)) columns <- NULL
             e <- substitute(columns)
-            private$call$set(j=quote(.SD), .SDcols=enquo(e, parent.frame()))
+            private$call$set(j=quote(.SD), .SDcols=enquo(e, parent.frame()), env=parent.frame())
             invisible(self)
         },
 
@@ -232,7 +236,7 @@ DataFrame <- R6::R6Class(
         #' df$group_by(NULL) # will remove grouping
         group_by = function(..., .as_key=FALSE) {
             e <- substitute(list(...))
-            if (.as_key) private$call$set(keyby=e) else private$call$set(by=e)
+            if (.as_key) private$call$set(keyby=e, env=parent.frame()) else private$call$set(by=e, env=parent.frame())
             invisible(self)
         },
 

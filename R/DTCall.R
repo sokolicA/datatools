@@ -32,11 +32,21 @@ DTCall <- R6::R6Class(
         #' @description Sets (or unsets) arguments in the `data.table` call.
         #'
         #' @param ... Named language (or symbol) arguments that are used in the `data.table` call.
+        #' @param env Optional enclosing environment of the `data.table` call.
         #'
         #' @return Invisibly returns itself.
         #'
-        set = function(...) {#browser()
+        set = function(..., env=NULL) {#browser()
             args <- list(...)
+            if (!is.null(env)) {
+                stopifnot("'env' must be an environment!" = is.environment(env))
+                if (!(is.null(private$env) || identical(private$env, env))) {
+                    warning("Environment has changed! Resetting previous call!")
+                    private$expr <- NULL
+                }
+                private$env <- env
+            }
+
             #private$expr[names(args)] <- unlist(args) # looks more concise but does not work for removing elements.
             for (arg in names(args)) {#browser()
                 arg_is_not_set_and_new_is_null <- is.null(private$expr[[arg]]) && is.null(args[[arg]])
@@ -119,6 +129,8 @@ DTCall <- R6::R6Class(
     private = list(
 
         expr = NULL,
+
+        env = NULL,
 
         subset = function(args) {
             private$expr[names(private$expr) %in% c("", "x", args)]
