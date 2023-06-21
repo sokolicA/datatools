@@ -42,7 +42,7 @@ DTCall <- R6::R6Class(
                 stopifnot("'env' must be an environment!" = is.environment(env))
                 if (!(is.null(private$env) || identical(private$env, env))) {
                     warning("Environment has changed! Resetting previous call!")
-                    private$expr <- private$expr[1:2]
+                    private$reset()
                 }
                 private$env <- env
             }
@@ -108,7 +108,7 @@ DTCall <- R6::R6Class(
             call <- if (is.character(subset)) private$subset(subset) else private$expr
             result <- if (any(names(call) %in% c("i", "j"))) call else call[["x"]]
             private$env <- NULL
-            private$expr <- call[1:2]
+            private$reset()
             enquo(result, private$env)
         },
 
@@ -150,6 +150,9 @@ DTCall <- R6::R6Class(
             private$expr[names(private$expr) %in% c("", "x", args)]
         },
 
+        reset = function() {
+            private$expr <- private$expr[1:2]
+        },
         parse_sdcols = function(e, env) {#browser() #TODO
             # e can be:
             # 1. character column names or numeric positions - is.character, is.numeric
