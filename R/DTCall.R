@@ -98,6 +98,20 @@ DTCall <- R6::R6Class(
             result[["x"]]
         },
 
+        #' @description Return the `data.table` call with its environment.
+        #'
+        #' @param subset Optional subset of arguments to keep.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        consume = function(subset=NULL) {
+            call <- if (is.character(subset)) private$subset(subset) else private$expr
+            result <- if (any(names(call) %in% c("i", "j"))) call else call[["x"]]
+            private$env <- NULL
+            private$expr <- call[1:2]
+            enquo(result, private$env)
+        },
+
         #' @description Create a copy of the object.
         #'
         #' @param subset Optional subset of arguments to keep.
