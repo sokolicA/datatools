@@ -54,14 +54,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // enquo
-SEXP enquo(SEXP expr, SEXP enclos);
-RcppExport SEXP _datatools_enquo(SEXP exprSEXP, SEXP enclosSEXP) {
+SEXP enquo(SEXP expr, SEXP env);
+RcppExport SEXP _datatools_enquo(SEXP exprSEXP, SEXP envSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type expr(exprSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type enclos(enclosSEXP);
-    rcpp_result_gen = Rcpp::wrap(enquo(expr, enclos));
+    Rcpp::traits::input_parameter< SEXP >::type env(envSEXP);
+    rcpp_result_gen = Rcpp::wrap(enquo(expr, env));
     return rcpp_result_gen;
 END_RCPP
 }
