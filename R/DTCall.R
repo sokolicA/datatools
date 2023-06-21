@@ -67,7 +67,7 @@ DTCall <- R6::R6Class(
                 } else if (arg=="on") {
                     private$expr[[arg]] <- private$parse_on(args[[arg]])
                 } else if (arg==".SDcols") {
-                    private$expr[[arg]] <- private$parse_sdcols(args[[arg]]$expr, parent.env(args[[arg]]))
+                    private$expr[[arg]] <- private$parse_sdcols(args[[arg]], env)
                 } else {
                     private$expr[[arg]] <- args[[arg]]
                 }
