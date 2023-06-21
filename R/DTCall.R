@@ -42,7 +42,7 @@ DTCall <- R6::R6Class(
                 stopifnot("'env' must be an environment!" = is.environment(env))
                 if (!(is.null(private$env) || identical(private$env, env))) {
                     warning("Environment has changed! Resetting previous call!")
-                    private$expr <- NULL
+                    private$expr <- private$expr[1:2]
                 }
                 private$env <- env
             }
