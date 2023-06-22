@@ -83,8 +83,50 @@ Call <- R6::R6Class(
             result
         },
 
-        parse_i = function(arg, env) {
-            arg
+        parse_i = function(e, env) {#browser()
+            # Rules:
+            #  - symbols are treated as column names
+            #  - atomic types are treated as such
+            #  - variables are parts of the expression surrounded with .v()
+            if (is.atomic(e)) return(e)
+            if (is.symbol(e)) {
+                is_column <- !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
+                if (is_column) return(e)
+                stop("Only column names can be passed as symbols!", call.=FALSE)
+            }
+
+            if (length(e) == 1) stop("Unable to parse expression ", deparse1(e), "!", call.=FALSE)
+
+            if (e[[1]] == quote(.v)) {
+                #IDEA add ability to specify environment .(v, env)
+                if (is.null(env)) stop("Environment must be provided for variables!", call.=FALSE)
+                return(e)
+            }
+
+            if (e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)) {
+                ev <- try(eval(e, env), silent=TRUE)
+                if (inherits(ev, "try-error") || is.null(ev)) stop(attr(ev, "condition")$message, call.=FALSE)
+                e[[2]] <-  private$parse_i(e[[2]], env)
+                return(e)
+            }
+
+            f <- eval(e[[1]], env)
+            if (!is.function(f)) stop("First element of expression must be a function!", call.=FALSE)
+            if (length(e[[1]]) > 1) stop("Currently unable to parse functions inside other objects.", call. = FALSE)
+
+
+            # if (!any(is.primitive(f), isNamespace(environment(f)))) {
+            #     f_chr <- deparse1(e[[1]])
+            #     e[[1]] <- call("get", f_chr, pos=1L)
+            # }
+
+
+            for (i in seq_along(e)[-1L]) {
+                e[[i]] <- private$parse_i(e[[i]], env)
+            }
+
+            e
+
         },
 
         parse_j = function(arg, env) {
