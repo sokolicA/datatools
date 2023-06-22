@@ -642,6 +642,14 @@ DataFrame <- R6::R6Class(
             result
         },
 
+        eval_ = function(q, env) {
+            if (length(q$expr) > 2 && !identical(q$env, env)) stop("Call must be built in the evaluation environment.")
+            eval_env <- new.env(parent = env)
+            eval_env$private <- private
+            result <- eval(q$expr, envir=enval_env, enclos=eval_env)
+            result
+        },
+
         build_eval_env = function() {
             result <- new.env(parent = private$caller_env())
             result$private <- private
