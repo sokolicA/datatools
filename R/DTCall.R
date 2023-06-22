@@ -11,12 +11,12 @@ DTCall <- R6::R6Class(
 
         #' @description Constructor.
         #'
-        #' @param x Name of the data.table.
+        #' @param x Language object with the name of the data.table (quoted).
         #'
         #' @return Invisibly returns itself.
         #'
-        initialize = function(x=private$tbl) {
-            private$expr <- as.call(list(quote(`[`), x=substitute(x)))
+        initialize = function(x=quote(private$tbl)) {
+            private$expr <- as.call(list(quote(`[`), x=x))
             invisible(self)
         },
 

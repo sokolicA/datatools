@@ -37,7 +37,7 @@ DataFrame <- R6::R6Class(
                 private$tbl <- data.table::setDT(tbl)
             }
             private$alias <- private$static_env$add(alias)
-            private$call <- DTCall$new(private$tbl)
+            private$call <- DTCall$new()
             invisible(self)
         },
 
@@ -371,7 +371,7 @@ DataFrame <- R6::R6Class(
                 new_cols <- c(new_cols, names(update)[-1L])
             }
 
-            inner_j <- DTCall$new()$set(x=substitute(other), i=quote(.SD), j=J, on = ON_REV,
+            inner_j <- DTCall$new(substitute(other))$set(i=quote(.SD), j=J, on = ON_REV,
                                         mult="all", nomatch=NA)$consume()$expr
 
             private$call$set(j = substitute(`:=` (new_cols, inner_j)))
@@ -419,7 +419,7 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' df$left_join(y, .(b=a))
         left_join = function(other, on) {#browser()
-            call <- DTCall$new()$set(x=substitute(other), i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA)
+            call <- DTCall$new(substitute(other))$set(i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA)
             ON <- call$get("on")
             call$reverse_on()
             ON_REV <- call$get("on")
