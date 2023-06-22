@@ -51,6 +51,7 @@ Call <- R6::R6Class(
 
             eval_env <- new.env(parent = env)
             eval_env$.__private__ <- private$df
+            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=FALSE)}
             result <- eval(private$expr, envir=eval_env, enclos=eval_env)
             private$reset()
             result
