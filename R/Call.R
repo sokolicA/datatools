@@ -132,12 +132,39 @@ Call <- R6::R6Class(
             arg
         },
 
-        parse_by = function(arg, env) {
-            arg
+        parse_by = function(arg, env) {#browser()
+            # Rules:
+            #  - symbols are treated as column names
+            #  - variables are parts of the expression surrounded with .v()
+            #  - atomic types are treated as such
+            for(i in seq_along(arg)[-1L]) {
+                if (is.null(arg[[i]])) return(arg[[i]])
+
+                if (is.character(arg[[i]])) arg[[i]] <- as.symbol(arg[[i]])
+                if (is.symbol(arg[[i]])) {
+                    if (private$is_column(arg[[i]])) next;
+                    stop("Only column names can be passed as symbols!", call.=FALSE)
+                }
+
+                if (length(arg[[i]]) < 2) stop("Unable to parse by!")
+
+                if (private$is_range(arg[[i]])) {
+                    #CONSIDER allowing ranges
+                    stop("Ranges are currently not supported!", call.=FALSE)
+                }
+
+                if (arg[[i]][[1]] == quote(.v)) next;
+
+                if (private$is_function(arg[[i]][[1]], env)) {
+                    #TODO add check for arguments!
+                    next
+                } else stop("Do not know how to interpret given grouping: ", deparse1(arg[[i]]), ".")
+            }
+            return(arg)
         },
 
         parse_keyby = function(arg, env) {
-            arg
+            private$parse_by(arg, env)
         },
 
         parse_nomatch = function(arg, env) {
