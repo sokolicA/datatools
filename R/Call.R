@@ -103,7 +103,7 @@ Call <- R6::R6Class(
                 return(e)
             }
 
-            if (e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)) {
+            if (private$is_extraction(e)) {
                 ev <- try(eval(e, env), silent=TRUE)
                 if (inherits(ev, "try-error") || is.null(ev)) stop(attr(ev, "condition")$message, call.=FALSE)
                 e[[2]] <-  private$parse_i(e[[2]], env)
@@ -160,6 +160,10 @@ Call <- R6::R6Class(
         reset = function() {
             private$expr <- private$expr[1:2]
             private$env <- NULL
+        },
+
+        is_extraction = function(e) {
+            e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
         },
 
         finalize = function() {
