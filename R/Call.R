@@ -90,8 +90,7 @@ Call <- R6::R6Class(
             #  - variables are parts of the expression surrounded with .v()
             if (is.atomic(e)) return(e)
             if (is.symbol(e)) {
-                is_column <- !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
-                if (is_column) return(e)
+                if (private$is_column(e)) return(e)
                 stop("Only column names can be passed as symbols!", call.=FALSE)
             }
 
@@ -164,6 +163,22 @@ Call <- R6::R6Class(
 
         is_extraction = function(e) {
             e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
+        },
+
+        is_range = function(e) {
+            length(e) == 3 && e[[1]] == quote(`:`)
+        },
+
+        is_column = function(e) {
+            !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
+        },
+
+        is_symbol = function(e, env) {
+          is.symbol(e) && !is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+        },
+
+        is_function = function(e, env) {
+          is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
         },
 
         finalize = function() {
