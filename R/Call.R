@@ -23,12 +23,11 @@ Call <- R6::R6Class(
         },
 
         set = function(..., env=parent.frame()) {#browser()
+            args <- list(...)
             private$assert_equal_env(env)
+            private$assert_named(args)
 
             private$env <- env
-
-            args <- list(...)
-            if (is.null(names(args)) || any(names(args)=="")) stop("All arguments must be named!", call.=FALSE)
 
             for (arg in names(args)) {
                 arg_is_not_set_and_new_is_null <- is.null(private$expr[[arg]]) && is.null(args[[arg]])
@@ -82,6 +81,11 @@ Call <- R6::R6Class(
             if (!is.environment(env)) stop("'env' must be an environment!", call.=FALSE)
             unequal_env <- is.environment(private$env) && !identical(env, private$env)
             if (unequal_env) stop("Call environment can not change!", call.=FALSE)
+        },
+
+        assert_named = function(args) {
+            if (is.null(names(args)) || any(names(args)==""))
+                stop("All arguments must be named!", call.=FALSE)
         },
 
         parser = function(arg) {
