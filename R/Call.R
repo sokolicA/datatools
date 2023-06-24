@@ -72,7 +72,7 @@ Call <- R6::R6Class(
         env = NULL,
 
         validate_init = function(x) {
-            if (!(is.environment(df) && inherits(df$tbl, "data.table"))) {
+            if (!(is.environment(x) && inherits(x$tbl, "data.table"))) {
                 stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
             }
         },
