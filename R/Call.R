@@ -54,8 +54,13 @@ Call <- R6::R6Class(
         subset = function(args) {
             private$expr <- private$expr[names(private$expr) %in% c("", "x", args)]
             invisible(self)
-        }
+        },
 
+        grouping = function() {
+            result <- self$arg("by")
+            if (is.null(result)) result <- self$arg("keyby")
+            result
+        }
     ),
 
     private = list(
