@@ -30,8 +30,9 @@ Call <- R6::R6Class(
             private$env <- env
 
             for (arg in names(args)) {
-                arg_is_not_set_and_new_is_null <- is.null(private$expr[[arg]]) && is.null(args[[arg]])
-                if (arg_is_not_set_and_new_is_null) next;
+                if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
+
+                if (arg=="by" || arg=="keyby") private$set_handle_by(arg);
 
                 parser <- private$parser(arg)
                 private$expr[[arg]] <- parser(args[[arg]], env)
@@ -216,7 +217,18 @@ Call <- R6::R6Class(
         },
 
         is_function = function(e, env) {
-          is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+            is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+        },
+
+        set_handle_by = function(arg) {
+            if (arg=="by" && !is.null(private$expr[["keyby"]])) {
+                warning("Removed previous group by key specification!", call.=FALSE)
+                private$expr[["keyby"]] <- NULL
+            }
+            if (arg=="keyby" && !is.null(private$expr[["by"]])) {
+                warning("Removed previous group by specification!", call. = FALSE)
+                private$expr[["by"]] <- NULL
+            }
         },
 
         finalize = function() {
