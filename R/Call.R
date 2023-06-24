@@ -10,9 +10,9 @@ Call <- R6::R6Class(
 
     public = list(
 
-        initialize = function(df) {
-            stopifnot("Must provide an environment containing a data.table named 'tbl'!" = is.environment(df) && inherits(df$tbl, "data.table"))
-            private$df <- df
+        initialize = function(x) {
+            private$validate_init(x)
+            private$df <- x
             private$expr <- as.call(list(quote(`[`), x=quote(.__private__$tbl)))
             invisible(self)
         },
@@ -76,6 +76,12 @@ Call <- R6::R6Class(
         expr = NULL,
 
         env = NULL,
+
+        validate_init = function(x) {
+            if (!(is.environment(df) && inherits(df$tbl, "data.table"))) {
+                stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
+            }
+        },
 
         parser = function(arg) {
             result <- try(get(paste0("parse_", arg), envir=private, inherits=FALSE), silent = TRUE)
