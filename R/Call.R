@@ -29,14 +29,8 @@ Call <- R6::R6Class(
 
             private$env <- env
 
-            for (arg in names(args)) {
-                if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
+            private$add_parsed(args, env)
 
-                if (arg=="by" || arg=="keyby") private$set_handle_by(arg);
-
-                parser <- private$parser(arg)
-                private$expr[[arg]] <- parser(args[[arg]], env)
-            }
 
             invisible(self)
         },
@@ -93,6 +87,15 @@ Call <- R6::R6Class(
             eval_env$.__private__ <- private$df
             eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=FALSE)}
             eval_env
+        },
+
+        add_parsed = function(args, env) {
+            for (arg in names(args)) {
+                if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
+                if (arg=="by" || arg=="keyby") private$set_handle_by(arg);
+                parser <- private$parser(arg)
+                private$expr[[arg]] <- parser(args[[arg]], env)
+            }
         },
 
         parser = function(arg) {
