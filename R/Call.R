@@ -39,7 +39,8 @@ Call <- R6::R6Class(
             private$assert_equal_env(env)
 
             eval_env <- private$build_eval_env(env)
-            result <- eval(private$expr, envir=eval_env, enclos=eval_env)
+            call <- private$build_call()
+            result <- eval(call, envir=eval_env, enclos=eval_env)
 
             private$reset()
             result
@@ -80,6 +81,10 @@ Call <- R6::R6Class(
         assert_named = function(args) {
             if (is.null(names(args)) || any(names(args)==""))
                 stop("All arguments must be named!", call.=FALSE)
+        },
+
+        build_call = function() {
+            if (any(names(private$expr) %in% c("i", "j"))) private$expr else private$expr[["x"]]
         },
 
         build_eval_env = function(env) {
