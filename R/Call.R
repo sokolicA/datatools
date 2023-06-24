@@ -29,7 +29,7 @@ Call <- R6::R6Class(
 
             private$env <- env
 
-            private$add_parsed(args, env)
+            private$add_parsed(args)
 
 
             invisible(self)
@@ -89,12 +89,12 @@ Call <- R6::R6Class(
             eval_env
         },
 
-        add_parsed = function(args, env) {
+        add_parsed = function(args) {
             for (arg in names(args)) {
                 if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
                 if (arg=="by" || arg=="keyby") private$set_handle_by(arg);
                 parser <- private$parser(arg)
-                private$expr[[arg]] <- parser(args[[arg]], env)
+                private$expr[[arg]] <- parser(args[[arg]])
             }
         },
 
@@ -104,7 +104,7 @@ Call <- R6::R6Class(
             result
         },
 
-        parse_i = function(e, env) {#browser()
+        parse_i = function(e) {#browser()
             # Rules:
             #  - symbols are treated as column names
             #  - atomic types are treated as such
@@ -124,13 +124,13 @@ Call <- R6::R6Class(
             }
 
             if (private$is_extraction(e)) {
-                ev <- try(eval(e, env), silent=TRUE)
+                ev <- try(eval(e, private$env), silent=TRUE)
                 if (inherits(ev, "try-error") || is.null(ev)) stop(attr(ev, "condition")$message, call.=FALSE)
                 e[[2]] <-  private$parse_i(e[[2]], env)
                 return(e)
             }
 
-            f <- eval(e[[1]], env)
+            f <- eval(e[[1]], private$env)
             if (!is.function(f)) stop("First element of expression must be a function!", call.=FALSE)
             if (length(e[[1]]) > 1) stop("Currently unable to parse functions inside other objects.", call. = FALSE)
 
@@ -142,18 +142,18 @@ Call <- R6::R6Class(
 
 
             for (i in seq_along(e)[-1L]) {
-                e[[i]] <- private$parse_i(e[[i]], env)
+                e[[i]] <- private$parse_i(e[[i]])
             }
 
             e
 
         },
 
-        parse_j = function(arg, env) {
+        parse_j = function(arg) {
             arg
         },
 
-        parse_by = function(arg, env) {#browser()
+        parse_by = function(arg) {#browser()
             # Rules:
             #  - symbols are treated as column names
             #  - variables are parts of the expression surrounded with .v()
@@ -184,15 +184,15 @@ Call <- R6::R6Class(
             return(arg)
         },
 
-        parse_keyby = function(arg, env) {
-            private$parse_by(arg, env)
+        parse_keyby = function(arg) {
+            private$parse_by(arg)
         },
 
-        parse_nomatch = function(arg, env) {
+        parse_nomatch = function(arg) {
             arg
         },
 
-        parse_mult = function(arg, env) {
+        parse_mult = function(arg) {
             arg
         },
 
@@ -200,7 +200,7 @@ Call <- R6::R6Class(
             arg
         },
 
-        parse_on = function(arg, env) {
+        parse_on = function(arg) {
             arg
         },
 
@@ -221,12 +221,12 @@ Call <- R6::R6Class(
             !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
         },
 
-        is_symbol = function(e, env) {
-            is.symbol(e) && !is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+        is_symbol = function(e) {
+            is.symbol(e) && !is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
         },
 
-        is_function = function(e, env) {
-            is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+        is_function = function(e) {
+            is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
         },
 
         set_handle_by = function(arg) {
