@@ -22,13 +22,10 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
-        set = function(..., env=NULL) {#browser()
-            #TODO do not allow env=NULL
-            if (is.environment(env)) {
-                unequal_env <- is.environment(private$env) && !identical(env, private$env)
-                if (unequal_env) stop("Call environment can not change!", call.=FALSE)
-                private$env <- env
-            }
+        set = function(..., env=parent.frame()) {#browser()
+            private$assert_equal_env(env)
+
+            private$env <- env
 
             args <- list(...)
             if (is.null(names(args)) || any(names(args)=="")) stop("All arguments must be named!", call.=FALSE)
@@ -44,10 +41,8 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
-        eval = function(env) {#browser()
-            if (missing(env)) stop("Must provide 'env' argument!")
-            if (!is.environment(env)) stop("'env' must be an environment!")
-            stopifnot("Evaluation environment must match the call environment!"=is.null(private$env) || identical(env, private$env))
+        eval = function(env=parent.frame()) {#browser()
+            private$assert_equal_env(env)
 
             eval_env <- new.env(parent = env)
             eval_env$.__private__ <- private$df
@@ -81,6 +76,12 @@ Call <- R6::R6Class(
             if (!(is.environment(df) && inherits(df$tbl, "data.table"))) {
                 stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
             }
+        },
+
+        assert_equal_env = function(env) {
+            if (!is.environment(env)) stop("'env' must be an environment!", call.=FALSE)
+            unequal_env <- is.environment(private$env) && !identical(env, private$env)
+            if (unequal_env) stop("Call environment can not change!", call.=FALSE)
         },
 
         parser = function(arg) {
