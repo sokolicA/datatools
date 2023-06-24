@@ -219,7 +219,7 @@ Call <- R6::R6Class(
         },
 
         is_symbol = function(e, env) {
-          is.symbol(e) && !is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
+            is.symbol(e) && !is.function(try(eval(e, envir=env, enclos=env), silent=TRUE))
         },
 
         is_function = function(e, env) {
