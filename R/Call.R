@@ -201,8 +201,31 @@ Call <- R6::R6Class(
             arg
         },
 
-        parse_.SDcols = function(arg, env) {
-            arg
+        parse_.SDcols = function(arg) {
+            # arg can be:
+            # 1. character column names or numeric positions - is.character, is.numeric
+            # 2. startcol:endcol
+            # 3. .SDcols=patterns(r5egex1, regex2, ...) - evaluated on names
+            # 3. .SDcols=is.numeric - evaluated on columns
+            # 4. Inversion (column dropping instead of keeping) can be accomplished be prepending the argument with ! or -
+
+            return(arg[[2]])
+
+            if (is.character(e) || is.integer(e) || is.null(e)) return(e)
+            if (private$is_range(e)) return(e)
+
+            if (is.symbol(e) && private$is_function(e)) return(e)
+
+            if (length(e) < 2) stop("Unable to parse select!", call.=FALSE)
+            if (e[[1]] ==  quote(.v)) return(e)
+            if (e[[1]] ==  quote(patterns)) return(e)
+            if (e[[1]] == quote(`!`) || e[[1]] == quote(`-`)) {
+                e[[2]] <- private$parse_sdcols(e[[2]])
+                return(e)
+            }
+
+            stop("Do not know?")
+
         },
 
         parse_on = function(arg) {
