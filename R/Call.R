@@ -44,10 +44,9 @@ Call <- R6::R6Class(
         eval = function(env=parent.frame()) {#browser()
             private$assert_equal_env(env)
 
-            eval_env <- new.env(parent = env)
-            eval_env$.__private__ <- private$df
-            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=FALSE)}
+            eval_env <- private$build_eval_env(env)
             result <- eval(private$expr, envir=eval_env, enclos=eval_env)
+
             private$reset()
             result
         },
@@ -87,6 +86,13 @@ Call <- R6::R6Class(
         assert_named = function(args) {
             if (is.null(names(args)) || any(names(args)==""))
                 stop("All arguments must be named!", call.=FALSE)
+        },
+
+        build_eval_env = function(env) {
+            eval_env <- new.env(parent = env)
+            eval_env$.__private__ <- private$df
+            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=FALSE)}
+            eval_env
         },
 
         parser = function(arg) {
