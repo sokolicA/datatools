@@ -20,7 +20,6 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
-        set = function(..., env=parent.frame()) {#browser()
         use = function(df) {
             private$validate_init(df)
             private$df <- df
@@ -28,6 +27,7 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
+        set = function(..., env=parent.frame(2L)) {#browser()
             args <- list(...)
             private$assert_equal_env(env)
             private$assert_named(args)
