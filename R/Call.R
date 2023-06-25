@@ -87,6 +87,7 @@ Call <- R6::R6Class(
         },
 
         assert_equal_env = function(env) {
+            if (is.null(private$df)) return(NULL)
             if (!is.environment(env)) stop("'env' must be an environment!", call.=FALSE)
             unequal_env <- is.environment(private$env) && !identical(env, private$env)
             if (unequal_env) stop("Call environment can not change!", call.=FALSE)
@@ -323,6 +324,7 @@ Call <- R6::R6Class(
         },
 
         is_column = function(e) {
+            if (is.null(private$df)) return(TRUE)
             !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
         },
 
