@@ -21,7 +21,7 @@ Call <- R6::R6Class(
         },
 
         use = function(df) {
-            private$validate_init(df)
+            private$validate_df(df)
             private$df <- df
             private$expr <- as.call(list(quote(`[`), x=quote(.__private__$tbl)))
             invisible(self)
@@ -80,7 +80,7 @@ Call <- R6::R6Class(
 
         env = NULL,
 
-        validate_init = function(x) {
+        validate_df = function(x) {
             if (!(is.environment(x) && inherits(x$tbl, "data.table"))) {
                 stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
             }
