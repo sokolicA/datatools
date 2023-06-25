@@ -125,6 +125,11 @@ Call <- R6::R6Class(
         },
 
         parse_i = function(e) {#browser()
+        parse_x = function(arg) {
+            if (!is.null(private$df)) stop("Can not set 'x' when using DataFrame!", call.=FALSE)
+            arg
+        },
+
             # Rules:
             #  - symbols are treated as column names
             #  - atomic types are treated as such
