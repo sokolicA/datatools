@@ -349,7 +349,7 @@ DataFrame <- R6::R6Class(
                 return(invisible(self))
             }
 
-            inner_j <- Call$new(substitute(other))$set(on=substitute(on), env=parent.frame())
+            inner_j <- Call$new()$set(x=substitute(other), on=substitute(on), env=parent.frame())
             inner_j$reverse_on()
             ON_REV <- inner_j$arg("on")
             J <- NULL
@@ -420,7 +420,7 @@ DataFrame <- R6::R6Class(
         # df <- DF(x)
         # df$left_join(y, .(b=a))
         left_join = function(other, on) {#browser()
-            call <- Call$new(substitute(other))$set(i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA, env=environment())
+            call <- Call$new()$set(x=quote(other), i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA, env=environment())
             ON <- call$arg("on")
             call$reverse_on()
             ON_REV <- call$arg("on")
