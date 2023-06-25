@@ -124,19 +124,22 @@ Call <- R6::R6Class(
             result
         },
 
-        parse_i = function(e) {#browser()
         parse_x = function(arg) {
             if (!is.null(private$df)) stop("Can not set 'x' when using DataFrame!", call.=FALSE)
             arg
         },
 
+        parse_i = function(arg) {#browser()
             # Rules:
             #  - symbols are treated as column names
             #  - atomic types are treated as such
             #  - variables are parts of the expression surrounded with .v()
+
+            return(arg)
+
             if (is.atomic(e)) return(e)
             if (is.symbol(e)) {
-                if (private$is_column(e)) return(e)
+                if (private$is_column(e) || e == quote(.SD)) return(e)
                 stop("Only column names can be passed as symbols!", call.=FALSE)
             }
 
@@ -151,7 +154,7 @@ Call <- R6::R6Class(
             if (private$is_extraction(e)) {
                 ev <- try(eval(e, private$env), silent=TRUE)
                 if (inherits(ev, "try-error") || is.null(ev)) stop(attr(ev, "condition")$message, call.=FALSE)
-                e[[2]] <-  private$parse_i(e[[2]], env)
+                e[[2]] <-  private$parse_i(e[[2]])
                 return(e)
             }
 
