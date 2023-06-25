@@ -21,6 +21,13 @@ Call <- R6::R6Class(
         },
 
         set = function(..., env=parent.frame()) {#browser()
+        use = function(df) {
+            private$validate_init(df)
+            private$df <- df
+            private$expr <- as.call(list(quote(`[`), x=quote(.__private__$tbl)))
+            invisible(self)
+        },
+
             args <- list(...)
             private$assert_equal_env(env)
             private$assert_named(args)
