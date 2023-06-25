@@ -11,7 +11,7 @@ Call <- R6::R6Class(
     public = list(
 
         initialize = function() {
-            private$expr <- call("[", x=quote(x))
+            private$start_call(quote(x))
             invisible(self)
         },
 
@@ -23,7 +23,7 @@ Call <- R6::R6Class(
         use = function(df) {
             private$validate_df(df)
             private$df <- df
-            private$expr <- as.call(list(quote(`[`), x=quote(.__private__$tbl)))
+            private$start_call(quote(.__private__$tbl))
             invisible(self)
         },
 
@@ -79,6 +79,10 @@ Call <- R6::R6Class(
         expr = NULL,
 
         env = NULL,
+
+        start_call = function(x) {
+            private$expr <- call("[", x=x)
+        },
 
         validate_df = function(x) {
             if (!(is.environment(x) && inherits(x$tbl, "data.table"))) {
