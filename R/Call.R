@@ -40,7 +40,7 @@ Call <- R6::R6Class(
             private$expr
         },
 
-        eval = function(env=parent.frame()) {#browser()
+        eval = function(env=parent.frame(2L)) {#browser()
             private$assert_equal_env(env)
 
             eval_env <- private$build_eval_env(env)
