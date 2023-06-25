@@ -10,10 +10,8 @@ Call <- R6::R6Class(
 
     public = list(
 
-        initialize = function(x) {
-            private$validate_init(x)
-            private$df <- x
-            private$expr <- as.call(list(quote(`[`), x=quote(.__private__$tbl)))
+        initialize = function() {
+            private$expr <- call("[", x=quote(x))
             invisible(self)
         },
 
