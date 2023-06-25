@@ -65,6 +65,10 @@ Call <- R6::R6Class(
             result <- self$arg("by")
             if (is.null(result)) result <- self$arg("keyby")
             result
+        },
+
+        reverse_on = function() {
+            private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
         }
     ),
 
@@ -238,8 +242,71 @@ Call <- R6::R6Class(
 
         },
 
-        parse_on = function(arg) {
-            arg
+        parse_on = function(e) {
+            # an unnamed character vector, c("a", "b"), used when columns a and b are common to both X and Y.
+            # a named character vector, c(x1="y1", x2="y2"), used when join columns have different names (Foreign key joins).
+            # string with a binary operator is also possible: c("x1==y1", "x2==y2")
+            # a list (or it's dot alias): list(a, b), list(x1=y1, x2=y2)
+            # non-equi joins are also possible: c("x>=a", "y<=b"), .(x>=a, y<=b)
+
+            # CHECK .parse_on https://github.com/Rdatatable/data.table/blob/master/R/data.table.R
+            if (is.null(e)) return(NULL)
+
+            if (is.character(e)) {
+                result <- call("c", e)
+                names(result) <- c("", e)
+                return(result)
+            }
+
+            if (e[[1L]] == quote(list) || e[[1L]] == quote(.)) {
+                e <- private$convert_on_call(e)
+            }
+
+            if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in other.", call.=FALSE)
+            private$add_missing_on_expr_names(e)
+        },
+
+        convert_on_call = function(e) {
+            ops <- c("==", "<=", "<", ">=", ">", "!=")
+            pat <- paste0("(", ops, ")", collapse="|")
+            spat <- paste0("[ ]+(", pat, ")[ ]+")
+            # remove spaces around ==, >=,..
+            e <- lapply(as.list(e)[-1L], function(x) gsub(spat, "\\1", deparse(x, width.cutoff=500L)))
+            as.call(c(quote(c), e))
+        },
+
+        add_missing_on_expr_names = function(e) {
+            result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
+            missing <- which(result == "")[-1L]
+            if (any(missing)) {
+                for (i in missing) result[i] <- sub("(=|!|>|<).*", "", e[[i]])
+                names(e) <- result
+            }
+            e
+        },
+
+        .reverse_on = function(e) {
+            result <- e
+            result_names <- names(result)
+
+            before <- c(">=", "<=", ">", "<", "!=")
+            after <- c( "<", ">", "<=", ">=", "!=")
+
+            for (i in seq_along(result)[-1L]) {
+                val <- result[[i]]
+                special <- sapply(before, grepl, val)
+                if (any(special)) {
+                    idx <- which.max(special)
+                    res <- unlist(strsplit(val, before[idx]))
+                    val <- res[2]
+                    res <- paste0(res[2], after[idx], res[1])
+                    result_names[i] <- res
+                }
+                result[[i]] <- result_names[i]
+                result_names[i] <- val
+            }
+            names(result) <- result_names
+            result
         },
 
         reset = function() {
