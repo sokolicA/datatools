@@ -31,13 +31,13 @@ Call <- R6::R6Class(
             args <- list(...)
             private$assert_equal_env(env)
             private$assert_named(args)
-
             private$env <- env
-
             private$add_parsed(args)
-
-
             invisible(self)
+        },
+
+        get = function() {
+            private$expr
         },
 
         eval = function(env=parent.frame()) {#browser()
