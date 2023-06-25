@@ -200,16 +200,15 @@ DataFrame <- R6::R6Class(
         #' $select(mean(x) >5) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
         #' $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
         #'
-        #' @param columns May be character column names or numeric positions. See details.
+        #' @param ... May be character column names or numeric positions. See details.
         #'
         #' @details
         #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
-        select = function(columns) {#browser()
-            if (missing(columns)) columns <- NULL
-            e <- substitute(columns)
+        select = function(...) {#browser()
+            e <- if (missing(...))quote(list(NULL)) else substitute(list(...))
             private$call$set(j=quote(.SD), .SDcols=e, env=parent.frame())
             invisible(self)
         },
