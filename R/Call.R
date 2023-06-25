@@ -208,7 +208,7 @@ Call <- R6::R6Class(
 
                 if (arg[[i]][[1]] == quote(.v)) next;
 
-                if (private$is_function(arg[[i]][[1]], env)) {
+                if (private$is_function(arg[[i]][[1]])) {
                     #TODO add check for arguments!
                     next
                 } else stop("Do not know how to interpret given grouping: ", deparse1(arg[[i]]), ".")
