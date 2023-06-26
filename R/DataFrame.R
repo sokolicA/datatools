@@ -217,6 +217,7 @@ DataFrame <- R6::R6Class(
         #' Used in calculation of statistics.
         #'
         #' @param ... An expression specifying by what to group the data. See details.
+        #' @param .as_key Whether to use the grouping as a key of the resulting `DataFrame`.
         #'
         #' @details Setting by Will override existing grouping without warning.
         #' Pass a character vector of groups `vec` using `c(vec)`.
