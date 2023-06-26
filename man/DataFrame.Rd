@@ -228,8 +228,7 @@ df <- DF(data.table(a=1, b=2))
 \item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
 \item \href{#method-DataFrame-aggregate}{\code{DataFrame$aggregate()}}
 \item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
-\item \href{#method-DataFrame-test_call}{\code{DataFrame$test_call()}}
-\item \href{#method-DataFrame-clone}{\code{DataFrame$clone()}}
+\item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -492,19 +491,17 @@ df
 \if{latex}{\out{\hypertarget{method-DataFrame-where}{}}}
 \subsection{Method \code{where()}}{
 Work (operate?) on a subset of rows.
-Experimental. #TODO define how certain methods use the persist option
+Experimental.
 This method will not remove the rows from the data.
 Selected data modifications or calculations will be based only on the selected subset of data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$where(rows, persist = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$where(rows)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{rows}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.}
-
-\item{\code{persist}}{Optional parameter whether the subset should persist after evaluation.}
 }
 \if{html}{\out{</div>}}
 }
@@ -528,15 +525,13 @@ Selected data modifications or calculations will be based only on the selected s
 $select(mean(x) >5) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
 $select(mean(is.na(x)) >0.2) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(columns, persist = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{columns}}{May be character column names or numeric positions. See details.}
-
-\item{\code{persist}}{Whether the subset should persist after  evaluation.}
+\item{\code{...}}{May be character column names or numeric positions. See details.}
 }
 \if{html}{\out{</div>}}
 }
@@ -556,7 +551,7 @@ Invisibly returns itself.
 Group or un-group the data.
 Used in calculation of statistics.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., persist = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., .as_key = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -564,7 +559,7 @@ Used in calculation of statistics.
 \describe{
 \item{\code{...}}{An expression specifying by what to group the data. See details.}
 
-\item{\code{persist}}{Optional parameter whether the grouping should persist after the first evaluation. Defaults to FALSE.}
+\item{\code{.as_key}}{Whether to use the grouping as a key of the resulting \code{DataFrame}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -999,29 +994,16 @@ The underlying \code{data.table} object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-test_call"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-test_call}{}}}
-\subsection{Method \code{test_call()}}{
+\if{html}{\out{<a id="method-DataFrame-copy"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-copy}{}}}
+\subsection{Method \code{copy()}}{
+Create a deep copy of the \code{DataFrame} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$test_call()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$copy()}\if{html}{\out{</div>}}
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$clone(deep = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
+\subsection{Returns}{
+A new \code{DataFrame} object.
 }
 }
 }
