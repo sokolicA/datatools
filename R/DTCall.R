@@ -64,10 +64,14 @@ DTCall <- R6::R6Class(
                         private$expr[["by"]] <- NULL
                     }
                     private$expr[[arg]] <- private$parse_by(args[[arg]])
+                } else if (arg=="i") {
+                    private$expr[[arg]] <- args[[arg]]
                 } else if (arg=="on") {
                     private$expr[[arg]] <- private$parse_on(args[[arg]])
                 } else if (arg==".SDcols") {
                     private$expr[[arg]] <- private$parse_sdcols(args[[arg]], env)
+                } else if (arg=="x") {
+                    stop("Can not change the table with x! Make a new call instead.", call.=FALSE)
                 } else {
                     private$expr[[arg]] <- args[[arg]]
                 }
@@ -93,9 +97,9 @@ DTCall <- R6::R6Class(
         #' @return Invisibly returns itself.
         #'
         call = function(subset=NULL) {
-            result <- if (is.character(subset)) private$subset(subset) else private$expr
-            if (any(names(result) %in% c("i", "j"))) return(result)
-            result[["x"]]
+            call <- if (is.character(subset)) private$subset(subset) else private$expr
+            result <- if (any(names(call) %in% c("i", "j"))) call else call[["x"]]
+            enquo(result, private$env)
         },
 
         #' @description Return the `data.table` call with its environment.
@@ -153,6 +157,60 @@ DTCall <- R6::R6Class(
         reset = function() {
             private$expr <- private$expr[1:2]
         },
+
+        parse_i = function(e, env) {#browser()
+            # e can be:
+            # 1. name/symbol - is.name
+            # 2. atomic - null, character, integer,...
+            # 3. a primitive: builtin (is.integer) or special (&)
+            # 3. a direct function call (e.g. grepl("a", b)) typeof closure, is.function
+            # 4. a non built-in comparison (%in%,..) - syntactic sugar over function calls..typeof == closure
+            # 5. a combination of the above.
+            if (is.atomic(e)) return(e)
+            if (is.symbol(e)) {
+                is_column <- !inherits(try(eval(e, private$tbl, emptyenv()), silent=TRUE), "try-error")
+                if (is_column) return(e)
+
+                ev <- try(eval(e, env), silent=TRUE) # note: if name is not found it will throw an error here
+                if (inherits(ev, "try-error")) stop(attr(ev, "condition")$message, call.=FALSE)
+                if (is.atomic(ev)) return(ev)
+                if (is.function(ev)) stop("Error. When can this happen? Function without arguments")
+
+                e_chr <- deparse1(e)
+                e_env <- find_obj_env(e_chr, env)
+                if (identical(e_env, globalenv()) || isNamespace(e_env)) return(e)
+                warning("Using locally defined functions or variables!", call. = FALSE)
+                return(substitute(get(e_chr, envir=private$i_env)))
+            }
+
+            if (length(e) < 2) stop("Unable to parse expression. Empty function call?")
+
+            if (e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)) {
+                e[[2]] <-  private$parse_i(e[[2]], env)
+                #TODO  the 3rd element should be evaluated inside the second element
+                return(e)
+            }
+
+            f <- eval(e[[1]], env)
+            if (!is.function(f)) stop("First element of expression must be a function!", call.=FALSE)
+            if (length(e[[1]]) > 1) stop("Currently unable to parse functions inside other objects.", call. = FALSE)
+
+
+            if (!any(is.primitive(f), isNamespace(environment(f)), identical(environment(f), globalenv()))) {
+                warning("Using locally defined functions or variables!", call. = FALSE)
+                fun_chr <- deparse1(e[[1]])
+                e[[1]] <- substitute(get(fun_chr, envir=private$i_env))
+            }
+
+
+            for (i in seq_along(e)[-1L]) {
+                e[[i]] <- private$parse_i(e[[i]], env)
+            }
+
+            e
+
+        },
+
         parse_sdcols = function(e, env) {#browser() #TODO
             # e can be:
             # 1. character column names or numeric positions - is.character, is.numeric
