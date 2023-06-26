@@ -18,8 +18,8 @@ Imports:
 LinkingTo: 
     Rcpp
 Collate: 
+    'Call.R'
     'Columns.R'
-    'DTCall.R'
     'StaticEnv.R'
     'RcppExports.R'
     'DataFrame.R'
