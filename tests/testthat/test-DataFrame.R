@@ -37,7 +37,7 @@ test_that("count returns a DataFrame with count of the number of rows", {
 
     df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
     expect_equal(df$count(), DF(data.table(N=5)))
-    expect_equal(df$group_by(g)$count()$unwrap(), data.table(g=c("a", "b", "c"), N=c(2,1,2), key="g"))
+    expect_equal(df$group_by(g, .as_key=TRUE)$count()$unwrap(), data.table(g=c("a", "b", "c"), N=c(2,1,2), key="g"))
 })
 
 
@@ -244,23 +244,7 @@ test_that("filter does not work with character vector", {
     expect_error(DataFrame$new(data.table(a=1:5, b=1:5))$filter("a"))
 })
 
-test_that("filter works with group_by to filter by group", {
-    df <- DataFrame$new(mtcars, copy=TRUE)
-    df$group_by(cyl)$filter_(mpg==max(mpg))
-    expect_equal(df$unwrap()$mpg, c(21.4, 33.9, 19.2))
-})
 
-
-TestPrivateDF <- R6::R6Class(
-    "TestPrivateDF",
-    inherit=DataFrame,
-    public=list(
-        t_by = function() return(private$by),
-        t_parse_i = function(e, env=parent.frame()) {
-            private$parse_expr(substitute(e), env)
-        }
-    )
-)
 
 TestPrivateCol <- R6::R6Class(
     "TestPrivateCol",
@@ -271,26 +255,6 @@ TestPrivateCol <- R6::R6Class(
     )
 )
 
-test_that("group_by works", {
-    x <- DataFrame$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
-    expect_error(x$group_by(c))
-    expect_error(x$group_by(1))
-    expect_error(x$group_by("c"))
-    x <- TestPrivateDF$new(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
-    x$group_by(x)
-    expect_equal(x$t_by(), quote(list(x)))
-    x$group_by(NULL)
-    expect_null(x$t_by())
-    x$group_by("x")
-    expect_equal(x$t_by(), quote(list(x)))
-    x$group_by(x, x >2, grepl("a", g))
-    expect_equal(x$t_by(), quote(list(x, x>2, grepl("a", g))))
-
-    grping <- "x"
-    expect_error(df$group_by(grping))
-    x$group_by(c(grping))
-    expect_equal(x$t_by(), quote(list(x)))
-})
 
 test_that("find_group_col works", {
     x <- TestPrivateCol$new(data.frame(a=1))
@@ -303,126 +267,6 @@ test_that("rename_grouping works", {
     x <- TestPrivateCol$new(data.frame(a=1))
     e <- quote(list(a, a>2, g=a !=b, d=a, a=gg, f=grepl("x", a)))
     expect_equal(x$t_rename_grouping(e, c("a", "b"), c("c", "d")), quote(list(c, c>2, g=c !=d, d=c, a=gg, f=grepl("x", c))))
-})
-
-
-#
-# test_that("subset works", {
-#     df <- DataFrame$new(data.table(a=1:3, b=1:3))
-#     expect_equal(df$subset(a==1)$count()$unwrap(), data.table(N=1))
-#     expect_equal(df$count()$unwrap(), data.table(N=3))
-#
-#     expect_equal(df$subset(a>1, persist=TRUE)$count()$unwrap(), data.table(N=2))
-#     expect_equal(df$count()$unwrap(), data.table(N=2))
-#
-#
-# })
-
-
-
-test_that("private$i works", {
-
-    TestPrivateDF <- R6::R6Class(
-        "TestPrivateDF",
-        inherit=DataFrame,
-        public=list(
-            t_parse_i = function(e, env=parent.frame()) {
-                #browser()
-                private$parse_i(substitute(e), env)
-            }
-        )
-    )
-
-    chr <- c("a", "b")
-    log <- c(TRUE, FALSE)
-    lng <- quote(mean)
-    blt_1 <- `==`
-    blt_2 <- c
-    fun_base <- mean
-    fun_loc <- function(x) "hi"
-    df <- data.frame(a=1)
-
-    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
-
-    # LENGTH 1
-    expect_null(df$t_parse_i(NULL))
-    expect_equal(df$t_parse_i(a), quote(a))
-    expect_equal(df$t_parse_i("a"), "a")
-    expect_equal(df$t_parse_i(FALSE), FALSE)
-    expect_equal(df$t_parse_i(2), 2)
-    expect_equal(df$t_parse_i(2L), 2L)
-    expect_equal(df$t_parse_i(chr), chr)
-    expect_equal(df$t_parse_i(log), log)
-    expect_equal(df$t_parse_i(blt_1), quote(`==`))
-    expect_equal(df$t_parse_i(blt_2), quote(c))
-    expect_equal(df$t_parse_i(fun_base), quote(get("fun_base", envir=private$i_env)))
-    expect_equal(df$t_parse_i(fun_loc), quote(get("fun_loc", envir=private$i_env)))
-    expect_equal(df$t_parse_i(df), quote(get("df", envir=private$i_env)))
-
-    expect_error(df$t_parse_i(mean()))
-    # LENGTH > 1
-    expect_equal(df$t_parse_i(mean(1:5)), quote(get("mean", envir = private$i_env)(1:5)))
-    expect_equal(df$t_parse_i(list(a)), quote(list(a)))
-})
-
-
-test_that("private$i works 2", {
-
-    TestPrivateDF <- R6::R6Class(
-        "TestPrivateDF",
-        inherit=DataFrame,
-        public=list(
-            t_parse_i = function(e, env=parent.frame()) {
-                #browser()
-                private$parse_i(substitute(e), env)
-            }
-        )
-    )
-
-
-    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
-
-    c <- "g"
-    d <- data.frame(x=1)
-    f <- function(x) "hi"
-    f2 <- function(x) `==`
-    expect_equal(df$t_parse_i(`==`), quote(`==`))
-    expect_equal(df$t_parse_i(f2), quote(get("f2", envir = private$i_env)))
-    expect_equal(df$t_parse_i(a == 3 & b > 2), quote(a == 3 & b > 2))
-})
-
-
-
-test_that("private$parse_sdcols works", {
-
-    TestPrivateDF <- R6::R6Class(
-        "TestPrivateDF",
-        inherit=DataFrame,
-        public=list(
-            t_parse_sdcols = function(e, env=parent.frame()) {
-                #browser()
-                private$parse_sdcols(substitute(e), env)
-            }
-        )
-    )
-
-
-    df <- TestPrivateDF$new(data.table(a=1:3, b=1:3))
-
-    c <- "a"
-    d <- data.frame(x=1)
-    f <- function(x) "hi"
-    f2 <- function(x) `==`
-    expect_error(df$t_parse_sdcols(d))
-    expect_equal(df$t_parse_sdcols(c), "a")
-    expect_equal(df$t_parse_sdcols("a"), "a")
-    expect_equal(df$t_parse_sdcols(-"a"), quote(-"a"))
-    expect_equal(df$t_parse_sdcols(!"a"), quote(!"a"))
-    expect_equal(df$t_parse_sdcols(1:5), quote(1:5))
-    expect_equal(df$t_parse_sdcols(-1:5), quote(-1:5))
-    expect_equal(df$t_parse_sdcols(!c), quote(!"a"))
-    expect_equal(df$t_parse_sdcols(is.numeric), is.numeric)
-    expect_equal(df$t_parse_sdcols(function(x) is.numeric(x) | is.character(x)), function(x) is.numeric(x) | is.character(x))
 })
 
 
@@ -470,71 +314,6 @@ test_that("insert works with subset/filter on columns (J)", {
 
     df$insert(test_2=mean(val[id=="CTRL"]))
     expect_equal(df$unwrap(), expected)
-})
-
-
-test_that("On argument parser works", {
-
-    Test <- R6::R6Class(
-        "Test",
-        inherit=DataFrame,
-        public=list(
-            t_parse_on = function(on) {
-                # browser()
-                e <- substitute(on)
-                private$parse_on(e)
-            }
-        )
-    )
-
-
-    df <- Test$new(data.table(a=1:3, b=1:3))
-
-    # EQUI JOINS
-    expect_equal(df$t_parse_on("a"), quote(c(a = "a")))
-    expect_equal(df$t_parse_on(c("a", "b")), quote(c(a="a", b="b")))
-    expect_equal(df$t_parse_on(c(a="b", b="a")), quote(c(a="b", b="a")))
-    expect_equal(df$t_parse_on(c(a="b", "b")), quote(c(a="b", b="b")))
-    expect_equal(df$t_parse_on(list(a, b)), quote(c(a="a", b="b")))
-    expect_equal(df$t_parse_on(.(a, b)), quote(c(a="a", b="b")))
-    expect_equal(df$t_parse_on(list(a=b, b=a)), quote(c(a="b", b="a")))
-    expect_equal(df$t_parse_on(list(a=b, b)), quote(c(a="b", b="b")))
-    #df$t_parse_on(c("a==b", "b")) # maybe in the future
-
-    # NON-EQUI JOINS
-    expect_equal(df$t_parse_on(list(a>b)), quote(c(a = "a>b")))
-    expect_equal(df$t_parse_on(list(a>b, b)), quote(c(a = "a>b", b="b")))
-    expect_equal(df$t_parse_on(.(a>b)), quote(c(a = "a>b")))
-    expect_equal(df$t_parse_on(.(a>b, b)), quote(c(a = "a>b", b="b")))
-    expect_equal(df$t_parse_on(c("a>b")), quote(c(a = "a>b")))
-    expect_equal(df$t_parse_on(c("a>b", "b")), quote(c(a = "a>b", b="b")))
-})
-
-test_that("reversing the on expression works", {
-
-    Test <- R6::R6Class(
-        "Test",
-        inherit=DataFrame,
-        public=list(
-            t_reverse_on_expr = function(e) {
-                #browser()
-                private$reverse_on_expr(e)
-            }
-        )
-    )
-
-    df <- Test$new(data.table(a=1:3, b=1:3))
-    # EQUI JOINS
-    expect_equal(df$t_reverse_on_expr(quote(c(a = "a"))), quote(c(a = "a")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a="a", b="b"))), quote(c(a="a", b="b")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a="b", b="a"))), quote(c(b="a", a="b")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a="b", b="b"))), quote(c(b="a", b="b")))
-
-    # NON-EQUI JOINS
-    expect_equal(df$t_reverse_on_expr(quote(c(b = "b!=a"))), quote(c(a = "a!=b")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a = "a>b"))), quote(c(b = "b<=a")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a = "a<=b"))), quote(c(b = "b>a")))
-    expect_equal(df$t_reverse_on_expr(quote(c(a = "a>b", b="a"))), quote(c(b = "b<=a", a="b")))
 })
 
 
@@ -630,14 +409,14 @@ test_that("Aggregate works with grouping and filtering", {
 
     expect_equal(df$select(is.numeric)$aggregate(mean(x), sum(x))$unwrap(), data.table(fun=c("mean", "sum"), a=c(3,15), b=c(8,40)))
 
-    expect_equal(df$select("a")$group_by(cond = !b %in% c(6, 7))$aggregate(max(x), mean(x))$unwrap(),
+    expect_equal(df$select("a")$group_by(cond = !b %in% c(6, 7), .as_key=TRUE)$aggregate(max(x), mean(x))$unwrap(),
                  data.table(cond=c(FALSE, FALSE, TRUE, TRUE),
                             fun = c("max", "mean", "max", "mean"),
                             a = c(2.0, 1.5, 5.0, 4.0),
                             key = "cond")
     )
 
-    expect_equal(df$select(is.numeric)$group_by(cond = !b %in% c(6, 7))$aggregate(max(x), mean(x))$unwrap(),
+    expect_equal(df$select(is.numeric)$group_by(cond = !b %in% c(6, 7), .as_key=TRUE)$aggregate(max(x), mean(x))$unwrap(),
                  data.table(cond=c(FALSE, FALSE, TRUE, TRUE),
                             fun = c("max", "mean", "max", "mean"),
                             a = c(2.0, 1.5, 5.0, 4.0),
@@ -645,13 +424,13 @@ test_that("Aggregate works with grouping and filtering", {
                             key = "cond")
     )
 
-    expect_equal(df$where(a!=2)$group_by(a==2)$select("b")$aggregate(mean(x), sum(x))$unwrap(),
+    expect_equal(df$where(a!=2)$group_by(a==2, .as_key=TRUE)$select("b")$aggregate(mean(x), sum(x))$unwrap(),
                  data.table(
                      `a == 2`=c(FALSE, FALSE),
                      fun=c("mean", "sum"), b=c(8.25, 33), key="a == 2")
     )
 
-    expect_equal(df$where(!a%in%2)$group_by(a%in%2)$select(is.logical)$aggregate(mean(x), sum(x))$unwrap(),
+    expect_equal(df$where(!a%in%2)$group_by(a%in%2, .as_key=TRUE)$select(is.logical)$aggregate(mean(x), sum(x))$unwrap(),
                  data.table(
                      `a %in% 2`=c(FALSE, FALSE),
                      fun=c("mean", "sum"), g=c(0.75, 3.00), key="a %in% 2")
