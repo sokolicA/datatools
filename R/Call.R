@@ -350,11 +350,11 @@ Call <- R6::R6Class(
 
         set_handle_by = function(arg) {
             if (arg=="by" && !is.null(private$expr[["keyby"]])) {
-                warning("Removed previous group by key specification!", call.=FALSE)
+                message("Removed previous group by key specification!", call.=FALSE)
                 private$expr[["keyby"]] <- NULL
             }
             if (arg=="keyby" && !is.null(private$expr[["by"]])) {
-                warning("Removed previous group by specification!", call. = FALSE)
+                message("Removed previous group by specification!", call. = FALSE)
                 private$expr[["by"]] <- NULL
             }
         },
