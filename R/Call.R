@@ -98,6 +98,15 @@ Call <- R6::R6Class(
         #'
         reverse_on = function() {
             private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
+        },
+
+        #' @description Get the column names defined by .SDcols.
+        #'
+        #' @param env The environment in which to evaluate.
+        #'
+        .SD_colnames = function(env=parent.frame(2L)) {
+            tmp <- self$clone()$subset(c(".SDcols"))$set(i=0, j=quote(.SD), env=env)
+            names(tmp$eval(env))
         }
     ),
 
