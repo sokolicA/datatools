@@ -694,7 +694,7 @@ DataFrame <- R6::R6Class(
             BY <- private$call$arg("by")
             if (!is.null(BY)) {
                 tmp <- i
-                i <- substitute(private$tbl[, .I[tmp], by=BY]$V1)
+                i <- substitute(.__private__$tbl[, .I[tmp], by=BY]$V1)
             }
             call$set(i=i, env=parent.frame(2L))$eval(parent.frame(2L))
         }
