@@ -9,17 +9,23 @@ Call <- R6::R6Class(
     portable=TRUE,
 
     public = list(
-
+        #' @description Constructor.
+        #'
         initialize = function() {
             private$start_call(quote(x))
             invisible(self)
         },
 
+        #' @description Print method.
+        #'
         print = function() {
             print(private$expr)
             invisible(self)
         },
 
+        #' @description Use DataFrame for the call.
+        #'
+        #' @param df The private part of a DataFrame.
         use = function(df) {
             private$validate_df(df)
             private$df <- df
@@ -27,6 +33,11 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Set or remove arguments to call.
+        #'
+        #' @param ... Named language objects.
+        #' @param env The environment used to set the arguments.
+        #'
         set = function(..., env=parent.frame(2L)) {#browser()
             args <- list(...)
             private$assert_equal_env(env)
@@ -36,10 +47,16 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Get the call expression.
+        #'
         get = function() {
             private$expr
         },
 
+        #' @description Evaluate the call.
+        #'
+        #' @param env The environment in which to evaluate.
+        #'
         eval = function(env=parent.frame(2L)) {#browser()
             private$assert_equal_env(env)
 
@@ -51,22 +68,34 @@ Call <- R6::R6Class(
             result
         },
 
+        #' @description Get a specific argument.
+        #'
+        #' @param name Name of the argument to get.
+        #'
         arg = function(name) {
             if (!is_string(name)) stop("'arg' must be a string!")
             private$expr[[name]]
         },
 
+        #' @description Subset the call.
+        #'
+        #' @param args Character vector of arguments to keep.
+        #'
         subset = function(args) {
             private$expr <- private$expr[names(private$expr) %in% c("", "x", args)]
             invisible(self)
         },
 
+        #' @description Get the used grouping.
+        #'
         grouping = function() {
             result <- self$arg("by")
             if (is.null(result)) result <- self$arg("keyby")
             result
         },
 
+        #' @description Reverse the on expression.
+        #'
         reverse_on = function() {
             private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
         }
