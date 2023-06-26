@@ -13,6 +13,7 @@ Call <- R6::R6Class(
         #'
         initialize = function() {
             private$start_call(quote(x))
+            private$verbose <- getOption("DataFrame.verbose", FALSE)
             invisible(self)
         },
 
@@ -62,9 +63,11 @@ Call <- R6::R6Class(
 
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
+            if (private$verbose) message("Evaluating: ", deparse1(call))
             result <- eval(call, envir=eval_env, enclos=eval_env)
 
             private$reset()
+            if (private$verbose) message("Rows affected: ", .Last.updated)
             result
         },
 
@@ -117,6 +120,8 @@ Call <- R6::R6Class(
         expr = NULL,
 
         env = NULL,
+
+        verbose = NULL,
 
         start_call = function(x) {
             private$expr <- call("[", x=x)
