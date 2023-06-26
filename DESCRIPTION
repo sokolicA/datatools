@@ -20,7 +20,6 @@ LinkingTo:
 Collate: 
     'Call.R'
     'Columns.R'
-    'StaticEnv.R'
     'RcppExports.R'
     'DataFrame.R'
     'datatools-package.R'

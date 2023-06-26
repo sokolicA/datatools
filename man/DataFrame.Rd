@@ -5,14 +5,12 @@
 \alias{DF}
 \title{DataFrame Class}
 \usage{
-DF(tbl, copy = FALSE, alias = NULL)
+DF(tbl, copy = FALSE)
 }
 \arguments{
 \item{tbl}{An object of class \code{data.frame}.}
 
 \item{copy}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
-
-\item{alias}{Optional alias of the DataFrame.}
 }
 \value{
 A \code{DataFrame} object.
@@ -196,8 +194,6 @@ df <- DF(data.table(a=1, b=2))
 \item{\code{columns}}{Column names object.}
 
 \item{\code{key}}{Key getter.}
-
-\item{\code{static}}{Static Information}
 }
 \if{html}{\out{</div>}}
 }
@@ -237,7 +233,7 @@ df <- DF(data.table(a=1, b=2))
 \subsection{Method \code{new()}}{
 \code{DataFrame} Constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, copy = FALSE, alias = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, copy = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -246,8 +242,6 @@ df <- DF(data.table(a=1, b=2))
 \item{\code{tbl}}{An object of class \code{data.frame}.}
 
 \item{\code{copy}}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
-
-\item{\code{alias}}{Optional alias of the DataFrame.}
 }
 \if{html}{\out{</div>}}
 }
