@@ -670,9 +670,6 @@ DataFrame <- R6::R6Class(
             cat(divisor, "\n")
         },
 
-        finalize = function() {
-
-        },
 
         finalize_aggregate = function(result, f_expr, by_expr) {
             if (f_expr[[1]] == quote(list)) {
