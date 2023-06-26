@@ -182,7 +182,12 @@ DataFrame <- R6::R6Class(
         #' @return Invisibly returns itself.
         where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
-            private$call$set(i=substitute(rows), env=parent.frame())
+            BY <- private$call$arg("by")
+            i <- substitute(rows)
+            if (!is.null(BY)) {
+                i <- substitute(.__private__$tbl[, .I[i], by=BY]$V1)
+            }
+            private$call$set(i=i, env=parent.frame())
             invisible(self)
         },
 
