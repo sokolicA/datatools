@@ -1,7 +1,3 @@
-#CONTINUE: always catch the caller env in the DF method. make a private member with the env address
-# couple DTCall with DF - accept env as init
-# for now do not allow sets from different environments!
-
 #' @title DataFrame Class
 #'
 #' @description A wrapper class for tabular data objects of class `data.frame`.
