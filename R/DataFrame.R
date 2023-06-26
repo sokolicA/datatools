@@ -415,10 +415,10 @@ DataFrame <- R6::R6Class(
         #'
         #'
         #' @examples
-        # x <- data.table(a=1:3, b = c("a", "b", "a"))
-        # y <- data.table(a=c("b", "c", "a"), b = 5:7)
-        # df <- DF(x)
-        # df$left_join(y, .(b=a))
+        #' x <- data.table(a=1:3, b = c("a", "b", "a"))
+        #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
+        #' df <- DF(x)
+        #' df$left_join(y, .(b=a))
         left_join = function(other, on) {#browser()
             call <- Call$new()$set(x=quote(other), i=quote(private$tbl), on=substitute(on), mult="all", nomatch=NA, env=environment())
             ON <- call$arg("on")
