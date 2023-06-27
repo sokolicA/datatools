@@ -637,30 +637,6 @@ DataFrame <- R6::R6Class(
             new_cols
         },
 
-        print_header = function() {
-            d <- dim(private$tbl)
-            title <- paste("Wrapping a", d[1], "x", d[2], "data.table.\n")
-            group <- if (!is.null(private$call$grouping())) {
-                txt <- gsub("(^list\\()|(\\)$)", "", deparse1(private$call$grouping()))
-                paste("  Grouped by:", txt, "\n")
-            } else NULL
-            i <- if (!is.null(private$call$arg("i"))) {
-                txt <- deparse1(private$call$arg("i"))
-                paste("  Using rows where:", txt, "\n")
-            } else NULL
-            sdcols <- if (!is.null(private$call$arg(".SDcols"))) {
-                txt <- deparse1(private$call$arg(".SDcols"))
-                paste("  Columns subset using:", txt, "\n")
-            } else NULL
-            length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
-            divisor <- paste0(rep("-", times = length), collapse="")
-            cat(title)
-            cat(i)
-            cat(sdcols)
-            cat(group)
-            cat(divisor, "\n")
-        },
-
 
         finalize_aggregate = function(result, f_expr, by_expr) {
             if (f_expr[[1]] == quote(list)) {
@@ -696,6 +672,18 @@ DataFrame <- R6::R6Class(
                 i <- substitute(.__private__$tbl[, .I[tmp], by=BY]$V1)
             }
             call$set(i=i, env=parent.frame(2L))$eval(parent.frame(2L))
+        },
+
+        print_header = function() {
+            d <- dim(private$tbl)
+            title <- paste("Wrapping a", d[1], "x", d[2], "data.table.\n")
+            group <- paste1("  Grouped by: ", private$call$grouping(TRUE), "\n")
+            i <- paste1("  Using rows where:", private$call$arg("i", TRUE), "\n")
+            sdcols <- paste1("  Columns subset using:", private$call$arg(".SDcols", TRUE), "\n")
+            length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
+            divisor <- paste0(rep("-", times = length), collapse="")
+            cat(title, i, sdcols, group, divisor, "\n")
         }
+
     )
 )
