@@ -80,9 +80,14 @@ Call <- R6::R6Class(
         #'
         #' @param name Name of the argument to get.
         #'
-        arg = function(name) {
-            if (!is_string(name)) stop("'arg' must be a string!")
-            private$expr[[name]]
+        arg = function(name, as_chr=FALSE) {
+            if (!is_string(name)) stop("'name' must be a string!")
+            result <- private$expr[[name]]
+            if (as_chr && !is.null(result)) {
+                result <- deparse1(result)
+                if (name=="by" || name=="keyby") result <- gsub("(^list\\()|(\\)$)", "", result)
+            }
+            result
         },
 
         #' @description Subset the call.
@@ -97,9 +102,10 @@ Call <- R6::R6Class(
 
         #' @description Get the used grouping.
         #'
-        grouping = function() {
+        grouping = function(as_chr=FALSE) {
             result <- self$arg("by")
             if (is.null(result)) result <- self$arg("keyby")
+            if (as_chr && !is.null(result)) result <- gsub("(^list\\()|(\\)$)", "", deparse1(result))
             result
         },
 
