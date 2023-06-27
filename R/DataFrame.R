@@ -13,22 +13,18 @@ DataFrame <- R6::R6Class(
     cloneable=FALSE,
 
     public = list(
-        #' @description `DataFrame` Constructor
+        #' @description `DataFrame` Constructor.
         #'
         #' @param tbl An object of class `data.frame`.
-        #' @param copy Optional argument specifying whether to wrap a copy of the passed object. Defaults to `FALSE`.
+        #' @param copy Optional argument specifying whether to wrap a copy of the passed object. Defaults to `FALSE`. See details.
         #'
-        #' @details The table is not copied by default which improves speed and memory performance.
+        #' @details The table is not copied by default for speed and memory performance.
         #' Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
         initialize = function(tbl, copy=FALSE) {
             #CONSIDER adding ... as argument which will allow to create a DataFrame by passing vectors of same length: DF(1:5, LETTERS[1:5]).
             #CONSIDER allowing lists as in data.table construction
-            stopifnot("tbl must be a data.frame" = inherits(tbl, "data.frame"))
-            if (copy) {
-                private$tbl <- data.table::as.data.table(tbl)
-            } else {
-                private$tbl <- data.table::setDT(tbl)
-            }
+            if (!inherits(tbl, "data.frame")) stop("tbl must be a data.frame!")
+            private$tbl <- if (copy) data.table::as.data.table(tbl) else data.table::setDT(tbl)
             private$call <- Call$new()$use(private)
             invisible(self)
         },
