@@ -81,8 +81,8 @@ extend_body <- function(fun, with, position=1L) {
     if (length(b) == 1 || b[[1]] != quote(`{`)) b <- call("{", b)
     nb <- as.call(append(as.list(b), with, after=position))
 
-    body(f) <- nb
-    f
+    body(fun) <- nb
+    fun
 }
 
 paste1 <- extend_body(paste0, quote(if (any(sapply(list(...), is.null))) return(NULL)), 1L)
