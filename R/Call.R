@@ -11,8 +11,11 @@ Call <- R6::R6Class(
     public = list(
         #' @description Constructor.
         #'
-        initialize = function() {
+        #' @param depth The default number of frames after the caller environment.
+        #'
+        initialize = function(depth=2L) {
             private$start_call(quote(x))
+            private$depth <- depth
             private$verbose <- getOption("DataFrame.verbose", FALSE)
             invisible(self)
         },
@@ -39,8 +42,9 @@ Call <- R6::R6Class(
         #' @param ... Named language objects.
         #' @param env The environment used to set the arguments.
         #'
-        set = function(..., env=parent.frame(2L)) {#browser()
+        set = function(..., env) {#browser()
             args <- list(...)
+            if (missing(env)) env <- parent.frame(private$depth)
             private$assert_equal_env(env)
             private$assert_named(args)
             private$env <- env
@@ -59,6 +63,7 @@ Call <- R6::R6Class(
         #' @param env The environment in which to evaluate.
         #'
         eval = function(env=parent.frame(2L)) {#browser()
+            if (missing(env)) env <- parent.frame(private$depth)
             private$assert_equal_env(env)
 
             eval_env <- private$build_eval_env(env)
@@ -107,7 +112,8 @@ Call <- R6::R6Class(
         #'
         #' @param env The environment in which to evaluate.
         #'
-        .SD_colnames = function(env=parent.frame(2L)) {
+        .SD_colnames = function(env) {
+            if (missing(env)) env <- parent.frame(private$depth)
             tmp <- self$clone()$subset(c(".SDcols"))$set(i=0, j=quote(.SD), env=env)
             names(tmp$eval(env))
         }
@@ -122,6 +128,8 @@ Call <- R6::R6Class(
         env = NULL,
 
         verbose = NULL,
+
+        depth = NULL,
 
         start_call = function(x) {
             private$expr <- call("[", x=x)
