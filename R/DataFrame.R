@@ -107,14 +107,16 @@ DataFrame <- R6::R6Class(
 
         #' @description Count the number of rows.
         #'
-        #' @return A `DataFrame` with the row counts. The result will be keyed by the grouping if a grouped `DataFrame` was used.
+        #' @details Affected by the setup verbs `where` and `group_by`.
+        #'
+        #' @return A `DataFrame` with the row counts.
         #'
         #' @examples
         #' df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
         #' df$count()
         #' df$group_by(g)$count()
         count = function() {
-            result <- private$call$set(j=quote(list(.N)))$subset(c("i", "j", "by", "keyby"))$eval()
+            result <- private$call$subset(c("i", "by", "keyby"))$set(j=quote(list(.N)))$eval()
             DataFrame$new(result)
         },
 
