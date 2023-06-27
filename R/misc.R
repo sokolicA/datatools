@@ -54,3 +54,35 @@ find_obj_env <- function(name, start=parent.frame()) {
         find_obj_env(name, parent.env(start))
     }
 }
+
+
+
+#' Extend the body of a function.
+#'
+#' @param fun The function of which the body is to be extended.
+#' @param with A language object to be inserted into the function body of `fun`.
+#' @param position The position where `with` is to be inserted. Either 1 (before) or 2 (after) the existing body.
+#'
+#' @details A function must have a body in order to be able to extend it.
+#' Primitive functions do not have a function body and trying to extend their body will result in an error.
+#' See chapter 6.2.2 Primitive functions in https://adv-r.hadley.nz/functions.html.
+#'
+#'
+#' @return A new function with the extended body.
+#' @export
+#'
+#' @examples
+#' mean_verbose <- extend_body(mean, quote(message("Calculating mean!")), 1L)
+#' mean_verbose(1:5)
+extend_body <- function(fun, with, position=1L) {
+    b <- body(fun)
+    if (is.null(b)) stop("Function has no body!")
+
+    if (length(b) == 1 || b[[1]] != quote(`{`)) b <- call("{", b)
+    nb <- as.call(append(as.list(b), with, after=position))
+
+    body(f) <- nb
+    f
+}
+
+paste1 <- extend_body(paste0, quote(if (any(sapply(list(...), is.null))) return(NULL)), 1L)
