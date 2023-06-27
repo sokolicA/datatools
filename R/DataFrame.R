@@ -197,22 +197,36 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Work on a subset of the columns.
-        #' Experimental. #TODO define behaviour of other methods.
-        #' This method will not remove the columns from the data.
-        #' Selected data modifications or calculations will be based only on the selected subset of data.
+        #' @description Operate on a subset of the columns.
         #'
-        #' $select(mean(x) >5) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
-        #' $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
+        #' Part of the *setup methods*. Sets the `.SDcols` argument.
         #'
-        #' @param ... May be character column names or numeric positions. See details.
+        #' Eligible data modifications (*update methods*) or calculations
+        #' (*transformation methods*) will be based only on the used subset of data
+        #' and using them will entirely reset the *setup methods*.
+        #'
+        #' Note that this method will not remove the columns from the data. Use `$columns$drop` instead.
+        #'
+        #' @param ... May be character vector of column names or numeric positions. See details.
         #'
         #' @details
-        #'  The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+        #'  The form startcol:endcol is also allowed. Dropping the specified columns can be
+        #'  accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
         #'  See documentation of `.SDcols` in `?data.table::data.table` for more possibilities.
         #'
         #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #'
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$select(c("mpg", "cyl"))$print()
+        #' df$select(1:2)$print()
+        #' df$select(is.numeric)$print()
+        #' df$select(is.character)$print()
+        #' df$select(patterns("m"))$print()
         select = function(...) {#browser()
+            #IDEA $select(mean(x) >5) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
+            #IDEA $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
             e <- if (missing(...))quote(list(NULL)) else substitute(list(...))
             private$call$set(j=quote(.SD), .SDcols=e)
             invisible(self)
