@@ -158,18 +158,33 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Work (operate?) on a subset of rows.
-        #' Experimental.
-        #' This method will not remove the rows from the data.
-        #' Selected data modifications or calculations will be based only on the selected subset of data.
+        #' @description Operate on a subset of rows.
         #'
+        #' Part of the *setup methods*.
         #'
-        #' @param rows An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.
+        #' This method sets the `i` argument of the `data.table` call without evaluating the call.
+        #' Eligible data modifications (*update methods*) or calculations
+        #' (*transformation methods*) will be based only on the used subset of data
+        #' and using them will entirely reset the *setup methods*.
+        #'
+        #' Note that this is fundamentally different than the `$filter` method, which
+        #' evaluates and returns the subset.
+        #'
+        #' @param rows An expression to be evaluated inside the table,
+        #' integer vector specifying rows to remove or a logical vector.
         #'
         #' @details
         #' If `rows` is missing or `NULL` then all rows will be used.
         #'
+        #' Experimental: **Subsetting by group.** If grouping is already specified when calling `where`, the
+        #' subsetting will be done by group. See examples.
+        #'
         #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$where(mpg > 20)$print()
+        #' df$group_by(vs)$where(mpg == max(mpg))$print()
         where = function(rows) {#browser()
             if (missing(rows)) rows <- NULL
             BY <- private$call$arg("by")
