@@ -33,7 +33,9 @@ DataFrame <- R6::R6Class(
         #'
         #' @nrows Even number of rows to print. Defaults to 12.
         #'
-        #' @details The method used is `print.data.table`.
+        #' @details The output is affected by the setup verbs `where` and `select`.
+        #' The header of the output is information about the `DataFrame`.
+        #' The method used to print the table is `print.data.table` using custom arguments.
         #'
         print = function(nrows=12L) {
             caller_env <- if (length(sys.calls())==1) parent.frame() else parent.frame(3L) # df$print() or df
