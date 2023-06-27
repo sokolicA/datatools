@@ -31,7 +31,7 @@ DataFrame <- R6::R6Class(
 
         #' @description Print the table object.
         #'
-        #' @nrows Even number of rows to print. Defaults to 12.
+        #' @param nrows Even number of rows to print. Defaults to 12.
         #'
         #' @details The output is affected by the setup verbs `where` and `select`.
         #' The header of the output is information about the `DataFrame`.
