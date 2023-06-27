@@ -71,8 +71,8 @@ Call <- R6::R6Class(
             if (private$verbose) message("Evaluating: ", deparse1(call))
             result <- eval(call, envir=eval_env, enclos=eval_env)
 
+            if (private$verbose && private$is_update()) message("Rows affected: ", .Last.updated)
             private$reset()
-            if (private$verbose) message("Rows affected: ", .Last.updated)
             result
         },
 
@@ -383,6 +383,11 @@ Call <- R6::R6Class(
         reset = function() {
             private$expr <- private$expr[1:2]
             private$env <- NULL
+        },
+
+        is_update = function() {
+            j <- private$expr[["j"]]
+            !is.null(j) && length(j) > 1 && j[[1]] == quote(`:=`)
         },
 
         is_extraction = function(e) {
