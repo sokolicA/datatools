@@ -177,7 +177,7 @@ DataFrame <- R6::R6Class(
         #' If `rows` is missing or `NULL` then all rows will be used.
         #'
         #' Experimental: **Subsetting by group.** If grouping is already specified when calling `where`, the
-        #' subsetting will be done by group. See examples.
+        #' subsetting will be done by group and the `group_by` setup will be consumed. See examples.
         #'
         #' @return Invisibly returns itself.
         #'
@@ -189,7 +189,10 @@ DataFrame <- R6::R6Class(
             if (missing(rows)) rows <- NULL
             BY <- private$call$arg("by")
             i <- substitute(rows)
-            if (!is.null(BY)) i <- substitute(.__private__$tbl[, .I[i], by=BY]$V1)
+            if (!is.null(BY)) {
+                i <- substitute(.__private__$tbl[, .I[i], by=BY]$V1)
+                private$call$set(by=NULL, keyby=NULL)
+            }
             private$call$set(i=i)
             invisible(self)
         },
