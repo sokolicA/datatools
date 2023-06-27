@@ -232,14 +232,21 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Group or un-group the data.
-        #' Used in calculation of statistics.
+        #' @description Operate on groups of data.
+        #'
+        #' Part of the *setup methods*. Sets the `by` or `keyby` argument.
+        #'
+        #' Eligible data modifications (*update methods*) or calculations
+        #' (*transformation methods*) will be group based
+        #' and using them will entirely reset the *setup methods*.
         #'
         #' @param ... An expression specifying by what to group the data. See details.
         #' @param .as_key Whether to use the grouping as a key of the resulting `DataFrame`.
         #'
-        #' @details Setting by Will override existing grouping without warning.
-        #' Pass a character vector of groups `vec` using `c(vec)`.
+        #' @details
+        #' Using `.as_key=TRUE` is suggested when using *transformation methods* but
+        #' usually discouraged using *update methods*.
+        #'
         #' Set to `NULL` to remove any existing grouping.
         #'
         #' @return Invisibly returns itself.
