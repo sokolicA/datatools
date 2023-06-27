@@ -36,7 +36,7 @@ DataFrame <- R6::R6Class(
         #' @details The method used is `print.data.table`.
         #'
         print = function(nrows=12L) {
-            caller_env <- if (length(sys.calls())==1) parent.frame() else parent.frame(3L)
+            caller_env <- if (length(sys.calls())==1) parent.frame() else parent.frame(3L) # df$print() or df
             call <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD), env=caller_env)
             result <- call$eval(caller_env)
             private$print_header()
