@@ -306,6 +306,7 @@ DataFrame <- R6::R6Class(
         #'    df$update(g = a, dd = ifelse(a==2, b, 0))
         update = function(...) {#browser()
             #TODO add tests
+            #TODO add note about filtering on j: df[, a:=max(w[id==1]), by=c], See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate. Also used with insert.
             j <- substitute(list(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) stop("Use the insert method to add new columns!")
             j[[1]] <- quote(`:=`)
