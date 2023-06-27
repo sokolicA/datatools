@@ -270,18 +270,23 @@ DataFrame <- R6::R6Class(
         },
 
         #' @description Set column values.
-        #' Experimental. #TODO define behaviour of other methods.
         #'
-        #' @param value Value to assign to the columns and rows specified by where.
+        #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
+        #'
+        #' @param value Value to assign. Can also be a function. See examples.
         #'
         #' @details
-        #' TO ADD
+        #' If `where` is not set then all rows will be set to the value.
+        #' If `select` is not set then all columns will be set to the value.
         #'
         #' @examples
         #' df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
         #' df$select(is.character)$where(a==2)$set(a); df
         #' df$where(a==2)$set(fifelse(a==3, 1, 0)); df
         #' df$select(is.numeric)$set(NA); df
+        #'
+        #' df <- DF(mtcars, copy=FALSE)
+        #' df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))
         #'
         #' @return Invisibly returns itself.
         set = function(value) {#browser()
