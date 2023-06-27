@@ -122,13 +122,13 @@ DataFrame <- R6::R6Class(
 
         #' @description Create a new `DataFrame` with filter applied to the rows.
         #'
-        #' @param keep An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
+        #' @param keep An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details.
         #'
         #' @details
         #' \itemize{
         #' \item If an expression is passed it will be evaluated inside the context of the table.
         #' \item If an integer vector is passed, the rows specified will be kept. Passing duplicated numbers will result in duplicated rows and passing numbers larger than the number of rows will result in `NA` rows.
-        #' \item If a logical vector is passed it must be of the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be removed.
+        #' \item If a logical vector is passed it must either of length one the same length as the number of rows. Logical `NA` values are treated as `FALSE` and those rows will not be returned.
         #'}
         #'
         #' @return A new `DataFrame` with kept rows.
