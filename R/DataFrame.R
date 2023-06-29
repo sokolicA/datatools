@@ -329,7 +329,18 @@ DataFrame <- R6::R6Class(
 
         #' @description Update table columns by reference.
         #'
-        #' @param ... Columns to update and the corresponding calculation.
+        #' @param ... Named arguments in the form `column_name` = `expression`. See examples.
+        #'
+        #' @details
+        #' This method can only be used to update existing columns and will throw an error
+        #' if any of the columns are not found in the table.
+        #' The `$insert` method is intended for adding new columns.
+        #'
+        #' You can also use filtering on `j` with this method. This means that the whole table is
+        #' taken but the operations are done only on a subset of the data in `.SD`.
+        #' See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
+        #' in the examples.
+        #' This is also an option with `$insert`.
         #'
         #' @return Invisibly returns itself.
         #'
@@ -337,11 +348,17 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$update(a = 2)
         #'    df$update(g = a, dd = ifelse(a==2, b, 0))
+        #'
+        #'   # Filtering on i (first transform) vs. filtering on j (second transform)
+        #'    df <- DF(mtcars, copy=TRUE)
+        #'    df$insert(a=NA_real_)$where(vs!=0)$group_by(cyl)$update(a= max(mpg))
+        #'    df$insert(b=NA_real_)$group_by(cyl)$update(b= max(mpg[vs!=0]))
         update = function(...) {#browser()
             #TODO add tests
-            #TODO add note about filtering on j: df[, a:=max(w[id==1]), by=c], See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate. Also used with insert.
             j <- substitute(list(...))
-            if (!all(names(j)[-1L] %in% names(private$tbl))) stop("Use the insert method to add new columns!")
+            if (!all(names(j)[-1L] %in% names(private$tbl))) {
+                stop("Use the insert method to add new columns!")
+            }
             j[[1]] <- quote(`:=`)
             private$call$set(j=j)$subset(c("i", "j", "by", "keyby"))$eval()
         },
