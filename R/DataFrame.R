@@ -281,12 +281,12 @@ DataFrame <- R6::R6Class(
         #'
         #' @examples
         #' df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
-        #' df$select(is.character)$where(a==2)$set(a); df
-        #' df$where(a==2)$set(fifelse(a==3, 1, 0)); df
-        #' df$select(is.numeric)$set(NA); df
+        #' df$select(is.character)$where(a==2)$set(a)$print()
+        #' df$where(a==2)$set(fifelse(a==3, 1, 0))$print()
+        #' df$select(is.numeric)$set(NA)$print()
         #'
         #' df <- DF(mtcars, copy=FALSE)
-        #' df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))
+        #' df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))$print()
         #'
         #' @return Invisibly returns itself.
         set = function(value) {#browser()
