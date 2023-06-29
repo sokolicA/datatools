@@ -304,6 +304,8 @@ DataFrame <- R6::R6Class(
 
         #' @description Transform columns with function
         #'
+        #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
+        #'
         #' @param fun A function that is applied to the selected columns.
         #' @param ... Optional arguments that are passed to `fun`.
         #'#'
@@ -313,16 +315,17 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
         #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
         #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
-        transform = function(fun, ...) {
+        transform = function(fun, ...) {#browser()
             cols <- private$call$.SD_colnames()
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
-                cols_call <- str2lang(paste0("c(", paste0("'", cols, "'", collapse = ","), ")"))
-                private$call$set(j = substitute(`:=` (cols_call, lapply(.SD, fun, ...))))$eval()
+                J <- call(":=", cols, substitute(lapply(.SD, fun, ...)))
+                private$call$set(j = J)$eval()
             }
             invisible(self)
         },
+
 
         #' @description Update table columns by reference.
         #'
