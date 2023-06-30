@@ -35,6 +35,10 @@ print.DataFrame <- function(x, ...) {
 }
 
 
+any_unnamed <- function(call) {
+    is.null(names(call)) || any(names(call)[-1L]=="")
+}
+
 
 merge_calls = function(c1, c2) {
     as.call(c(as.list(c1), as.list(c2)[-1L]))

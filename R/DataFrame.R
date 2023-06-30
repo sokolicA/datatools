@@ -394,7 +394,7 @@ DataFrame <- R6::R6Class(
             if (!inherits(other, "data.table")) stop("Must provide a data.table object.")
             if (is.null(ins) && is.null(upd)) return(invisible(self))
             if (!is.null(upd)) {
-                if (is.null(names(upd)) || any(names(upd)[-1L] == "")) stop("Must provide column names to update!")
+                if (any_unnamed(upd)) stop("Must provide column names to update!")
                 if (!all(names(upd)[-1L] %in% names(private$tbl))) stop("New columns must be provided to the insert argument!")
                 upd[[1L]] <- quote(list)
             }
@@ -521,7 +521,7 @@ DataFrame <- R6::R6Class(
         #' #TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
         insert = function(...) {#browser()
             e <- substitute(list(...))
-            if (is.null(names(e)) || any(names(e)[-1L]=="")) stop("Must pass named columns!")
+            if (any_unnamed(e)) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
             e[[1L]] <- quote(`:=`)
             private$call$set(j=e)$subset(c("i", "j", "by", "keyby"))$eval()
