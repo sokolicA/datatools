@@ -680,10 +680,6 @@ DataFrame <- R6::R6Class(
                     result[i] <- as.character(e[[i]])
                     e[[i]] <- as.name(paste0("x.", e[[i]]))
                 }
-                dupl <- intersect(result[missing], names(private$tbl))
-                # if (length(dupl)>0) {
-                #     warning(paste("Column(s)", paste0(dupl, collapse=", "), "will be overwritten with columns of the same name from the other table."), call. = FALSE)
-                # }
                 names(e) <- result
             }
             e
