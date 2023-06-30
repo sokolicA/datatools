@@ -113,6 +113,7 @@ Call <- R6::R6Class(
         #'
         reverse_on = function() {
             private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
+            invisible(self)
         },
 
         #' @description Get the column names defined by .SDcols.
