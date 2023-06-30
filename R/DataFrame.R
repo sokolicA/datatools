@@ -365,24 +365,21 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform an update join.
         #'
-        #' @param other The other (right) `data.table`.
+        #' @param other The other `data.table`.
         #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
-        #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'add'` to insert all columns from the other table that are not used for joining.
+        #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'all'` to insert all columns from the other table that are not used for joining.
         #' @param update Optional list specifying updates of existing columns. No updates are performed by default.
         #'
         #' @return Invisibly returns the updated itself.
         #'
-        #' Returns an error if there are multiple matches found in the `other` table.
+        #' In case of multiple matches in the `other` table the update by reference
+        #' can not be performed and an error is thrown.
+        #' In such cases use either `left_join` or delete duplicated foreign keys in the `other` table.
         #'
         #' @details
         #'
         #' Using columns from the wrapped `data.table` table in calculations provided in `update` can be done by
         #' prefixing the column names of the left table with **`i.`**. See examples.
-        #'
-        #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
-        #'
-        #' The join will not be performed if there are multiple matches found in the `other` table.
-        #' In such cases use either `left_join` or delete duplicated foreign keys in the `other` table.
         #'
         #' @examples
         #' x <- data.table(a=1:3, b = c("a", "b", "a"))
@@ -392,64 +389,41 @@ DataFrame <- R6::R6Class(
         update_join = function(other, on, insert=NULL, update=NULL) {#browser()
             #CONSIDER To allow data.tables or only DataFrames or both?
             #REFACTOR
-            insert <- substitute(insert)
-            update <- substitute(update)
+            ins <- substitute(insert)
+            upd <- substitute(update)
             if (!inherits(other, "data.table")) stop("Must provide a data.table object.")
-            if (is.null(insert) && is.null(update)) {
-                warning("Provide either insert or update!");
-                return(invisible(self))
+            if (is.null(ins) && is.null(upd)) return(invisible(self))
+            if (!is.null(upd)) {
+                if (is.null(names(upd)) || any(names(upd)[-1L] == "")) stop("Must provide column names to update!")
+                if (!all(names(upd)[-1L] %in% names(private$tbl))) stop("New columns must be provided to the insert argument!")
+                upd[[1L]] <- quote(list)
             }
 
-            inner_j <- Call$new()$set(x=substitute(other), on=substitute(on))
-            inner_j$reverse_on()
-            ON_REV <- inner_j$arg("on")
-            J <- NULL
+            rev_join <- Call$new()$set(x=substitute(other), on=substitute(on))$reverse_on()
 
-            if (is.null(insert)) {
-                #Do nothing
-            } else if (insert=="all") {# add all columns
-                SDCOLS <- setdiff(names(other), names(ON_REV))
-                new_cols <- private$rename_duplicated_cols(SDCOLS)
-                J <- str2lang(paste0(".(", paste(SDCOLS, collapse = ","), ")"))
-            } else {
-                J <- private$add_missing_join_j_expr_names(insert)
-                if (any(names(J)[-1L] %in% names(private$tbl))) stop("Some columns already exist! Provide new column names or use the update argument to update existing columns.", call.=FALSE)
-                new_cols <- names(J)[-1L]
+            if (!is.null(ins)) {
+                if (ins=="all") {
+                    ins_cols <- setdiff(names(other), names(rev_join$arg("on")))
+                    ins <- str2lang(paste0("list(", paste(ins_cols, collapse = ","), ")"))
+                    ins_names <- private$upd_join_rename_duplicated_cols(ins_cols)
+                } else {
+                    ins[[1L]] <- quote(list)
+                    ins <- private$upd_join_add_missing_insert_names(ins)
+                    ins_names <- names(ins)[-1L]
+                    if (any(ins_names %in% names(private$tbl))) stop("Some columns already exist! Provide new column names or use the update argument to update existing columns.", call.=FALSE)
+                }
             }
 
-            if (!is.null(update)) {
-                if (is.null(names(update)) || any(names(update)[-1L] == "")) stop("Must provide column names to update!")
-                if (!all(names(update)[-1L] %in% names(private$tbl))) stop("New columns must be provided to the insert argument!")
-                J <- merge_calls(J, update)
-                new_cols <- c(new_cols, names(update)[-1L])
-            }
-
-            J <- inner_j$set(i=quote(.SD), j=J, mult="all", nomatch=NA)$get()
-
-            private$call$set(j = substitute(`:=` (new_cols, J)))
+            ins_upd <- merge_calls(ins, upd)
+            new_names <- c(ins_names, names(upd)[-1L])
+            J <- rev_join$set(i=quote(.SD), j=ins_upd, mult="all", nomatch=NA)$get()
 
             tryCatch(
-                private$call$eval(),
-                error = function(e) {
-                    if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
-                        stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
-                    }
-                    if (grepl("argument specifying columns specify non existing column\\(s\\)", e)) {
-                        col_name <- gsub(".*=", "", e$message)
-                        param <- gsub(".*unname\\((.*)\\),.*", "\\1", deparse1(e$call))
-                        msg <- paste0("Can not find column ", col_name, " provided in the '", param, "' argument.")
-                        stop (msg, call.=FALSE)
-                    }
-                    if (identical(e$call, quote(eval(jsub, SDenv, parent.frame())))) {
-                        col_name <- gsub(".*'(.*)'.*", "\\1", e$message)
-                        msg <- paste0("Cannot find column '", col_name, "'.")
-                        stop (msg, call.=FALSE)
-                    }
-                    stop(e)
-                }
+                private$call$set(j = call(":=", new_names, J))$eval(),
+                error = private$upd_join_error_handler
             )
 
-            return(invisible(self))
+            invisible(self)
         },
 
         #' @description Perform a left (outer) join.
@@ -672,7 +646,7 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        add_missing_join_j_expr_names = function(e) {
+        upd_join_add_missing_insert_names = function(e) {
             result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
             missing <- which(result == "")[-1L]
             if (any(missing)) {
@@ -685,13 +659,30 @@ DataFrame <- R6::R6Class(
             e
         },
 
-        rename_duplicated_cols = function(new_cols) {
+        upd_join_rename_duplicated_cols = function(new_cols) {
             while (any(dupl <- new_cols %in% names(private$tbl))) {
                 new_cols[dupl] <- paste0(new_cols[dupl], "_y")
             }
             new_cols
         },
 
+        upd_join_error_handler = function(e) {
+            if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
+                stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
+            }
+            if (grepl("argument specifying columns specify non existing column\\(s\\)", e)) {
+                col_name <- gsub(".*=", "", e$message)
+                param <- gsub(".*unname\\((.*)\\),.*", "\\1", deparse1(e$call))
+                msg <- paste0("Can not find column ", col_name, " provided in the '", param, "' argument.")
+                stop (msg, call.=FALSE)
+            }
+            if (identical(e$call, quote(eval(jsub, SDenv, parent.frame())))) {
+                col_name <- gsub(".*'(.*)'.*", "\\1", e$message)
+                msg <- paste0("Cannot find column '", col_name, "'.")
+                stop (msg, call.=FALSE)
+            }
+            stop(e)
+        },
 
         finalize_aggregate = function(result, f_expr, by_expr) {
             if (f_expr[[1]] == quote(list)) {
