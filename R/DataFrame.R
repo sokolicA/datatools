@@ -428,16 +428,14 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform a left (outer) join.
         #'
-        #' @param other The other (right) `data.table`.
-        #' @param on The condition to join the tables on. Either a...
+        #' @param other The other `data.table`.
+        #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
         #'
         #' @return A new `DataFrame` extended with columns from the other table.
         #'
         #'
         #' @details
-        #'
-        #' Note that `list(...)` can be aliased with `.(...)` due to the background use of `data.table`.
-        #'
+        #' The method performs a full left outer join.
         #'
         #' @examples
         #' x <- data.table(a=1:3, b = c("a", "b", "a"))
@@ -449,31 +447,15 @@ DataFrame <- R6::R6Class(
                 x=quote(other), i=quote(private$tbl),
                 on=substitute(on), mult="all", nomatch=NA, env=environment()
             )
+
             ON <- call$arg("on")
             call$reverse_on()
             ON_REV <- call$arg("on")
 
             result <- call$eval(environment())
-            # x[y, on...]
-            # if on column names differ, the column from y is not returned
-            # duplicated columns in y are prefixed with i.
-            # if y has a column of the same name of one of the on columns for x (but is not used in the join), it is also added and prefixed with i.
-            on_x <- names(ON)[-1L]
-            on_y <- names(ON_REV)[-1L]
-            new_x <- old_x <- setdiff(names(private$tbl), on_x)
-            new_y <- old_y <- setdiff(names(other), on_y)
-            dupl <- new_x %in% names(other)
-            dupl_y <- old_y %in% c(old_x[dupl], on_x)
-            old_x[dupl] <- paste0("i.", old_x[dupl])
-            new_y[dupl_y] <- paste0(old_y[dupl_y], "_y")
-
-            data.table::setnames(
-                result,
-                c(on_y, old_y, old_x),
-                c(on_x, new_y, new_x)
-            )
+            private$l_join_rename(result, names(ON)[-1L], names(ON_REV)[-1L], names(other))
             setcolorder(result, names(private$tbl))
-            DF(result)
+            DataFrame$new(result)
         },
 
         #' @description Remove specified rows from the table in place.
@@ -682,6 +664,26 @@ DataFrame <- R6::R6Class(
                 stop (msg, call.=FALSE)
             }
             stop(e)
+        },
+
+        l_join_rename = function(result, on_x, on_y, names_y) {
+            # x[y, on...]
+            # if on column names differ, the column from y is not returned
+            # duplicated columns in y are prefixed with i.
+            # if y has a column of the same name of one of the on columns for x
+            #(but is not used in the join), it is also added and prefixed with i.
+            new_x <- old_x <- setdiff(names(private$tbl), on_x)
+            new_y <- old_y <- setdiff(names_y, on_y)
+            dupl <- new_x %in% names_y
+            dupl_y <- old_y %in% c(old_x[dupl], on_x)
+            old_x[dupl] <- paste0("i.", old_x[dupl])
+            new_y[dupl_y] <- paste0(old_y[dupl_y], "_y")
+
+            data.table::setnames(
+                result,
+                c(on_y, old_y, old_x),
+                c(on_x, new_y, new_x)
+            )
         },
 
         finalize_aggregate = function(result, f_expr, by_expr) {
