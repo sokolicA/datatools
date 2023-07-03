@@ -357,11 +357,10 @@ DataFrame <- R6::R6Class(
         #'    df$insert(b=NA_real_)$group_by(cyl)$update(b= max(mpg[vs!=0]))
         update = function(...) {#browser()
             #TODO add tests
-            j <- substitute(list(...))
+            j <- substitute(`:=`(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) {
                 stop("Use the insert method to add new columns!")
             }
-            j[[1]] <- quote(`:=`)
             private$call$set(j=j)$subset(c("i", "j", "by", "keyby"))$eval()
         },
 
