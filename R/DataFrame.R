@@ -538,12 +538,15 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Create a new `DataFrame` by appending tables using column names.
+        #' @description Create a new `DataFrame` by concatenating table rows.
         #'
         #' @param ... Objects of class `data.frame` or `DataFrame`.
         #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
         #'
-        #' @return A new unkeyed `DataFrame` object with rows appended.
+        #' @return A new unkeyed `DataFrame` object with rows from tables passed in `...` appended.
+        #'
+        #' @details
+        #' The concatenation is based on column names.
         #'
         #' @examples
         #' x <- data.frame(a=1:5, b=1:5)
@@ -554,13 +557,13 @@ DataFrame <- R6::R6Class(
             to_concat <- list(private$tbl, ...)
             tbls <- lapply(to_concat, function(x) {
                 if(inherits(x, "DataFrame")) return(x$unwrap())
-                return(x)
+                x
             })
-            DF(rbindlist(tbls, use.names = TRUE, fill = fill))
+            DataFrame$new(rbindlist(tbls, use.names = TRUE, fill = fill))
         },
 
-        #' @description Concatenate the rows of the `DataFrame`.
-        #' Same as the `$concat` method but without creating a new object.
+        #' @description Concatenate the rows of the `DataFrame` (in place).
+        #' The result of `$concat` method is set as the new underlying table.
         #'
         #' @param ... Objects of class `data.frame` or `DataFrame`.
         #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
@@ -573,7 +576,7 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' df$concat_(y, x, y, df)
         #'
-        concat_ = function(..., fill=FALSE) {browser()
+        concat_ = function(..., fill=FALSE) {#browser()
             private$tbl <- self$concat(..., fill=fill)$unwrap()
             invisible(self)
         },
