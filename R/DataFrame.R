@@ -481,14 +481,14 @@ DataFrame <- R6::R6Class(
             if (try(is.logical(where), silent=TRUE) == TRUE && length(where) != dim(private$tbl)[1]) {
                 stop("Logical vectors must be of equal length as the number of table rows.")
             }
-            idx_remove <- eval(substitute(private$tbl[, .I[where]]))
-            idx_remove <- int_remove_na(idx_remove)
-            removed <- DataFrame$new(private$tbl[idx_remove])
-            private$tbl <- private$tbl[!idx_remove]
+            remove_idx <- Call$new(1L)$use(private)$set(j = substitute(.I[where]))$eval()
+            remove_idx <- int_remove_na(remove_idx)
+            removed <- DataFrame$new(private$tbl[remove_idx])
+            private$tbl <- private$tbl[!remove_idx]
             return(removed)
         },
 
-        #' @description Insert columns to the `DataFrame`.
+        #' @description Insert (add) new columns to the `DataFrame`.
         #'
         #' Experimental. Considerations:
         #' This method will insert new columns by reference.
