@@ -581,14 +581,15 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Data aggregation
+        #' @description Aggregate data.
+        #'
+        #' Part of the *transformation methods*. Uses `where`, `select` and `group_by`.
         #'
         #' @param ... Functions used to create an aggregate summary. See details.
         #'
         #' @details
-        #' An additional column with the name of the function is added to the table.
+        #' An additional column with the name of the function is added to the resulting table.
         #' Passing named arguments will result in using the names in the output. See examples.
-        #'
         #'
         #' @return A `DataFrame`.
         #'
@@ -599,13 +600,13 @@ DataFrame <- R6::R6Class(
         #' df$aggregate(max(x), mean(x))
         #' df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
         aggregate = function(...) {#browser()
-            fexpr <- substitute(list(...))
-            if (grepl("function\\(", deparse(fexpr))) stop("Anonymous functions are not supported!")
+            f <- substitute(list(...))
+            if (grepl("function\\(", deparse(f))) stop("Anonymous functions are not supported!")
             groups <- private$call$grouping()
-            private$call$set(j=substitute(lapply(lapply(.SD, function(x) {fexpr}), unlist)))
+            private$call$set(j=substitute(lapply(lapply(.SD, function(x) {f}), unlist)))
             result <- private$call$eval()
-            private$finalize_aggregate(result, fexpr, groups)
-            DF(result)
+            private$finalize_aggregate(result, f, groups)
+            DataFrame$new(result)
         },
 
         #' @description Get the underlying data.
@@ -705,18 +706,18 @@ DataFrame <- R6::R6Class(
             )
         },
 
-        finalize_aggregate = function(result, f_expr, by_expr) {
-            if (f_expr[[1]] == quote(list)) {
-                f_expr <- f_expr[-1L]
-                f_names <- if (!is.null(names(f_expr))) names(f_expr) else vector("character", length=length(f_expr))
+        finalize_aggregate = function(result, f, by) {
+            if (f[[1]] == quote(list)) {
+                f <- f[-1L]
+                f_names <- if (!is.null(names(f))) names(f) else vector("character", length=length(f))
                 missing <- which(f_names=="")
                 if (length(missing) > 0) {
-                    for (i in missing) f_names[i] <- deparse(f_expr[[i]][[1]])
+                    for (i in missing) f_names[i] <- deparse(f[[i]][[1]])
                 }
-            } else {f_names <- deparse(f_expr[[1]])}
+            } else {f_names <- deparse(f[[1]])}
             result[, fun := rep(f_names, times=dim(result)[1L] %/% length(f_names))]
 
-            groups <- private$aggregate_add_names_by(by_expr)
+            groups <- private$aggregate_add_names_by(by)
             if (!is.null(groups)) {data.table::setnames(result, seq_along(groups), groups)}
             data.table::setcolorder(result, c(groups, "fun"))
         },
