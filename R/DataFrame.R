@@ -522,7 +522,7 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Create a key the table.
+        #' @description Create a key on the table.
         #'
         #' `set_key` sorts the table using `data.table::setkeyv`, which marks it as sorted with an attribute sorted.
         #'
