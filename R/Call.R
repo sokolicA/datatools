@@ -62,7 +62,7 @@ Call <- R6::R6Class(
         #'
         #' @param env The environment in which to evaluate.
         #'
-        eval = function(env=parent.frame(2L)) {#browser()
+        eval = function(env) {#browser()
             if (missing(env)) env <- parent.frame(private$depth)
             private$assert_equal_env(env)
 
