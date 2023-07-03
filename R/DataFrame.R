@@ -329,6 +329,8 @@ DataFrame <- R6::R6Class(
 
         #' @description Update table columns by reference.
         #'
+        #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
+        #'
         #' @param ... Named arguments in the form `column_name` = `expression`. See examples.
         #'
         #' @details
