@@ -512,12 +512,16 @@ DataFrame <- R6::R6Class(
 
         #' @description Create a key the table.
         #'
-        #' `set_key` sorts the table and marks it as sorted with an attribute sorted.
+        #' `set_key` sorts the table using `data.table::setkeyv`, which marks it as sorted with an attribute sorted.
         #'
-        #' @param key A Character vector of column names to set the key on.
+        #' @param ... Column names. Can either be quoted (strings) or unquoted.
         #'
         #' @return Invisibly returns itself.
-        set_key = function(key) {
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$set_key("mpg", "cyl")
+        #' df$set_key(mpg, vs)
+        set_key = function(...) {#browser()
+            key <- as.character(substitute(...()))
             data.table::setkeyv(x=private$tbl, cols=key)
             invisible(self)
         },
