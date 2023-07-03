@@ -494,22 +494,30 @@ DataFrame <- R6::R6Class(
 
         #' @description Insert (add) new columns to the `DataFrame`.
         #'
-        #' Experimental. Considerations:
-        #' This method will insert new columns by reference.
+        #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
         #'
-        #' @param ... Columns to add.
+        #' @param ... Named arguments in the form `column_name` = `expression`. See examples.
         #'
         #' @details
-        #'  #'TO ADD
+        #' This method can only be used to insert new columns and will throw an error
+        #' if any of the columns are already found in the table.
+        #' The `$update` method is intended for adding new columns.
+        #'
+        #' You can also use filtering on `j` with this method. This means that the whole table is
+        #' taken but the operations are done only on a subset of the data in `.SD`.
+        #' See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
+        #' in the examples.
+        #' This is also an option with `$update`.
+        #'
         #' @return Invisibly returns itself.
         #'
         #' @examples
-        #' #TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$insert(mpg2 = mpg**2)
         insert = function(...) {#browser()
-            e <- substitute(list(...))
+            e <- substitute(`:=`(...))
             if (any_unnamed(e)) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
-            e[[1L]] <- quote(`:=`)
             private$call$set(j=e)$subset(c("i", "j", "by", "keyby"))$eval()
             invisible(self)
         },
