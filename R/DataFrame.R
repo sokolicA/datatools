@@ -367,6 +367,8 @@ DataFrame <- R6::R6Class(
 
         #' @description Perform an update join.
         #'
+        #' Part of the *update methods*. Uses `where`.
+        #'
         #' @param other The other `data.table`.
         #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
         #' @param insert Optional list specifying which columns to add. `NULL` (default) does not insert any. Use `'all'` to insert all columns from the other table that are not used for joining.
