@@ -25,18 +25,19 @@ Columns <- R6::R6Class(
             cat(names(private$df_env$tbl), sep = ", ")
         },
 
-        #' @description Drop columns in place
+        #' @description Drop columns in place.
         #'
-        #' @param columns Character vector of the column names to remove.
+        #' @param ... Column names to remove. Can be quoted (as strings) or unquoted.
         #'
         #' @examples
         #' x <- DF(data.frame(a=1:5, b=1:5))
-        #' x$columns$drop("b") #
+        #' x$columns$drop("b")
+        #' x$columns$drop(a)
         #' x$columns$names
-        drop = function(columns) {
-            if (!is.character(columns)) stop("Provide a vector of column names!")
-            if (any(columns %in% private$find_group_cols(private$df_env$call$grouping()))) stop("Can not drop columns used in grouping!")
-            private$df_env$tbl[, (c(columns)) := NULL]
+        drop = function(...) {
+            cols <- as.character(substitute(...()))
+            if (any(cols %in% private$find_group_cols(private$df_env$call$grouping()))) stop("Can not drop columns used in grouping!")
+            private$df_env$tbl[, (c(cols)) := NULL]
         },
 
         #' @description Reorder columns in place
