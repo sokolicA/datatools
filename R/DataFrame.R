@@ -624,6 +624,25 @@ DataFrame <- R6::R6Class(
         is_key_unique = function() {
             if (is.null(self$key)) return(FALSE)
             uniqueN(private$tbl, by = self$key) == nrow(private$tbl)
+        },
+
+        #' @description Drop columns in place.
+        #'
+        #' @param ... Column names to remove. Can be quoted (as strings) or unquoted.
+        #'
+        #' @examples
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$columns$drop("b")
+        #' x$columns$drop(a)
+        #' x$columns$names
+        drop = function(...) {
+            if (missing(...)) return(invisible(self))
+            cols <- stringify_dots(...)
+            if (any(cols %in% private$find_group_cols(private$call$grouping()))) {
+                stop("Can not drop columns used in grouping!")
+            }
+            private$tbl[, (c(cols)) := NULL]
+            invisible(self)
         }
 
     ),
@@ -751,6 +770,31 @@ DataFrame <- R6::R6Class(
             length <- max(sapply(c(title, group, i, sdcols), nchar)) - 1
             divisor <- paste0(rep("-", times = length), collapse="")
             cat(title, i, sdcols, group, divisor, "\n")
+        },
+
+        find_group_cols = function(e) {
+            #CONSIDER moving to Call class?
+            #REFACTOR
+            if (is.null(e)) return(NULL)
+            result <- character(length = length(e) - 1)
+            xtr <- 0
+            for (i in seq_along(e[-1L])) {
+                el <- e[[i+1]]
+                if (is.name(el)) {
+                    result[i+xtr] <- as.character(el)
+                    next
+                }
+                if (is.call(el)) {
+                    multiple <- FALSE
+                    for (j in seq_along(el)[-1L]) {
+                        if (!is.name(el[[j]])) next
+                        if (multiple) xtr <- xtr+1
+                        result[i+xtr] <- as.character(el[[j]])
+                        multiple <- TRUE
+                    }
+                }
+            }
+            result
         }
 
     )
