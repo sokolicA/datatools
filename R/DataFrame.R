@@ -698,9 +698,9 @@ DataFrame <- R6::R6Class(
 
     active = list(
 
-        #' @field columns Column names object.
+        #' @field columns Column names.
         columns = function() {
-            Columns$new(private)
+            names(private$tbl)
         },
 
         #' @field key Key getter.
