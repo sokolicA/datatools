@@ -30,6 +30,7 @@ Call <- R6::R6Class(
         #' @description Use DataFrame for the call.
         #'
         #' @param df The private part of a DataFrame.
+        #'
         use = function(df) {
             private$validate_df(df)
             private$df <- df
@@ -79,6 +80,7 @@ Call <- R6::R6Class(
         #' @description Get a specific argument.
         #'
         #' @param name Name of the argument to get.
+        #' @param as_chr Whether to return as character string.
         #'
         arg = function(name, as_chr=FALSE) {
             if (!is_string(name)) stop("'name' must be a string!")
@@ -101,6 +103,8 @@ Call <- R6::R6Class(
         },
 
         #' @description Get the used grouping.
+        #'
+        #' @param as_chr Whether to return as character string.
         #'
         grouping = function(as_chr=FALSE) {
             result <- self$arg("by")
