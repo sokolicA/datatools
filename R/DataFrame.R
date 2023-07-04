@@ -59,9 +59,7 @@ DataFrame <- R6::R6Class(
         #' @return A new `DataFrame` object.
         #'
         copy = function() {#browser()
-            result <- DataFrame$new(tbl=private$tbl, copy=TRUE)
-            assign("call", private$call$clone(), .subset2(result, ".__enclos_env__")$private)
-            result
+            DataFrame$new(tbl=private$tbl, copy=TRUE)
         },
 
         #' @description Return the first n rows.
