@@ -642,6 +642,24 @@ DataFrame <- R6::R6Class(
             }
             private$tbl[, (c(cols)) := NULL]
             invisible(self)
+        },
+
+        #' @description Set the order of columns in place.
+        #'
+        #' @param order Vector of column names or column numbers specifying the order. See details.
+        #'
+        #' @details
+        #' If length(order) < length(x),
+        #' the specified columns are moved in order to the "front" of x.
+        #' By default, reorder without a specified order moves the key columns in order to the "front".
+        #'
+        #' @examples
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$set_order(c("b", "a"))$print() # same as x$set_order("b")
+        set_order = function(order="key") {
+            if (identical(order, "key")) order <- self$key
+            data.table::setcolorder(private$tbl, neworder = order)
+            invisible(self)
         }
 
     ),
