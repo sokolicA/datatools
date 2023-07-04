@@ -532,7 +532,7 @@ DataFrame <- R6::R6Class(
         #' df$set_key("mpg", "cyl")
         #' df$set_key(mpg, vs)
         set_key = function(...) {#browser()
-            key <- as.character(substitute(...()))
+            key <- stringify_dots(...)
             data.table::setkeyv(x=private$tbl, cols=key)
             invisible(self)
         },

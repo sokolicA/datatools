@@ -35,8 +35,10 @@ Columns <- R6::R6Class(
         #' x$columns$drop(a)
         #' x$columns$names
         drop = function(...) {
-            cols <- as.character(substitute(...()))
-            if (any(cols %in% private$find_group_cols(private$df_env$call$grouping()))) stop("Can not drop columns used in grouping!")
+            cols <- stringify_dots(...)
+            if (any(cols %in% private$find_group_cols(private$df_env$call$grouping()))) {
+                stop("Can not drop columns used in grouping!")
+            }
             private$df_env$tbl[, (c(cols)) := NULL]
         },
 
