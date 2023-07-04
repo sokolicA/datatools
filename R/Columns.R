@@ -53,7 +53,8 @@ Columns <- R6::R6Class(
         #' x <- DF(data.frame(a=1:5, b=1:5))
         #' x$columns$reorder(c("b", "a")) # same as x_cols$reorder("b")
         #' x
-        reorder = function(order=key(private$df_env$tbl)) {
+        reorder = function(order="key") {
+            if (identical(order, "key")) order <- data.table::key(private$df_env$tbl)
             data.table::setcolorder(private$df_env$tbl, neworder = order)
             return(invisible(self))
         },
