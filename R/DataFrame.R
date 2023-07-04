@@ -632,9 +632,8 @@ DataFrame <- R6::R6Class(
         #'
         #' @examples
         #' x <- DF(data.frame(a=1:5, b=1:5))
-        #' x$columns$drop("b")
-        #' x$columns$drop(a)
-        #' x$columns$names
+        #' x$drop("b")
+        #' x$drop(a)
         drop = function(...) {
             if (missing(...)) return(invisible(self))
             cols <- stringify_dots(...)
