@@ -660,6 +660,38 @@ DataFrame <- R6::R6Class(
             if (identical(order, "key")) order <- self$key
             data.table::setcolorder(private$tbl, neworder = order)
             invisible(self)
+        },
+
+        #' @description Rename column names in place.
+        #'
+        #' @param mapping Named character vector.
+        #' Names of the vector elements are the old names and the elements itself are the new names.
+        #'
+        #' @examples
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$rename(c("a"="A", "b"="B"))
+        rename = function(mapping) {
+            if (!is.character(mapping) || is.null(names(mapping))) stop("Provide a named character vector!")
+            private$call$set(by = private$rename_grouping(private$call$grouping(), names(mapping), mapping))
+            data.table::setnames(private$tbl, old=names(mapping), new=mapping)
+            invisible(self)
+        },
+
+        #' @description Rename column names in place using a mapping function.
+        #'
+        #' @param mapper Function that accepts old column names as a character vector and returns a character vector of new column names.
+        #'
+        #' @examples
+        #' x <- DF(data.frame(a=1:5, b=1:5))
+        #' x$rename_with(toupper)
+        #' custom_mapper = function(x) {return(paste0(x, 1))}
+        #' x$rename_with(custom_mapper)
+        rename_with = function(mapper) {
+            if (!is.function(mapper)) stop("Provide a function that maps old names to new names!")
+            cols <- names(private$tbl)
+            private$call$set(by = private$rename_grouping(private$call$grouping(), cols, mapper(cols)))
+            data.table::setnames(private$tbl, old=mapper)
+            invisible(self)
         }
 
     ),
@@ -812,6 +844,26 @@ DataFrame <- R6::R6Class(
                 }
             }
             result
+        },
+
+        rename_grouping = function(e, old, new) {
+            if (is.null(e)) return()
+            for (i in seq_along(e)[-1L]) {
+                el <- e[[i]]
+                if (is.name(el)) {
+                    idx <- which(as.character(el)==old)
+                    if (length(idx) == 1) e[[i]] <- as.name(new[idx])
+                    next
+                }
+                if (is.call(el)) {
+                    for (j in seq_along(el)[-1L]) {
+                        if (!is.name(el[[j]])) next
+                        idx <- which(as.character(el[[j]])==old)
+                        if (length(idx)==1) e[[i]][[j]] <- as.name(new[idx])
+                    }
+                }
+            }
+            e
         }
 
     )
