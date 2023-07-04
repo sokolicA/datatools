@@ -581,7 +581,7 @@ DataFrame <- R6::R6Class(
             DataFrame$new(result)
         },
 
-        #' @description Sort the table rows
+        #' @description Order the table rows by column values.
         #'
         #' @param ...  The columns to sort by. Do not quote column names. See `?data.table::setorder`.
         #'
@@ -590,7 +590,7 @@ DataFrame <- R6::R6Class(
         #' @examples
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$sort(-b)
-        sort = function(...) {
+        order_by = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$tbl, ...)
             return(invisible(self))
