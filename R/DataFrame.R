@@ -29,6 +29,14 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Get the underlying data.
+        #'
+        #' @return The underlying `data.table` object.
+        #'
+        unwrap = function() {
+            private$tbl[]
+        },
+
         #' @description Print the table object.
         #'
         #' @param nrows Even number of rows to print. Defaults to 12.
@@ -44,6 +52,16 @@ DataFrame <- R6::R6Class(
             private$print_header()
             print(result, nrows=nrows, topn=floor(nrows/2), class=TRUE, print.keys=TRUE)
             invisible(self)
+        },
+
+        #' @description Create a deep copy of the `DataFrame` object.
+        #'
+        #' @return A new `DataFrame` object.
+        #'
+        copy = function() {#browser()
+            result <- DataFrame$new(tbl=private$tbl, copy=TRUE)
+            assign("call", private$call$clone(), .subset2(result, ".__enclos_env__")$private)
+            result
         },
 
         #' @description Return the first n rows.
@@ -74,50 +92,6 @@ DataFrame <- R6::R6Class(
         tail = function(n=5L) {
             result <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD))$eval()
             DataFrame$new(tail(result, n))
-        },
-
-        #' @description Sort the table rows
-        #'
-        #' @param ...  The columns to sort by. Do not quote column names. See `?data.table::setorder`.
-        #'
-        #' @return Invisibly returns itself.
-        #'
-        #' @examples
-        #'    df <- DF(data.frame(a=1:5, b=1:5))
-        #'    df$sort(-b)
-        sort = function(...) {
-            if (!is.null(self$key)) stop("Table is already sorted with key!")
-            data.table::setorder(private$tbl, ...)
-            return(invisible(self))
-        },
-
-        #' @description Check whether keys represent unique entries
-        #'
-        #' @return `TRUE` if the set key is unique and `FALSE` otherwise. If no key is set the result is `FALSE`.
-        #'
-        #' @examples
-        #' df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
-        #' df$is_key_unique()
-        #' df <- DF(data.frame(a=1:5, b=1:5))
-        #' df$is_key_unique()
-        is_key_unique = function() {
-            if (is.null(self$key)) return(FALSE)
-            uniqueN(private$tbl, by = self$key) == nrow(private$tbl)
-        },
-
-        #' @description Count the number of rows.
-        #'
-        #' @details Affected by the setup verbs `where` and `group_by`.
-        #'
-        #' @return A `DataFrame` with the row counts.
-        #'
-        #' @examples
-        #' df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
-        #' df$count()
-        #' df$group_by(g)$count()
-        count = function() {
-            result <- private$call$subset(c("i", "by", "keyby"))$set(j=quote(list(.N)))$eval()
-            DataFrame$new(result)
         },
 
         #' @description Create a new `DataFrame` with filter applied to the rows.
@@ -156,6 +130,111 @@ DataFrame <- R6::R6Class(
         filter_ = function(keep) {
             private$tbl <- private$.filter(substitute(keep))
             invisible(self)
+        },
+
+        #' @description Remove specified rows from the table in place.
+        #'
+        #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
+        #'
+        #' @details
+        #' \itemize{
+        #' \item If an expression is passed it will be evaluated inside the context of the table, treating columns as variables.
+        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers will return duplicated rows as removed. `NA` values are treated as `FALSE` and those rows will not be removed.
+        #' \item If a logical vector is passed it must be of the same length as the number of rows. `NA` values are treated as `FALSE` and those rows will not be removed.
+        #'}
+        #'
+        #' @return A `DataFrame` object consisting of removed rows.
+        #' @examples
+        #' df <- DF(data.frame(a=1:5, b=1:5))
+        #' df$remove(a > 2)
+        #' df <- DF(data.frame(a=1:5, b=1:5))
+        #' df$remove(c(1, 3, 5))
+        #' df <- DF(data.frame(a=1:3, b=1:3))
+        #' df$remove(c(TRUE, NA, FALSE))
+        remove = function(where) {
+            if (try(is.logical(where), silent=TRUE) == TRUE && length(where) != dim(private$tbl)[1]) {
+                stop("Logical vectors must be of equal length as the number of table rows.")
+            }
+            remove_idx <- Call$new(1L)$use(private)$set(j = substitute(.I[where]))$eval()
+            remove_idx <- int_remove_na(remove_idx)
+            removed <- DataFrame$new(private$tbl[remove_idx])
+            private$tbl <- private$tbl[!remove_idx]
+            return(removed)
+        },
+
+        #' @description Create a new `DataFrame` by concatenating table rows.
+        #'
+        #' @param ... Objects of class `data.frame` or `DataFrame`.
+        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
+        #'
+        #' @return A new unkeyed `DataFrame` object with rows from tables passed in `...` appended.
+        #'
+        #' @details
+        #' The concatenation is based on column names.
+        #'
+        #' @examples
+        #' x <- data.frame(a=1:5, b=1:5)
+        #' y <- data.frame(a=1:5, b=1:5)
+        #' df <- DF(x)
+        #' res <- df$concat(y, x, y, df)
+        concat = function(..., fill=FALSE) {
+            to_concat <- list(private$tbl, ...)
+            tbls <- lapply(to_concat, function(x) {
+                if(inherits(x, "DataFrame")) return(x$unwrap())
+                x
+            })
+            DataFrame$new(rbindlist(tbls, use.names = TRUE, fill = fill))
+        },
+
+        #' @description Concatenate the rows of the `DataFrame` (in place).
+        #' The result of `$concat` method is set as the new underlying table.
+        #'
+        #' @param ... Objects of class `data.frame` or `DataFrame`.
+        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' x <- data.frame(a=1:5, b=1:5)
+        #' y <- data.frame(a=1:5, b=1:5)
+        #' df <- DF(x)
+        #' df$concat_(y, x, y, df)
+        #'
+        concat_ = function(..., fill=FALSE) {#browser()
+            private$tbl <- self$concat(..., fill=fill)$unwrap()
+            invisible(self)
+        },
+
+        #' @description Perform a left (outer) join.
+        #'
+        #' @param other The other `data.table`.
+        #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
+        #'
+        #' @return A new `DataFrame` extended with columns from the other table.
+        #'
+        #'
+        #' @details
+        #' The method performs a full left outer join.
+        #'
+        #' @examples
+        #' x <- data.table(a=1:3, b = c("a", "b", "a"))
+        #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
+        #' df <- DF(x)
+        #' df$left_join(y, .(b=a))
+        left_join = function(other, on) {#browser()
+            call <- Call$new()$set(
+                x=quote(other), i=quote(private$tbl),
+                on=substitute(on), mult="all", nomatch=NA, env=environment()
+            )
+
+            ON <- call$arg("on")
+            call$reverse_on()
+            ON_REV <- call$arg("on")
+
+            result <- call$eval(environment())
+            private$l_join_rename(result, names(ON)[-1L], names(ON_REV)[-1L], names(other))
+            setcolorder(result, names(private$tbl))
+            DataFrame$new(result)
         },
 
         #' @description Operate on a subset of rows.
@@ -302,30 +381,35 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Transform columns with function
+        #' @description Insert (add) new columns to the `DataFrame`.
         #'
         #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
         #'
-        #' @param fun A function that is applied to the selected columns.
-        #' @param ... Optional arguments that are passed to `fun`.
-        #'#'
+        #' @param ... Named arguments in the form `column_name` = `expression`. See examples.
+        #'
+        #' @details
+        #' This method can only be used to insert new columns and will throw an error
+        #' if any of the columns are already found in the table.
+        #' The `$update` method is intended for adding new columns.
+        #'
+        #' You can also use filtering on `j` with this method. This means that the whole table is
+        #' taken but the operations are done only on a subset of the data in `.SD`.
+        #' See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
+        #' in the examples.
+        #' This is also an option with `$update`.
+        #'
         #' @return Invisibly returns itself.
         #'
         #' @examples
-        #'    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
-        #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
-        #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
-        transform = function(fun, ...) {#browser()
-            cols <- private$call$.SD_colnames()
-            if (length(cols) == 0) {
-                warning("No columns matching the select criteria!")
-            } else {
-                J <- call(":=", cols, substitute(lapply(.SD, fun, ...)))
-                private$call$set(j = J)$eval()
-            }
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$insert(mpg2 = mpg**2)
+        insert = function(...) {#browser()
+            e <- substitute(`:=`(...))
+            if (any_unnamed(e)) stop("Must pass named columns!")
+            if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
+            private$call$set(j=e)$subset(c("i", "j", "by", "keyby"))$eval()
             invisible(self)
         },
-
 
         #' @description Update table columns by reference.
         #'
@@ -429,156 +513,30 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Perform a left (outer) join.
-        #'
-        #' @param other The other `data.table`.
-        #' @param on The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).
-        #'
-        #' @return A new `DataFrame` extended with columns from the other table.
-        #'
-        #'
-        #' @details
-        #' The method performs a full left outer join.
-        #'
-        #' @examples
-        #' x <- data.table(a=1:3, b = c("a", "b", "a"))
-        #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
-        #' df <- DF(x)
-        #' df$left_join(y, .(b=a))
-        left_join = function(other, on) {#browser()
-            call <- Call$new()$set(
-                x=quote(other), i=quote(private$tbl),
-                on=substitute(on), mult="all", nomatch=NA, env=environment()
-            )
-
-            ON <- call$arg("on")
-            call$reverse_on()
-            ON_REV <- call$arg("on")
-
-            result <- call$eval(environment())
-            private$l_join_rename(result, names(ON)[-1L], names(ON_REV)[-1L], names(other))
-            setcolorder(result, names(private$tbl))
-            DataFrame$new(result)
-        },
-
-        #' @description Remove specified rows from the table in place.
-        #'
-        #' @param where An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details
-        #'
-        #' @details
-        #' \itemize{
-        #' \item If an expression is passed it will be evaluated inside the context of the table, treating columns as variables.
-        #' \item If an integer vector is passed, the rows specified will be removed. Passing duplicated numbers will return duplicated rows as removed. `NA` values are treated as `FALSE` and those rows will not be removed.
-        #' \item If a logical vector is passed it must be of the same length as the number of rows. `NA` values are treated as `FALSE` and those rows will not be removed.
-        #'}
-        #'
-        #' @return A `DataFrame` object consisting of removed rows.
-        #' @examples
-        #' df <- DF(data.frame(a=1:5, b=1:5))
-        #' df$remove(a > 2)
-        #' df <- DF(data.frame(a=1:5, b=1:5))
-        #' df$remove(c(1, 3, 5))
-        #' df <- DF(data.frame(a=1:3, b=1:3))
-        #' df$remove(c(TRUE, NA, FALSE))
-        remove = function(where) {
-            if (try(is.logical(where), silent=TRUE) == TRUE && length(where) != dim(private$tbl)[1]) {
-                stop("Logical vectors must be of equal length as the number of table rows.")
-            }
-            remove_idx <- Call$new(1L)$use(private)$set(j = substitute(.I[where]))$eval()
-            remove_idx <- int_remove_na(remove_idx)
-            removed <- DataFrame$new(private$tbl[remove_idx])
-            private$tbl <- private$tbl[!remove_idx]
-            return(removed)
-        },
-
-        #' @description Insert (add) new columns to the `DataFrame`.
+        #' @description Transform columns with function
         #'
         #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
         #'
-        #' @param ... Named arguments in the form `column_name` = `expression`. See examples.
-        #'
-        #' @details
-        #' This method can only be used to insert new columns and will throw an error
-        #' if any of the columns are already found in the table.
-        #' The `$update` method is intended for adding new columns.
-        #'
-        #' You can also use filtering on `j` with this method. This means that the whole table is
-        #' taken but the operations are done only on a subset of the data in `.SD`.
-        #' See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
-        #' in the examples.
-        #' This is also an option with `$update`.
-        #'
+        #' @param fun A function that is applied to the selected columns.
+        #' @param ... Optional arguments that are passed to `fun`.
+        #'#'
         #' @return Invisibly returns itself.
         #'
         #' @examples
-        #' df <- DF(mtcars, copy=TRUE)
-        #' df$insert(mpg2 = mpg**2)
-        insert = function(...) {#browser()
-            e <- substitute(`:=`(...))
-            if (any_unnamed(e)) stop("Must pass named columns!")
-            if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
-            private$call$set(j=e)$subset(c("i", "j", "by", "keyby"))$eval()
+        #'    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+        #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
+        #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
+        transform = function(fun, ...) {#browser()
+            cols <- private$call$.SD_colnames()
+            if (length(cols) == 0) {
+                warning("No columns matching the select criteria!")
+            } else {
+                J <- call(":=", cols, substitute(lapply(.SD, fun, ...)))
+                private$call$set(j = J)$eval()
+            }
             invisible(self)
         },
 
-        #' @description Create a key on the table.
-        #'
-        #' `set_key` sorts the table using `data.table::setkeyv`, which marks it as sorted with an attribute sorted.
-        #'
-        #' @param ... Column names. Can either be quoted (strings) or unquoted.
-        #'
-        #' @return Invisibly returns itself.
-        #' df <- DF(mtcars, copy=TRUE)
-        #' df$set_key("mpg", "cyl")
-        #' df$set_key(mpg, vs)
-        set_key = function(...) {#browser()
-            key <- stringify_dots(...)
-            data.table::setkeyv(x=private$tbl, cols=key)
-            invisible(self)
-        },
-
-        #' @description Create a new `DataFrame` by concatenating table rows.
-        #'
-        #' @param ... Objects of class `data.frame` or `DataFrame`.
-        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
-        #'
-        #' @return A new unkeyed `DataFrame` object with rows from tables passed in `...` appended.
-        #'
-        #' @details
-        #' The concatenation is based on column names.
-        #'
-        #' @examples
-        #' x <- data.frame(a=1:5, b=1:5)
-        #' y <- data.frame(a=1:5, b=1:5)
-        #' df <- DF(x)
-        #' res <- df$concat(y, x, y, df)
-        concat = function(..., fill=FALSE) {
-            to_concat <- list(private$tbl, ...)
-            tbls <- lapply(to_concat, function(x) {
-                if(inherits(x, "DataFrame")) return(x$unwrap())
-                x
-            })
-            DataFrame$new(rbindlist(tbls, use.names = TRUE, fill = fill))
-        },
-
-        #' @description Concatenate the rows of the `DataFrame` (in place).
-        #' The result of `$concat` method is set as the new underlying table.
-        #'
-        #' @param ... Objects of class `data.frame` or `DataFrame`.
-        #' @param fill Optional parameter whether to fill missing columns with `NA`. Defaults to `FALSE`.
-        #'
-        #' @return Invisibly returns itself.
-        #'
-        #' @examples
-        #' x <- data.frame(a=1:5, b=1:5)
-        #' y <- data.frame(a=1:5, b=1:5)
-        #' df <- DF(x)
-        #' df$concat_(y, x, y, df)
-        #'
-        concat_ = function(..., fill=FALSE) {#browser()
-            private$tbl <- self$concat(..., fill=fill)$unwrap()
-            invisible(self)
-        },
 
         #' @description Aggregate data.
         #'
@@ -608,23 +566,66 @@ DataFrame <- R6::R6Class(
             DataFrame$new(result)
         },
 
-        #' @description Get the underlying data.
+        #' @description Count the number of rows.
         #'
-        #' @return The underlying `data.table` object.
+        #' @details Affected by the setup verbs `where` and `group_by`.
         #'
-        unwrap = function() {
-            private$tbl[]
+        #' @return A `DataFrame` with the row counts.
+        #'
+        #' @examples
+        #' df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+        #' df$count()
+        #' df$group_by(g)$count()
+        count = function() {
+            result <- private$call$subset(c("i", "by", "keyby"))$set(j=quote(list(.N)))$eval()
+            DataFrame$new(result)
         },
 
-        #' @description Create a deep copy of the `DataFrame` object.
+        #' @description Sort the table rows
         #'
-        #' @return A new `DataFrame` object.
+        #' @param ...  The columns to sort by. Do not quote column names. See `?data.table::setorder`.
         #'
-        copy = function() {#browser()
-            result <- DataFrame$new(tbl=private$tbl, copy=TRUE)
-            assign("call", private$call$clone(), .subset2(result, ".__enclos_env__")$private)
-            result
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #'    df <- DF(data.frame(a=1:5, b=1:5))
+        #'    df$sort(-b)
+        sort = function(...) {
+            if (!is.null(self$key)) stop("Table is already sorted with key!")
+            data.table::setorder(private$tbl, ...)
+            return(invisible(self))
+        },
+
+        #' @description Create a key on the table.
+        #'
+        #' `set_key` sorts the table using `data.table::setkeyv`, which marks it as sorted with an attribute sorted.
+        #'
+        #' @param ... Column names. Can either be quoted (strings) or unquoted.
+        #'
+        #' @return Invisibly returns itself.
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$set_key("mpg", "cyl")
+        #' df$set_key(mpg, vs)
+        set_key = function(...) {#browser()
+            key <- stringify_dots(...)
+            data.table::setkeyv(x=private$tbl, cols=key)
+            invisible(self)
+        },
+
+        #' @description Check whether keys represent unique entries
+        #'
+        #' @return `TRUE` if the set key is unique and `FALSE` otherwise. If no key is set the result is `FALSE`.
+        #'
+        #' @examples
+        #' df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
+        #' df$is_key_unique()
+        #' df <- DF(data.frame(a=1:5, b=1:5))
+        #' df$is_key_unique()
+        is_key_unique = function() {
+            if (is.null(self$key)) return(FALSE)
+            uniqueN(private$tbl, by = self$key) == nrow(private$tbl)
         }
+
     ),
 
     active = list(
