@@ -46,11 +46,11 @@ Call <- R6::R6Class(
         #' @param ... Named language objects.
         #' @param env The environment used to set the arguments.
         #'
-        set = function(..., env) {#browser()
+        set = function(..., env=parent.frame(private$depth)) {#browser()
             args <- list(...)
-            if (missing(env)) env <- parent.frame(private$depth)
-            private$assert_equal_env(env)
             private$assert_named(args)
+
+            private$assert_equal_env(env)
             private$env <- env
             private$add_parsed(args)
             invisible(self)
