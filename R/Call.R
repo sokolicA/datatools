@@ -14,9 +14,12 @@ Call <- R6::R6Class(
         #' @param depth The default number of frames after the caller environment.
         #'
         initialize = function(depth=2L) {
+            if (!is.integer(depth)) stop("Depth must be integer!")
+
             private$start_call(quote(x))
             private$depth <- depth
             private$verbose <- getOption("DataFrame.verbose", FALSE)
+
             invisible(self)
         },
 
