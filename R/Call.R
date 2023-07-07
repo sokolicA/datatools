@@ -11,13 +11,21 @@ Call <- R6::R6Class(
     public = list(
         #' @description Constructor.
         #'
-        #' @param depth The default number of frames after the caller environment.
+        #' @param tbl_env Optional environment containing a `data.table` named 'tbl'. See details.
+        #' @param depth Optional default number of frames after the caller environment. Defaults to 2.
         #'
-        initialize = function(depth=2L) {
+        #' @details
+        #' By passing `tbl_env` you are specifying that the call is to be built for the 'tbl' contained in the environment.
+        #' Additional checks for the validity of the changes to the call will be made.
+        #'
+        initialize = function(tbl_env=NULL, depth=2L) {
+            if (!is.null(tbl_env)) private$validate_dt_env(tbl_env)
             if (!is.integer(depth)) stop("Depth must be integer!")
 
-            private$start_call(quote(x))
+            private$tbl_env <- tbl_env
             private$depth <- depth
+
+            private$start_call()
             private$verbose <- getOption("DataFrame.verbose", FALSE)
 
             invisible(self)
@@ -55,6 +63,7 @@ Call <- R6::R6Class(
             private$add_parsed(args)
             invisible(self)
         },
+
 
         #' @description Get the call expression.
         #'
@@ -136,6 +145,8 @@ Call <- R6::R6Class(
 
     private = list(
 
+        tbl_env = NULL,
+
         df = NULL,
 
         expr = NULL,
@@ -146,11 +157,17 @@ Call <- R6::R6Class(
 
         depth = NULL,
 
-        start_call = function(x) {
-            private$expr <- call("[", x=x)
+        start_call = function() {
+            tbl <- if (is.null(private$tbl_env)) quote(x) else quote(.__private__$tbl)
+            private$expr <- call("[", x=tbl)
         },
 
-        validate_df = function(x) {
+        assert_named = function(args) {
+            if (is.null(names(args)) || any(names(args)==""))
+                stop("All arguments must be named!", call.=FALSE)
+        },
+
+        validate_dt_env = function(x) {
             if (!(is.environment(x) && inherits(x$tbl, "data.table"))) {
                 stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
             }
@@ -163,10 +180,6 @@ Call <- R6::R6Class(
             if (unequal_env) stop("Call environment can not change!", call.=FALSE)
         },
 
-        assert_named = function(args) {
-            if (is.null(names(args)) || any(names(args)==""))
-                stop("All arguments must be named!", call.=FALSE)
-        },
 
         build_call = function() {
             if (any(names(private$expr) %in% c("i", "j"))) private$expr else private$expr[["x"]]
