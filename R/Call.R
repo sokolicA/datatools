@@ -216,7 +216,8 @@ Call <- R6::R6Class(
         },
 
         parse_x = function(arg) {
-            if (!is.null(private$df)) stop("Can not set 'x' when using DataFrame!", call.=FALSE)
+            if (is.null(arg)) stop("Can not set 'x' to NULL.", call.=FALSE)
+            if (!is.null(private$tbl_env)) stop("Can not set 'x' when 'tbl_env' is provided!", call.=FALSE)
             arg
         },
 
