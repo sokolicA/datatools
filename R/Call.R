@@ -429,8 +429,15 @@ Call <- R6::R6Class(
         },
 
         is_column = function(e) {
-            if (is.null(private$df)) return(TRUE)
-            !inherits(try(eval(e, private$df$tbl, emptyenv()), silent=TRUE), "try-error")
+            if (is.null(private$tbl_env)) return(NULL)
+            if (is.symbol(e)) {
+                check <- try(eval(e, private$tbl_env$tbl, emptyenv()), silent=TRUE)
+                return(!inherits(check, "try-error"))
+            }
+            if (is.character(e)) {
+                return(is.element(e, names(private$tbl_env$tbl)))
+            }
+            FALSE
         },
 
         is_symbol = function(e) {
