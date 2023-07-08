@@ -51,16 +51,24 @@ Call <- R6::R6Class(
 
         #' @description Set or remove arguments to call.
         #'
-        #' @param ... Named language objects.
+        #' @param ... Named language objects. See details.
         #' @param env The environment used to set the arguments.
+        #'
+        #' @details
+        #' In order to decrease the amount of ambiguity when evaluating objects
+        #' using a DataMask, the following rules must be followed:
+        #'  1. Column names must be passed as symbols. Example: `a`.
+        #'  2. Variables must be passed as arguments to the `.v` function. Example: `.v(variable)`.
+        #'  3. Functions must be passed as arguments to the `.f` function. Example: `.f(is.integer)`.
         #'
         set = function(..., env=parent.frame(private$depth)) {#browser()
             args <- list(...)
             private$assert_named(args)
+            private$assert_equal_env(env) #CONSIDER removing env altogether?
 
-            private$assert_equal_env(env)
             private$env <- env
             private$add_parsed(args)
+
             invisible(self)
         },
 
