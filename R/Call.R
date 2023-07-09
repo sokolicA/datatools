@@ -265,34 +265,41 @@ Call <- R6::R6Class(
         },
 
         parse_by = function(arg) {#browser()
+            for (i in seq_along(arg)[-1L]) {
+                arg[[i]] <- private$parse_by_inner(arg[[i]])
+            }
+            arg
+        },
+
+        parse_by_inner = function(arg) {#browser()
             # Rules:
             #  - symbols are treated as column names
             #  - variables are parts of the expression surrounded with .v()
             #  - atomic types are treated as such
-            for(i in seq_along(arg)[-1L]) {
-                if (is.null(arg[[i]])) return(arg[[i]])
 
-                if (is.character(arg[[i]])) arg[[i]] <- as.symbol(arg[[i]])
-                if (is.symbol(arg[[i]])) {
-                    if (private$is_column(arg[[i]])) next;
+            if (is.atomic(arg)) return(arg)
+            if (is.symbol(arg)) {
+                if (is.null(private$tbl_env)) {
+                    if (exists(arg, envir=private$env, inherits=TRUE)) {
+                        if (private$is_function(arg)) stop("Can not pass functions to 'by'.", call.=FALSE)
+                        warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
+                        return(arg)
+                    } else stop("Can not find object '", arg, "'!", call.=FALSE)
+                } else {
+                    if (private$is_column(arg)) return(arg)
+                    if (private$is_function(arg)) stop("Can not pass functions to 'by':", arg, ".", call.=FALSE)
                     stop("Only column names can be passed as symbols!", call.=FALSE)
                 }
-
-                if (length(arg[[i]]) < 2) stop("Unable to parse by!")
-
-                if (private$is_range(arg[[i]])) {
-                    #CONSIDER allowing ranges
-                    stop("Ranges are currently not supported!", call.=FALSE)
-                }
-
-                if (arg[[i]][[1]] == quote(.v)) next;
-
-                if (private$is_function(arg[[i]][[1]])) {
-                    #TODO add check for arguments!
-                    next
-                } else stop("Do not know how to interpret given grouping: ", deparse1(arg[[i]]), ".")
             }
-            return(arg)
+
+            if (length(arg) == 1) stop("Unable to parse expression ", deparse1(arg), "!", call.=FALSE)
+            if (arg[[1]] == quote(.v)) return(arg)
+            if (!private$is_function(arg[[1]])) stop("First element of expression must be a function!", call.=FALSE)
+            if (private$is_extraction(arg)) return(arg)
+
+            for (i in seq_along(arg)[-1L]) arg[[i]] <- private$parse_by_inner(arg[[i]])
+
+            arg
         },
 
         parse_keyby = function(arg) {
