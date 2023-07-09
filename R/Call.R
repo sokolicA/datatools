@@ -283,8 +283,8 @@ Call <- R6::R6Class(
                     if (exists(arg, envir=private$env, inherits=TRUE)) {
                         if (private$is_function(arg)) stop("Can not pass functions to 'by'.", call.=FALSE)
                         warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
-                        return(arg)
-                    } else stop("Can not find object '", arg, "'!", call.=FALSE)
+                    }
+                    return(arg)
                 } else {
                     if (private$is_column(arg)) return(arg)
                     if (private$is_function(arg)) stop("Can not pass functions to 'by':", arg, ".", call.=FALSE)
