@@ -19,12 +19,8 @@ Call <- R6::R6Class(
         #' Additional checks for the validity of the changes to the call will be made.
         #'
         initialize = function(tbl_env=NULL, depth=2L) {
-            if (!is.null(tbl_env)) private$validate_dt_env(tbl_env)
-            if (!is.integer(depth)) stop("Depth must be integer!")
-
-            private$tbl_env <- tbl_env
-            private$depth <- depth
-
+            private$set_tbl_env(tbl_env)
+            private$set_depth(depth)
             private$start_call()
             private$verbose <- getOption("DataFrame.verbose", FALSE)
 
@@ -175,10 +171,17 @@ Call <- R6::R6Class(
                 stop("All arguments must be named!", call.=FALSE)
         },
 
-        validate_dt_env = function(x) {
+        set_tbl_env = function(x) {
+            if (is.null(x)) return(NULL)
             if (!(is.environment(x) && inherits(x$tbl, "data.table"))) {
                 stop("Must provide an environment containing a data.table named 'tbl'!", call.=FALSE)
             }
+            private$tbl_env <- x
+        },
+
+        set_depth = function(x) {
+            if (!is.integer(x)) stop("Depth must be integer!", call.=FALSE)
+            private$depth <- x
         },
 
         assert_equal_env = function(env) {
