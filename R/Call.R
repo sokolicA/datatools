@@ -231,50 +231,33 @@ Call <- R6::R6Class(
 
         parse_i = function(arg) {#browser()
             # Rules:
-            #  - symbols are treated as column names
-            #  - atomic types are treated as such
-            #  - variables are parts of the expression surrounded with .v()
+            # - If tbl_env is set enforce symbols as column names.
+            # - If tbl_env is not set then warn if object of the same name is found in env
+            # - functions not allowed (only function calls())
+            if (is.atomic(arg)) return(arg)
 
-            return(arg)
+            if (is.symbol(arg)) {
+                if (private$is_function(arg)) stop("Can not pass functions to 'i'.", call.=FALSE)
 
-            if (is.atomic(e)) return(e)
-            if (is.symbol(e)) {
-                if (private$is_column(e) || e == quote(.SD)) return(e)
-                stop("Only column names can be passed as symbols!", call.=FALSE)
+                if (is.null(private$tbl_env)) {
+                    if (exists(arg, envir=private$env, inherits=TRUE)) {
+                        warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
+                        return(arg)
+                    } else stop("Can not find object '", arg, "'!", call.=FALSE)
+                } else {
+                    if (private$is_column(arg) || arg == quote(.SD)) return(arg)
+                    stop("Only column names can be passed as symbols!", call.=FALSE)
+                }
             }
 
-            if (length(e) == 1) stop("Unable to parse expression ", deparse1(e), "!", call.=FALSE)
+            if (length(arg) == 1) stop("Unable to parse expression ", deparse1(arg), "!", call.=FALSE)
+            if (arg[[1]] == quote(.v)) return(arg)
+            if (!private$is_function(arg[[1]])) stop("First element of expression must be a function!", call.=FALSE)
+            if (private$is_extraction(arg)) return(arg)
 
-            if (e[[1]] == quote(.v)) {
-                #IDEA add ability to specify environment .(v, env)
-                if (is.null(env)) stop("Environment must be provided for variables!", call.=FALSE)
-                return(e)
-            }
+            for (i in seq_along(arg)[-1L]) arg[[i]] <- private$parse_i(arg[[i]])
 
-            if (private$is_extraction(e)) {
-                ev <- try(eval(e, private$env), silent=TRUE)
-                if (inherits(ev, "try-error") || is.null(ev)) stop(attr(ev, "condition")$message, call.=FALSE)
-                e[[2]] <-  private$parse_i(e[[2]])
-                return(e)
-            }
-
-            f <- eval(e[[1]], private$env)
-            if (!is.function(f)) stop("First element of expression must be a function!", call.=FALSE)
-            if (length(e[[1]]) > 1) stop("Currently unable to parse functions inside other objects.", call. = FALSE)
-
-
-            # if (!any(is.primitive(f), isNamespace(environment(f)))) {
-            #     f_chr <- deparse1(e[[1]])
-            #     e[[1]] <- call("get", f_chr, pos=1L)
-            # }
-
-
-            for (i in seq_along(e)[-1L]) {
-                e[[i]] <- private$parse_i(e[[i]])
-            }
-
-            e
-
+            arg
         },
 
         parse_j = function(arg) {
