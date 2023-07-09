@@ -315,6 +315,15 @@ Call <- R6::R6Class(
         },
 
         parse_.SDcols = function(arg) {
+            for (i in seq_along(arg)[-1L]) {
+                arg[[i]] <- private$parse_.SDcols_inner(arg[[i]])
+            }
+            if (length(arg)==2L) return(arg[[2L]])
+
+            return(private$parse_.SDcols_combine(arg))
+        },
+
+        parse_.SDcols_inner = function(arg, sym_to_char=TRUE) {
             # arg can be:
             # 1. character column names or numeric positions - is.character, is.numeric
             # 2. startcol:endcol
@@ -322,23 +331,67 @@ Call <- R6::R6Class(
             # 3. .SDcols=is.numeric - evaluated on columns
             # 4. Inversion (column dropping instead of keeping) can be accomplished be prepending the argument with ! or -
 
-            return(arg[[2]])
+            if (is.numeric(arg) || is.character(arg)) return(arg)
+            if (private$is_function(arg)) return(arg)
+            if (is.symbol(arg)) return(private$parse_.SDcols_sym(arg, sym_to_char))
 
-            if (is.character(e) || is.integer(e) || is.null(e)) return(e)
-            if (private$is_range(e)) return(e)
+            if (length(arg) <= 1L) stop("Unable to parse expression ", deparse1(arg), "!", call.=FALSE)
+            if (arg[[1]] == quote(.v)) return(arg)
+            if (arg[[1]] == quote(patterns)) return(arg)
+            if (!private$is_function(arg[[1L]])) stop("First element of expression must be a function!", call.=FALSE)
+            if (private$is_extraction(arg)) return(arg)
 
-            if (is.symbol(e) && private$is_function(e)) return(e)
-
-            if (length(e) < 2) stop("Unable to parse select!", call.=FALSE)
-            if (e[[1]] ==  quote(.v)) return(e)
-            if (e[[1]] ==  quote(patterns)) return(e)
-            if (e[[1]] == quote(`!`) || e[[1]] == quote(`-`)) {
-                e[[2]] <- private$parse_sdcols(e[[2]])
-                return(e)
+            for (i in seq_along(arg)[-1L]) {
+                if (arg[[1]] != quote(`:`)) {
+                    arg[[i]] <- private$parse_.SDcols_inner(arg[[i]], sym_to_char)
+                } else {
+                    arg[[i]] <- private$parse_.SDcols_inner(arg[[i]], FALSE)
+                }
             }
 
-            stop("Do not know?")
+            arg
+        },
 
+        parse_.SDcols_sym = function(arg, as_chr=TRUE) {
+            if (is.null(private$tbl_env)) {
+                if (exists(arg, envir=private$env, inherits=TRUE)) {
+                    warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
+                }
+                if (as_chr) return(as.character(arg)) else return(arg)
+            }
+            if (!private$is_column(arg)) stop("Only column names can be passed as symbols!", call.=FALSE)
+            if (as_chr) return(as.character(arg)) else return(arg)
+        },
+
+        parse_.SDcols_combine = function(arg) {
+            exclude <- character()
+            result <- character()
+            for (i in seq_along(arg)[-1L]) {
+                if (length(arg[[i]])==1L) {
+                    result <- if (is.character(arg[[i]])) {
+                        c(result, arg[[i]])
+                    } else {
+                        sdcols <- arg[[i]]
+                        call <- substitute(private$tbl_env$tbl[, names(.SD), .SDcols=sdcols])
+                        result <- c(result, eval(call))
+                    }
+                    next;
+                }
+
+                if (arg[[i]][[1]] == quote(`!`) || arg[[i]][[1]] == quote(`-`)) {
+                    sdcols <- arg[[i]][[2]]
+                    call <- substitute(private$tbl_env$tbl[, names(.SD), .SDcols=sdcols])
+                    exclude <- c(exclude, eval(call))
+                    next;
+                }
+
+                if (is.null(private$tbl_env)) stop("Can not parse multiple without tbl_env!")
+                sdcols <- arg[[i]]
+                call <- substitute(private$tbl_env$tbl[, names(.SD), .SDcols=sdcols])
+                result <- c(result, eval(call))
+            }
+
+            setdiff(unique(result), exclude)
         },
 
         parse_on = function(e) {
