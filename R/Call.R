@@ -428,10 +428,6 @@ Call <- R6::R6Class(
             !is.null(j) && length(j) > 1 && j[[1]] == quote(`:=`)
         },
 
-        is_extraction = function(e) {
-            e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
-        },
-
         is_range = function(e) {
             length(e) == 3 && e[[1]] == quote(`:`)
         },
@@ -455,6 +451,10 @@ Call <- R6::R6Class(
         # Both functions and symbols that evaluate to functions!
         is_function = function(e) {
             is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
+        },
+
+        is_extraction = function(e) {
+            e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
         },
 
         set_handle_by = function(arg) {
