@@ -242,8 +242,8 @@ Call <- R6::R6Class(
                 if (is.null(private$tbl_env)) {
                     if (exists(arg, envir=private$env, inherits=TRUE)) {
                         warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
-                        return(arg)
-                    } else stop("Can not find object '", arg, "'!", call.=FALSE)
+                    }
+                    return(arg)
                 } else {
                     if (private$is_column(arg) || arg == quote(.SD)) return(arg)
                     stop("Only column names can be passed as symbols!", call.=FALSE)
