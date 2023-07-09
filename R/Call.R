@@ -471,10 +471,6 @@ Call <- R6::R6Class(
             !is.null(j) && length(j) > 1 && j[[1]] == quote(`:=`)
         },
 
-        is_range = function(e) {
-            length(e) == 3 && e[[1]] == quote(`:`)
-        },
-
         is_column = function(e) {
             if (is.null(private$tbl_env)) return(NULL)
             if (is.symbol(e)) {
@@ -485,10 +481,6 @@ Call <- R6::R6Class(
                 return(is.element(e, names(private$tbl_env$tbl)))
             }
             FALSE
-        },
-
-        is_symbol = function(e) {
-            is.symbol(e) && !is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
         },
 
         # Both functions and symbols that evaluate to functions!
