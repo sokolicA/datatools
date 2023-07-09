@@ -60,9 +60,9 @@ Call <- R6::R6Class(
         set = function(..., env=parent.frame(private$depth)) {#browser()
             args <- list(...)
             private$assert_named(args)
-            private$assert_equal_env(env) #CONSIDER removing env altogether?
 
-            private$env <- env
+            private$set_env(env)
+
             private$add_parsed(args)
 
             invisible(self)
@@ -184,11 +184,16 @@ Call <- R6::R6Class(
             private$depth <- x
         },
 
-        assert_equal_env = function(env) {
-            if (is.null(private$df)) return(NULL)
-            if (!is.environment(env)) stop("'env' must be an environment!", call.=FALSE)
-            unequal_env <- is.environment(private$env) && !identical(env, private$env)
-            if (unequal_env) stop("Call environment can not change!", call.=FALSE)
+        set_env = function(env) {
+            private$env <- if (is.null(env)) {
+                env
+            } else if (!is.environment(env)) {
+                stop("'env' must be an environment!", call.=FALSE)
+            } else {
+                unequal_env <- is.environment(private$env) && !identical(env, private$env)
+                if (unequal_env) stop("Call environment can not change!", call.=FALSE)
+                env
+            }
         },
 
 
