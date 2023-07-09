@@ -444,6 +444,7 @@ Call <- R6::R6Class(
             is.symbol(e) && !is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
         },
 
+        # Both functions and symbols that evaluate to functions!
         is_function = function(e) {
             is.function(try(eval(e, envir=private$env, enclos=private$env), silent=TRUE))
         },
