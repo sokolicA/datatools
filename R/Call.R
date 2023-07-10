@@ -80,7 +80,6 @@ Call <- R6::R6Class(
         #' @param env The environment in which to evaluate.
         #'
         eval = function(env=parent.frame(private$depth)) {#browser()
-
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
             if (private$verbose) message("Evaluating: ", deparse1(call))
@@ -202,7 +201,7 @@ Call <- R6::R6Class(
         build_eval_env = function(env) {
             eval_env <- new.env(parent = env)
             eval_env$.__private__ <- private$tbl_env
-            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=FALSE)}
+            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=TRUE)}
             eval_env
         },
 
