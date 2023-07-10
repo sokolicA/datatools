@@ -237,14 +237,14 @@ Call <- R6::R6Class(
 
             if (is.symbol(arg)) {
                 if (private$is_function(arg)) stop("Can not pass functions to 'i'.", call.=FALSE)
-
+                if (arg==quote(.SD) || arg==quote(.I)) return(arg)
                 if (is.null(private$tbl_env)) {
                     if (exists(arg, envir=private$env, inherits=TRUE)) {
                         warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
                     }
                     return(arg)
                 } else {
-                    if (private$is_column(arg) || arg == quote(.SD)) return(arg)
+                    if (private$is_column(arg)) return(arg)
                     stop("Only column names can be passed as symbols!", call.=FALSE)
                 }
             }
