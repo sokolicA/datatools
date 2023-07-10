@@ -81,7 +81,6 @@ Call <- R6::R6Class(
         #'
         eval = function(env) {#browser()
             if (missing(env)) env <- parent.frame(private$depth)
-            private$assert_equal_env(env)
 
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
