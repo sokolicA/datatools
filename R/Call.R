@@ -79,8 +79,7 @@ Call <- R6::R6Class(
         #'
         #' @param env The environment in which to evaluate.
         #'
-        eval = function(env) {#browser()
-            if (missing(env)) env <- parent.frame(private$depth)
+        eval = function(env=parent.frame(private$depth)) {#browser()
 
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
