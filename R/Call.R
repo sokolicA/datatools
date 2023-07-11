@@ -140,8 +140,6 @@ Call <- R6::R6Class(
 
         tbl_env = NULL,
 
-        df = NULL,
-
         expr = NULL,
 
         env = NULL,
