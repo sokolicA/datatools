@@ -208,6 +208,10 @@ Call <- R6::R6Class(
             eval_env
         },
 
+        reset = function() {
+            self$subset(NULL)
+        },
+
         add_parsed = function(args) {
             for (arg in names(args)) {
                 if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
@@ -459,11 +463,6 @@ Call <- R6::R6Class(
             }
             names(result) <- result_names
             result
-        },
-
-        reset = function() {
-            private$expr <- private$expr[1:2]
-            private$env <- NULL
         },
 
         is_update = function() {
