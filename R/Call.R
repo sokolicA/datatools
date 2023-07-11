@@ -34,17 +34,6 @@ Call <- R6::R6Class(
             invisible(self)
         },
 
-        #' @description Use DataFrame for the call.
-        #'
-        #' @param df The private part of a DataFrame.
-        #'
-        use = function(df) {
-            private$validate_df(df)
-            private$df <- df
-            private$start_call(quote(.__private__$tbl))
-            invisible(self)
-        },
-
         #' @description Set or remove arguments to call.
         #'
         #' @param ... Named language objects. See details.
