@@ -7,6 +7,7 @@ Call <- R6::R6Class(
     "Call",
     lock_class=TRUE,
     portable=TRUE,
+    cloneable=TRUE,
 
     public = list(
         #' @description Constructor.
