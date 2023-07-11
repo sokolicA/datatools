@@ -369,7 +369,7 @@ DataFrame <- R6::R6Class(
         set = function(value) {#browser()
             #CONSIDER renaming the method due to it overriding the default $set (method) method.
             value <- substitute(function(x) value)
-            cols <- if (is.null(private$call$arg(".SDcols"))) names(private$tbl) else private$call$.SD_colnames()
+            cols <- if (is.null(private$call$arg(".SDcols"))) names(private$tbl) else private$call$selected_columns()
 
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
@@ -525,7 +525,7 @@ DataFrame <- R6::R6Class(
         #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
         #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
         transform = function(fun, ...) {#browser()
-            cols <- private$call$.SD_colnames()
+            cols <- private$call$selected_columns()
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
             } else {
