@@ -25,7 +25,7 @@ DataFrame <- R6::R6Class(
             #CONSIDER allowing lists as in data.table construction
             if (!inherits(tbl, "data.frame")) stop("tbl must be a data.frame!")
             private$tbl <- if (copy) data.table::as.data.table(tbl) else data.table::setDT(tbl)
-            private$call <- Call$new(depth=2L)$use(private)
+            private$call <- Call$new(tbl_env=private, depth=2L)
             invisible(self)
         },
 
@@ -153,7 +153,7 @@ DataFrame <- R6::R6Class(
             if (try(is.logical(where), silent=TRUE) == TRUE && length(where) != dim(private$tbl)[1]) {
                 stop("Logical vectors must be of equal length as the number of table rows.")
             }
-            remove_idx <- Call$new(1L)$use(private)$set(j = substitute(.I[where]))$eval()
+            remove_idx <- Call$new(private, depth=1L)$set(j = substitute(.I[where]))$eval()
             remove_idx <- int_remove_na(remove_idx)
             removed <- DataFrame$new(private$tbl[remove_idx])
             private$tbl <- private$tbl[!remove_idx]
