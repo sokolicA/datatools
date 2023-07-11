@@ -204,7 +204,9 @@ Call <- R6::R6Class(
         build_eval_env = function(env) {
             eval_env <- new.env(parent = env)
             eval_env$.__private__ <- private$tbl_env
-            eval_env$.v <- function(x) {get(substitute(x), pos=1L, inherits=TRUE)}
+            eval_env$.v <- function(x) {
+                get(substitute(x), envir=env, inherits=TRUE)
+            }
             eval_env
         },
 
