@@ -130,10 +130,10 @@ Call <- R6::R6Class(
         #'
         #' @param env The environment in which to evaluate.
         #'
-        .SD_colnames = function(env) {
-            if (missing(env)) env <- parent.frame(private$depth)
-            tmp <- self$clone()$subset(c(".SDcols"))$set(i=0, j=quote(.SD), env=env)
-            names(tmp$eval(env))
+        selected_columns = function(env=parent.frame(private$depth)) {
+            if (is.null(private$tbl_env)) stop("Can not evaluate without tbl_env!")
+            call <- self$clone()$subset(c(".SDcols"))$set(i=0, j=quote(.SD), env=env)
+            names(call$eval(env))
         }
     ),
 
