@@ -85,8 +85,11 @@ Call <- R6::R6Class(
             if (private$verbose) message("Evaluating: ", deparse1(call))
             result <- eval(call, envir=eval_env, enclos=eval_env)
 
-            if (private$verbose && private$is_update()) message("Rows affected: ", .Last.updated)
+            if (private$verbose && private$is_update()) {
+                message("Rows affected: ", .Last.updated)
+            }
             private$reset()
+
             result
         },
 
