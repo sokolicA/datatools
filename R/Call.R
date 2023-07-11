@@ -205,6 +205,11 @@ Call <- R6::R6Class(
             eval_env <- new.env(parent = env)
             eval_env$.__private__ <- private$tbl_env
             eval_env$.v <- function(x) {
+                #.v's environment is the evaluation environment of buil_eval_env,
+                # in which env is the caller environment. Since this is the next
+                # environment on the search path (after the evaluation environment
+                # of .v), x will be searched in the caller environment and its
+                # parents.
                 get(substitute(x), envir=env, inherits=TRUE)
             }
             eval_env
