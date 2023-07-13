@@ -346,6 +346,21 @@ DataFrame <- R6::R6Class(
             invisible(self)
         },
 
+        #' @description Reset the setup prepared with setup methods.
+        #'
+        #' Part of the *setup methods*. Resets the setup.
+        #'
+        #' @return Invisibly returns itself.
+        #'
+        #' @examples
+        #' df <- DF(mtcars, copy=TRUE)
+        #' df$where(mpg>15)$print()
+        #' df$reset_setup()$print()
+        reset_setup = function() {
+            private$call$subset(NULL)
+            invisible(self)
+        },
+
         #' @description Set column values.
         #'
         #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
