@@ -45,8 +45,9 @@ DataFrame <- R6::R6Class(
         #' The header of the output is information about the `DataFrame`.
         #' The method used to print the table is `print.data.table` using custom arguments.
         #'
-        print = function(nrows=12L) {
-            caller_env <- if (length(sys.calls())==1) parent.frame() else parent.frame(3L) # df$print() or df
+        print = function(nrows=12L) {#browser()
+            n_calls <- length(sys.calls())
+            caller_env <- if (n_calls==1) parent.frame() else sys.frame(n_calls-1) # df$print() or df
             call <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD), env=caller_env)
             result <- call$eval(caller_env)
             private$print_header()
