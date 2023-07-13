@@ -179,7 +179,12 @@ Call <- R6::R6Class(
                 stop("'env' must be an environment!", call.=FALSE)
             } else {
                 unequal_env <- is.environment(private$env) && !identical(env, private$env)
-                if (unequal_env) stop("Call environment can not change!", call.=FALSE)
+                if (unequal_env) stop("Call environment can not change! ",
+                                      sub(".*(\\[.*)", "\\1", deparse1(private$expr)),
+                                      " was set in environment '",
+                                      data.table::address(private$env),
+                                      "'. Use the 'reset_setup' method to reset the call.",
+                                      call.=FALSE)
                 env
             }
         },
