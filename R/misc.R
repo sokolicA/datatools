@@ -31,7 +31,9 @@ as.data.table.DataFrame <- function(x) {
 #' @return Invisibly returns the `DataFrame`.
 #' @export
 print.DataFrame <- function(x, ...) {
-    eval(x$print(), envir=parent.frame(2L))
+    # Problematic due to the dispatch. Printing the object in the console causes
+    # loss of the actual parent/caller environment.
+    stop("To print the object use the dedicated 'print' method.")
 }
 
 
