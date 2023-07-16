@@ -45,10 +45,17 @@ DataFrame <- R6::R6Class(
         #' The header of the output is information about the `DataFrame`.
         #' The method used to print the table is `print.data.table` using custom arguments.
         #'
+        #' Printing a `DataFrame` using the S3 method dispatch (e.g. by just typing
+        #' the object name and pressing enter) is limited to showing
+        #' only the entire table.
         print = function(nrows=12L) {#browser()
-            call <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD))
-            result <- call$eval()
-            private$print_header()
+            if (identical(sys.function(1), print)) {
+                result <- private$tbl
+            } else {
+                call <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD))
+                result <- call$eval()
+                private$print_header()
+            }
             print(result, nrows=nrows, topn=floor(nrows/2), class=TRUE, print.keys=TRUE)
             invisible(self)
         },
