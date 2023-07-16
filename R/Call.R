@@ -216,12 +216,12 @@ Call <- R6::R6Class(
             for (arg in names(args)) {
                 if (is.null(private$expr[[arg]]) && is.null(args[[arg]])) next;
                 if (arg=="by" || arg=="keyby") private$set_handle_by(arg);
-                parser <- private$parser(arg)
+                parser <- private$find_parser(arg)
                 private$expr[[arg]] <- parser(args[[arg]])
             }
         },
 
-        parser = function(arg) {
+        find_parser = function(arg) {#browser()
             result <- try(get(paste0("parse_", arg), envir=private, inherits=FALSE), silent = TRUE)
             if (inherits(result, "try-error")) stop("Can not set ", arg, "!", call.=FALSE)
             result
