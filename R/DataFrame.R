@@ -72,7 +72,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(data.frame(a=1:5, b=1:5))
         #'    df$head(1)
         head = function(n=5L) {
-            call <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD))$eval()
+            result <- private$call$clone()$subset(c("i",".SDcols"))$set(j=quote(.SD))$eval()
             DataFrame$new(head(result, n))
         },
 
