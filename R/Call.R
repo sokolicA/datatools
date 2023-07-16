@@ -286,7 +286,7 @@ Call <- R6::R6Class(
                 if (is.null(private$tbl_env)) {
                     if (exists(arg, envir=private$env, inherits=TRUE)) {
                         if (private$is_function(arg)) stop("Can not pass functions to 'by'.", call.=FALSE)
-                        warning("Object '", arg, "' found in the calling environment! Use .v(", arg, ") to make the intent clear.",  call.=FALSE)
+                        warning("Object '", arg, "' found in the calling environment!",  call.=FALSE)
                     }
                     return(arg)
                 } else {
