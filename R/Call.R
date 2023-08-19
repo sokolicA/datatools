@@ -25,7 +25,6 @@ Call <- R6::R6Class(
             private$set_depth(depth)
             private$start_call()
             private$verbose <- getOption("DataFrame.verbose", FALSE)
-
             invisible(self)
         },
 
@@ -38,7 +37,7 @@ Call <- R6::R6Class(
 
         #' @description Set or remove arguments to call.
         #'
-        #' @param ... Named language objects. See details.
+        #' @param ... Named language objects or literals. See details.
         #' @param env The environment used to set the arguments.
         #'
         #' @details
@@ -48,14 +47,15 @@ Call <- R6::R6Class(
         #'  2. Variables must be passed as arguments to the `.v` function. Example: `.v(variable)`.
         #'  3. Functions must be passed as arguments to the `.f` function. Example: `.f(is.integer)`.
         #'
-        set = function(..., env=parent.frame(private$depth)) {#browser()
+        #' @examples
+        #' x <- Call$new()
+        #' x$set(i=3, j=quote(.SD))$print()
+        #' x$set(.SDcols=quote(list("a")), i=NULL)$print()
+        set = function(..., env=parent.frame(private$depth)) {
             args <- list(...)
             private$assert_named(args)
-
             private$set_env(env)
-
             private$add_parsed(args)
-
             invisible(self)
         },
 
@@ -501,10 +501,6 @@ Call <- R6::R6Class(
 
         is_extraction = function(e) {
             e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
-        },
-
-        finalize = function() {
-
         }
 
     )
