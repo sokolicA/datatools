@@ -6,12 +6,21 @@
 \description{
 Friend class of the \code{DataFrame} (has access to the private environment).
 }
+\examples{
+
+## ------------------------------------------------
+## Method `Call$set`
+## ------------------------------------------------
+
+x <- Call$new()
+x$set(i=3, j=quote(.SD))$print()
+x$set(.SDcols=quote(list("a")), i=NULL)$print()
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Call-new}{\code{Call$new()}}
 \item \href{#method-Call-print}{\code{Call$print()}}
-\item \href{#method-Call-use}{\code{Call$use()}}
 \item \href{#method-Call-set}{\code{Call$set()}}
 \item \href{#method-Call-get}{\code{Call$get()}}
 \item \href{#method-Call-eval}{\code{Call$eval()}}
@@ -19,6 +28,7 @@ Friend class of the \code{DataFrame} (has access to the private environment).
 \item \href{#method-Call-subset}{\code{Call$subset()}}
 \item \href{#method-Call-grouping}{\code{Call$grouping()}}
 \item \href{#method-Call-reverse_on}{\code{Call$reverse_on()}}
+\item \href{#method-Call-selected_columns}{\code{Call$selected_columns()}}
 \item \href{#method-Call-clone}{\code{Call$clone()}}
 }
 }
@@ -28,7 +38,22 @@ Friend class of the \code{DataFrame} (has access to the private environment).
 \subsection{Method \code{new()}}{
 Constructor.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Call$new(tbl_env = NULL, depth = 2L)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{tbl_env}}{Optional environment containing a \code{data.table} object named \code{tbl}. See details.}
+
+\item{\code{depth}}{Optional default number of frames after the caller environment. Defaults to 2.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+By passing \code{tbl_env} you are specifying that the call is to be built
+for the \code{tbl} object contained in the environment.
+Additional checks for the validity of the changes to the call will be made.
 }
 
 }
@@ -43,40 +68,43 @@ Print method.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Call-use"></a>}}
-\if{latex}{\out{\hypertarget{method-Call-use}{}}}
-\subsection{Method \code{use()}}{
-Use DataFrame for the call.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$use(df)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{df}}{The private part of a DataFrame.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Call-set"></a>}}
 \if{latex}{\out{\hypertarget{method-Call-set}{}}}
 \subsection{Method \code{set()}}{
 Set or remove arguments to call.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$set(..., env = parent.frame(2L))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Call$set(..., env = parent.frame(private$depth))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{Named language objects.}
+\item{\code{...}}{Named language objects or literals. See details.}
 
 \item{\code{env}}{The environment used to set the arguments.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+In order to decrease the amount of ambiguity when evaluating objects
+using a DataMask, the following rules must be followed:
+\enumerate{
+\item Column names must be passed as symbols. Example: \code{a}.
+\item Variables must be passed as arguments to the \code{.v} function. Example: \code{.v(variable)}.
+\item Functions must be passed as arguments to the \code{.f} function. Example: \code{.f(is.integer)}.
+}
+}
+
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- Call$new()
+x$set(i=3, j=quote(.SD))$print()
+x$set(.SDcols=quote(list("a")), i=NULL)$print()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Call-get"></a>}}
@@ -94,7 +122,7 @@ Get the call expression.
 \subsection{Method \code{eval()}}{
 Evaluate the call.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$eval(env = parent.frame(2L))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Call$eval(env = parent.frame(private$depth))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -111,13 +139,15 @@ Evaluate the call.
 \subsection{Method \code{arg()}}{
 Get a specific argument.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$arg(name)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Call$arg(name, as_chr = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{name}}{Name of the argument to get.}
+
+\item{\code{as_chr}}{Whether to return as character string.}
 }
 \if{html}{\out{</div>}}
 }
@@ -145,9 +175,16 @@ Subset the call.
 \subsection{Method \code{grouping()}}{
 Get the used grouping.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Call$grouping()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Call$grouping(as_chr = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{as_chr}}{Whether to return as character string.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Call-reverse_on"></a>}}
@@ -158,6 +195,23 @@ Reverse the on expression.
 \if{html}{\out{<div class="r">}}\preformatted{Call$reverse_on()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Call-selected_columns"></a>}}
+\if{latex}{\out{\hypertarget{method-Call-selected_columns}{}}}
+\subsection{Method \code{selected_columns()}}{
+Get the column names defined by .SDcols.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Call$selected_columns(env = parent.frame(private$depth))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{env}}{The environment in which to evaluate.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Call-clone"></a>}}
