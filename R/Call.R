@@ -331,6 +331,8 @@ Call <- R6::R6Class(
         },
 
         parse_.SDcols = function(arg) {
+            if (is.null(arg)) return(NULL)
+            if (arg[[1]] != quote(list)) stop("Must be a call to list!")
             for (i in seq_along(arg)[-1L]) {
                 arg[[i]] <- private$parse_.SDcols_inner(arg[[i]])
             }
