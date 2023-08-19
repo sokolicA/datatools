@@ -12,11 +12,12 @@ Call <- R6::R6Class(
     public = list(
         #' @description Constructor.
         #'
-        #' @param tbl_env Optional environment containing a `data.table` named 'tbl'. See details.
+        #' @param tbl_env Optional environment containing a `data.table` object named `tbl`. See details.
         #' @param depth Optional default number of frames after the caller environment. Defaults to 2.
         #'
         #' @details
-        #' By passing `tbl_env` you are specifying that the call is to be built for the 'tbl' contained in the environment.
+        #' By passing `tbl_env` you are specifying that the call is to be built
+        #' for the `tbl` object contained in the environment.
         #' Additional checks for the validity of the changes to the call will be made.
         #'
         initialize = function(tbl_env=NULL, depth=2L) {
