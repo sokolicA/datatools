@@ -70,7 +70,7 @@ Call <- R6::R6Class(
         #'
         #' @param env The environment in which to evaluate.
         #'
-        eval = function(env=parent.frame(private$depth)) {#browser()
+        eval = function(env=parent.frame(private$depth)) {
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
             if (private$verbose) message("Evaluating: ", deparse1(call))
@@ -222,7 +222,18 @@ Call <- R6::R6Class(
             }
         },
 
-        find_parser = function(arg) {#browser()
+        set_handle_by = function(arg) {
+            if (arg=="by" && !is.null(private$expr[["keyby"]])) {
+                private$expr[["keyby"]] <- NULL
+                message("Removed previous group by key specification!")
+            }
+            if (arg=="keyby" && !is.null(private$expr[["by"]])) {
+                private$expr[["by"]] <- NULL
+                message("Removed previous group by specification!")
+            }
+        },
+
+        find_parser = function(arg) {
             result <- try(get(paste0("parse_", arg), envir=private, inherits=FALSE), silent = TRUE)
             if (inherits(result, "try-error")) stop("Can not set ", arg, "!", call.=FALSE)
             result
@@ -234,7 +245,7 @@ Call <- R6::R6Class(
             arg
         },
 
-        parse_i = function(arg) {#browser()
+        parse_i = function(arg) {
             # Rules:
             # - If tbl_env is set enforce symbols as column names.
             # - If tbl_env is not set then warn if object of the same name is found in env
@@ -269,14 +280,14 @@ Call <- R6::R6Class(
             arg
         },
 
-        parse_by = function(arg) {#browser()
+        parse_by = function(arg) {
             for (i in seq_along(arg)[-1L]) {
                 arg[[i]] <- private$parse_by_inner(arg[[i]])
             }
             arg
         },
 
-        parse_by_inner = function(arg) {#browser()
+        parse_by_inner = function(arg) {
             # Rules:
             #  - symbols are treated as column names
             #  - variables are parts of the expression surrounded with .v()
@@ -490,17 +501,6 @@ Call <- R6::R6Class(
 
         is_extraction = function(e) {
             e[[1]] == quote(`$`) || e[[1]] == quote(`[`) || e[[1]] == quote(`[[`)
-        },
-
-        set_handle_by = function(arg) {
-            if (arg=="by" && !is.null(private$expr[["keyby"]])) {
-                message("Removed previous group by key specification!", call.=FALSE)
-                private$expr[["keyby"]] <- NULL
-            }
-            if (arg=="keyby" && !is.null(private$expr[["by"]])) {
-                message("Removed previous group by specification!", call. = FALSE)
-                private$expr[["by"]] <- NULL
-            }
         },
 
         finalize = function() {
