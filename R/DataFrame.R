@@ -116,7 +116,7 @@ DataFrame <- R6::R6Class(
         #' df$filter(c(1, 3, 5))
         #' df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
         filter = function(keep) {
-            result <- private$.filter(substitute(keep))
+            result <- private$apply_filter(substitute(keep))
             DataFrame$new(result)
         },
 
@@ -132,7 +132,7 @@ DataFrame <- R6::R6Class(
         #' df$filter_(a > 2)
         #' df
         filter_ = function(keep) {
-            private$tbl <- private$.filter(substitute(keep))
+            private$tbl <- private$apply_filter(substitute(keep))
             invisible(self)
         },
 
@@ -511,10 +511,10 @@ DataFrame <- R6::R6Class(
                 if (ins=="all") {
                     ins_cols <- setdiff(names(other), names(rev_join$arg("on")))
                     ins <- str2lang(paste0("list(", paste(ins_cols, collapse = ","), ")"))
-                    ins_names <- private$upd_join_rename_duplicated_cols(ins_cols)
+                    ins_names <- private$uj_rename_dupl_cols(ins_cols)
                 } else {
                     ins[[1L]] <- quote(list)
-                    ins <- private$upd_join_add_missing_insert_names(ins)
+                    ins <- private$uj_add_insert_names(ins)
                     ins_names <- names(ins)[-1L]
                     if (any(ins_names %in% names(private$tbl))) stop("Some columns already exist! Provide new column names or use the update argument to update existing columns.", call.=FALSE)
                 }
@@ -526,7 +526,7 @@ DataFrame <- R6::R6Class(
 
             tryCatch(
                 private$call$set(j = call(":=", new_names, J))$eval(),
-                error = private$upd_join_error_handler
+                error = private$uj_err_handler
             )
 
             invisible(self)
@@ -585,7 +585,7 @@ DataFrame <- R6::R6Class(
             groups <- private$call$grouping()
             private$call$set(j=substitute(lapply(lapply(.SD, function(x) {f}), unlist)))
             result <- private$call$eval()
-            private$finalize_aggregate(result, f, groups)
+            private$aggregate_finalize(result, f, groups)
             DataFrame$new(result)
         },
 
@@ -739,7 +739,7 @@ DataFrame <- R6::R6Class(
 
         tbl = NULL,
 
-        upd_join_add_missing_insert_names = function(e) {
+        uj_add_insert_names = function(e) {
             result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
             missing <- which(result == "")[-1L]
             if (any(missing)) {
@@ -752,14 +752,14 @@ DataFrame <- R6::R6Class(
             e
         },
 
-        upd_join_rename_duplicated_cols = function(new_cols) {
+        uj_rename_dupl_cols = function(new_cols) {
             while (any(dupl <- new_cols %in% names(private$tbl))) {
                 new_cols[dupl] <- paste0(new_cols[dupl], "_y")
             }
             new_cols
         },
 
-        upd_join_error_handler = function(e) {
+        uj_err_handler = function(e) {
             if (grepl("Supplied [1-9]+ items to be assigned to [1-9]+ items", e)) {
                 stop ("Unable to perform update join (by reference) due to the specified relationship resulting in a one to many join.", call.=FALSE)
             }
@@ -797,7 +797,7 @@ DataFrame <- R6::R6Class(
             )
         },
 
-        finalize_aggregate = function(result, f, by) {
+        aggregate_finalize = function(result, f, by) {
             if (f[[1]] == quote(list)) {
                 f <- f[-1L]
                 f_names <- if (!is.null(names(f))) names(f) else vector("character", length=length(f))
@@ -823,7 +823,7 @@ DataFrame <- R6::R6Class(
             result
         },
 
-        .filter = function(i) {
+        apply_filter = function(i) {
             call <- private$call$clone()$subset(NULL)
             BY <- private$call$arg("by")
             if (!is.null(BY)) {

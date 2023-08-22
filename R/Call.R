@@ -122,7 +122,7 @@ Call <- R6::R6Class(
         #' @description Reverse the on expression.
         #'
         reverse_on = function() {
-            private$expr[["on"]] <- private$.reverse_on(private$expr[["on"]])
+            private$expr[["on"]] <- private$on_reverse(private$expr[["on"]])
             invisible(self)
         },
 
@@ -426,14 +426,14 @@ Call <- R6::R6Class(
             }
 
             if (e[[1L]] == quote(list) || e[[1L]] == quote(.)) {
-                e <- private$convert_on_call(e)
+                e <- private$on_convert(e)
             }
 
             if (e[[1L]] != quote(c)) stop("'on' argument should be a named vector of column names indicating which columns in self should be joined with which columns in other.", call.=FALSE)
-            private$add_missing_on_expr_names(e)
+            private$on_add_names(e)
         },
 
-        convert_on_call = function(e) {
+        on_convert = function(e) {
             ops <- c("==", "<=", "<", ">=", ">", "!=")
             pat <- paste0("(", ops, ")", collapse="|")
             spat <- paste0("[ ]+(", pat, ")[ ]+")
@@ -442,7 +442,7 @@ Call <- R6::R6Class(
             as.call(c(quote(c), e))
         },
 
-        add_missing_on_expr_names = function(e) {
+        on_add_names = function(e) {
             result <- if (!is.null(names(e))) names(e) else vector("character", length=length(e))
             missing <- which(result == "")[-1L]
             if (any(missing)) {
@@ -452,7 +452,7 @@ Call <- R6::R6Class(
             e
         },
 
-        .reverse_on = function(e) {
+        on_reverse = function(e) {
             result <- e
             result_names <- names(result)
 
