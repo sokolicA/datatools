@@ -1,22 +1,36 @@
-test_that("$new does not copy the table object by default ", {
-    x <- data.table(a=1:5, b=1:5)
+test_that("$new does not copy the data.table object by default ", {
+    x <- data.table(a=1)
     df <- DataFrame$new(x)
     expect_equal(address(x), address(df$unwrap()))
 })
 
+test_that("$new copies dataframes and tibbles even with copy=FALSE", {
+    dataframe <- data.frame(a=1)
+    tibble <- dplyr::tibble(a=1)
+    expect_false(address(DF(tibble)$unwrap())==address(tibble))
+    expect_false(address(DF(dataframe)$unwrap())==address(dataframe))
+})
+
 test_that("$new copies the table object if copy=TRUE", {
-    dataframe <- data.frame(a=1:5, b=1:5)
-    datatable <- data.table(a=1:5, b=1:5)
-    tibble <- dplyr::tibble(a=1:5, b=1:5)
+    dataframe <- data.frame(a=1)
+    datatable <- data.table(a=1)
+    tibble <- dplyr::tibble(a=1)
 
     expect_false(address(DF(dataframe, copy=TRUE)$unwrap())==address(dataframe))
     expect_false(address(DF(tibble, copy=TRUE)$unwrap())==address(tibble))
     expect_false(address(DF(datatable, copy=TRUE)$unwrap())==address(datatable))
 })
 
+test_that("$unwrap returns the underlying table", {
+    x <- data.frame(a=1)
+    df <- DataFrame$new(x)
 
-test_that("copy creates an entirely new object and table", {
-    x <- data.table(a=1:5, b=1:5)
+    expect_equal(df$unwrap(), x)
+})
+
+
+test_that("copy creates a new DataFrame with a copied table and new empty call", {
+    x <- data.table(a=1)
     df <- DataFrame$new(x)
 
     df_copy <- df$copy()
@@ -41,82 +55,82 @@ test_that("count returns a DataFrame with count of the number of rows", {
 })
 
 
-test_that("columns$names returns character vector of column names", {
+test_that("columns returns character vector of column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    expect_equal(df$columns$names, c("a", "b"))
+    expect_equal(df$columns, c("a", "b"))
 })
 
-test_that("columns$rename_with and $reorder can be chained", {
+test_that("rename_with and reorder can be chained", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df$columns$rename_with(toupper)$reorder("B")
-    expect_equal(df$columns$names, c("B", "A"))
+    df$rename_with(toupper)$set_order("B")
+    expect_equal(df$columns, c("B", "A"))
 
 })
 
-test_that("columns$rename changes column names", {
+test_that("rename changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    df$columns$rename(c("a" = "A", "b"="B"))
-    expect_equal(df$columns$names, c("A", "B"))
-    df$columns$rename(c("A" = "b"))
-    expect_equal(df$columns$names, c("b", "B"))
+    df$rename(c("a" = "A", "b"="B"))
+    expect_equal(df$columns, c("A", "B"))
+    df$rename(c("A" = "b"))
+    expect_equal(df$columns, c("b", "B"))
 })
 
-test_that("columns$rename_with changes column names", {
+test_that("rename_with changes column names", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
-    df$columns$rename_with(toupper)
-    expect_equal(df$columns$names, c("A", "B"))
+    df$rename_with(toupper)
+    expect_equal(df$columns, c("A", "B"))
 
     custom_map <- function(x) ifelse(x == "A", "AA", "BB")
-    df$columns$rename_with(custom_map)
-    expect_equal(df$columns$names, c("AA", "BB"))
+    df$rename_with(custom_map)
+    expect_equal(df$columns, c("AA", "BB"))
 })
 
-test_that("columns$rename_with changes column names in place", {
+test_that("rename_with changes column names in place", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
-    df$columns$rename_with(toupper)
+    df$rename_with(toupper)
     expect_equal(address(df$unwrap()), old_address_tbl)
     expect_equal(address(df$unwrap()$B), old_address_col)
 })
 
-test_that("columns$reorder changes column order in place", {
+test_that("reorder changes column order in place", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)$set_key("b")
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
-    df$columns$reorder()
-    expect_equal(df$columns$names, c("b", "a"))
+    df$set_order()
+    expect_equal(df$columns, c("b", "a"))
     expect_equal(address(df$unwrap()), old_address_tbl)
     expect_equal(address(df$unwrap()$b), old_address_col)
-    df$columns$reorder(c("a", "b"))
-    expect_equal(df$columns$names, c("a", "b"))
+    df$set_order(c("a", "b"))
+    expect_equal(df$columns, c("a", "b"))
 })
 
-test_that("sort changes row order in place", {
+test_that("order_by changes row order in place", {
     x <- data.table(a=1:5, b=5:1)
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
-    df$sort(b)
+    df$order_by(b)
     expect_equal(df$unwrap(), data.table(a=5:1, b=1:5))
     expect_equal(address(df$unwrap()), old_address_tbl)
     expect_equal(address(df$unwrap()$b), old_address_col)
-    df$sort(-b)
+    df$order_by(-b)
     expect_equal(df$unwrap(), data.table(a=1:5, b=5:1))
 })
 
-test_that("sort does not work with keyed data", {
+test_that("order_by does not work with keyed data", {
     x <- data.table(a=1:5, b=5:1)
     df <- DataFrame$new(x)$set_key("b")
-    expect_error(df$sort(b))
+    expect_error(df$order_by(b))
 })
 
 
@@ -147,9 +161,9 @@ test_that("drop removes the supplied columns", {
     x <- data.table(a=1:5, b=1:5)
     df <- DataFrame$new(x)
 
-    df$columns$drop("a")
+    df$drop("a")
 
-    expect_equal(names(df$unwrap()), "b")
+    expect_equal(df$columns, "b")
 })
 
 test_that("drop does not copy the data object or its columns", {
@@ -157,7 +171,7 @@ test_that("drop does not copy the data object or its columns", {
     df <- DataFrame$new(x)
     old_address_tbl <- address(df$unwrap())
     old_address_col <- address(df$unwrap()$b)
-    df$columns$drop("a")
+    df$drop("a")
 
     expect_equal(address(df$unwrap()), old_address_tbl)
     expect_equal(address(df$unwrap()$b), old_address_col)
@@ -246,17 +260,18 @@ test_that("filter does not work with character vector", {
 
 
 
-TestPrivateCol <- R6::R6Class(
-    "TestPrivateCol",
-    inherit=Columns,
-    public=list(
-        t_rename_grouping = function(e, old, new) private$rename_grouping(e, old, new),
-        t_find_group_cols = function(e) private$find_group_cols(e)
-    )
-)
-
 
 test_that("find_group_col works", {
+    TestPrivateCol <- R6::R6Class(
+        "TestPrivateCol",
+        inherit=DataFrame,
+        public=list(
+            t_rename_grouping = function(e, old, new) private$rename_grouping(e, old, new),
+            t_find_group_cols = function(e) private$find_group_cols(e)
+        )
+    )
+
+
     x <- TestPrivateCol$new(data.frame(a=1))
     expect_null(x$t_find_group_cols(NULL))
     expect_equal(x$t_find_group_cols(quote(list(a, a>2, g=a !=b, d=a, a=gg, grepl("x", f, d, "g", FALSE)))),
@@ -264,6 +279,15 @@ test_that("find_group_col works", {
 })
 
 test_that("rename_grouping works", {
+    TestPrivateCol <- R6::R6Class(
+        "TestPrivateCol",
+        inherit=DataFrame,
+        public=list(
+            t_rename_grouping = function(e, old, new) private$rename_grouping(e, old, new),
+            t_find_group_cols = function(e) private$find_group_cols(e)
+        )
+    )
+
     x <- TestPrivateCol$new(data.frame(a=1))
     e <- quote(list(a, a>2, g=a !=b, d=a, a=gg, f=grepl("x", a)))
     expect_equal(x$t_rename_grouping(e, c("a", "b"), c("c", "d")), quote(list(c, c>2, g=c !=d, d=c, a=gg, f=grepl("x", c))))
@@ -444,6 +468,19 @@ test_that("Aggregate works with grouping and filtering", {
 test_that("Aggregate currently does not work anonymous functions", {
     df <- DataFrame$new(data.table(a=1:5, b=6:10))
     expect_error(df$aggregate(mean(x), function(x) sum(x**2)))
+})
+
+
+test_that("transform works with anonymous functions", {
+    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+    df$where(b>3)$select("a")$transform(function(x) x + 50)
+    expect_equal(df$unwrap()$a, c(1,2,3,54,55))
+})
+
+test_that("transform passes ... to fun", {
+    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+    df$where(b>3)$select("c")$transform(mean, na.rm=T)
+    expect_equal(df$unwrap()$c, c(1,2,3,4,4))
 })
 
 

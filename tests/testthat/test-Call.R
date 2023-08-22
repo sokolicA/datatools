@@ -337,16 +337,16 @@ test_that("reversing the on expression works", {
     e <- TestCall$new(tbl_env=environment())
 
     # EQUI JOINS
-    expect_equal(e$private_.reverse_on(quote(c(a = "a"))), quote(c(a = "a")))
-    expect_equal(e$private_.reverse_on(quote(c(a="a", b="b"))), quote(c(a="a", b="b")))
-    expect_equal(e$private_.reverse_on(quote(c(a="b", b="a"))), quote(c(b="a", a="b")))
-    expect_equal(e$private_.reverse_on(quote(c(a="b", b="b"))), quote(c(b="a", b="b")))
+    expect_equal(e$private_on_reverse(quote(c(a = "a"))), quote(c(a = "a")))
+    expect_equal(e$private_on_reverse(quote(c(a="a", b="b"))), quote(c(a="a", b="b")))
+    expect_equal(e$private_on_reverse(quote(c(a="b", b="a"))), quote(c(b="a", a="b")))
+    expect_equal(e$private_on_reverse(quote(c(a="b", b="b"))), quote(c(b="a", b="b")))
 
     # NON-EQUI JOINS
-    expect_equal(e$private_.reverse_on(quote(c(b = "b!=a"))), quote(c(a = "a!=b")))
-    expect_equal(e$private_.reverse_on(quote(c(a = "a>b"))), quote(c(b = "b<=a")))
-    expect_equal(e$private_.reverse_on(quote(c(a = "a<=b"))), quote(c(b = "b>a")))
-    expect_equal(e$private_.reverse_on(quote(c(a = "a>b", b="a"))), quote(c(b = "b<=a", a="b")))
+    expect_equal(e$private_on_reverse(quote(c(b = "b!=a"))), quote(c(a = "a!=b")))
+    expect_equal(e$private_on_reverse(quote(c(a = "a>b"))), quote(c(b = "b<=a")))
+    expect_equal(e$private_on_reverse(quote(c(a = "a<=b"))), quote(c(b = "b>a")))
+    expect_equal(e$private_on_reverse(quote(c(a = "a>b", b="a"))), quote(c(b = "b<=a", a="b")))
 })
 
 
