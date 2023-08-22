@@ -612,7 +612,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @examples
         #'    df <- DF(data.frame(a=1:5, b=1:5))
-        #'    df$sort(-b)
+        #'    df$order_by(-b)
         order_by = function(...) {
             if (!is.null(self$key)) stop("Table is already sorted with key!")
             data.table::setorder(private$tbl, ...)
