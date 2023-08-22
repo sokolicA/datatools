@@ -24,7 +24,6 @@ Call <- R6::R6Class(
             private$set_tbl_env(tbl_env)
             private$set_depth(depth)
             private$start_call()
-            private$verbose <- getOption("DataFrame.verbose", FALSE)
             invisible(self)
         },
 
@@ -73,10 +72,10 @@ Call <- R6::R6Class(
         eval = function(env=parent.frame(private$depth)) {
             eval_env <- private$build_eval_env(env)
             call <- private$build_call()
-            if (private$verbose) message("Evaluating: ", deparse1(call))
+            if (getOption("DF.verbose", FALSE)) message("Evaluating: ", deparse1(call))
             result <- eval(call, envir=eval_env, enclos=eval_env)
 
-            if (private$verbose && private$is_update()) {
+            if (getOption("DF.verbose", FALSE) && private$is_update()) {
                 message("Rows affected: ", .Last.updated)
             }
             private$reset()
@@ -145,8 +144,6 @@ Call <- R6::R6Class(
         expr = NULL,
 
         env = NULL,
-
-        verbose = NULL,
 
         depth = NULL,
 
