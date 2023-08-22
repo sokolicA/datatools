@@ -33,7 +33,6 @@ as.data.table.DataFrame <- function(x) {
 print.DataFrame <- function(x, ...) {
     # Problematic due to the dispatch. Printing the object in the console causes
     # loss of the actual parent/caller environment.
-    #CONSIDER splitting behaviour for df vs print(df) - (the latter can be tracked)
     x$print()
 }
 
