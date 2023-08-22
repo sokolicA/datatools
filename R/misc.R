@@ -37,33 +37,37 @@ print.DataFrame <- function(x, ...) {
     x$print()
 }
 
-
+#' Check for any unnamed parameters in call.
+#'
+#' @param call A call (list) object.
+#'
+#' @return `TRUE` if atleast one parameter is not named.
 any_unnamed <- function(call) {
     is.null(names(call)) || any(names(call)[-1L]=="")
 }
 
+#' Return ellipsis as character vector.
+#'
+#' @param ... Arbitrary values.
+#'
+#' @return A character vector with quoted arguments.
 stringify_dots <- function(...) as.character(substitute(...()))
 
-merge_calls = function(c1, c2) {
-    as.call(c(as.list(c1), as.list(c2)[-1L]))
-}
 
-
-find_obj_env <- function(name, start=parent.frame()) {
-    stopifnot(is_string(name))
-
-    if (identical(start, emptyenv())) {
-        stop("Can't find ", name, call. = FALSE)
+#' Merge two calls.
+#'
+#' @param c1 First call.
+#' @param c2 Second call.
+#'
+#' @return A merged call using arguments from both c1 and c2.
+merge_calls = function(c1, c2) {# calls may ybe null.
+    if (is.null(c1) && is.null(c2)) return(NULL)
+    if (!is.null(c1) && !is.null(c2) && c1[[1]] != c2[[1]]) {
+        stop("Different calls passed.")
     }
-
-    if (exists(name, start, inherits = FALSE)) {
-        start
-    } else {
-        find_obj_env(name, parent.env(start))
-    }
+    f <- ifelse(is.null(c1[[1]]), c2[[1]], c1[[1]])
+    as.call(c(f, as.list(c1)[-1L], as.list(c2)[-1L]))
 }
-
-
 
 #' Extend the body of a function.
 #'
@@ -77,7 +81,6 @@ find_obj_env <- function(name, start=parent.frame()) {
 #'
 #'
 #' @return A new function with the extended body.
-#' @export
 #'
 #' @examples
 #' mean_verbose <- extend_body(mean, quote(message("Calculating mean!")), 1L)
@@ -94,3 +97,10 @@ extend_body <- function(fun, with, position=1L) {
 }
 
 paste1 <- extend_body(paste0, quote(if (any(sapply(list(...), is.null))) return(NULL)), 1L)
+
+
+with_debugger <- function(f) {
+    extend_body(f, quote(browser()), 1L)
+}
+
+
