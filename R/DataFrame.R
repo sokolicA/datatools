@@ -48,7 +48,7 @@ DataFrame <- R6::R6Class(
         #' Printing a `DataFrame` using the S3 method dispatch (e.g. by just typing
         #' the object name and pressing enter) is limited to showing
         #' only the entire table.
-        print = function(nrows=12L) {#browser()
+        print = function(nrows=12L) {
             if (identical(sys.function(1), print)) {
                 result <- private$tbl
             } else {
@@ -64,7 +64,7 @@ DataFrame <- R6::R6Class(
         #'
         #' @return A new `DataFrame` object.
         #'
-        copy = function() {#browser()
+        copy = function() {
             DataFrame$new(tbl=private$tbl, copy=TRUE)
         },
 
@@ -204,7 +204,7 @@ DataFrame <- R6::R6Class(
         #' df <- DF(x)
         #' df$concat_(y, x, y, df)
         #'
-        concat_ = function(..., fill=FALSE) {#browser()
+        concat_ = function(..., fill=FALSE) {
             private$tbl <- self$concat(..., fill=fill)$unwrap()
             invisible(self)
         },
@@ -225,7 +225,7 @@ DataFrame <- R6::R6Class(
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
         #' df$left_join(y, .(b=a))
-        left_join = function(other, on) {#browser()
+        left_join = function(other, on) {
             call <- Call$new()$set(
                 x=quote(other), i=quote(private$tbl),
                 on=substitute(on), mult="all", nomatch=NA, env=environment()
@@ -268,7 +268,7 @@ DataFrame <- R6::R6Class(
         #' df <- DF(mtcars, copy=TRUE)
         #' df$where(mpg > 20)$print()
         #' df$group_by(vs)$where(mpg == max(mpg))$print()
-        where = function(rows) {#browser()
+        where = function(rows) {
             if (missing(rows)) rows <- NULL
             BY <- private$call$arg("by")
             i <- substitute(rows)
@@ -307,7 +307,7 @@ DataFrame <- R6::R6Class(
         #' df$select(is.numeric)$print()
         #' df$select(is.character)$print()
         #' df$select(patterns("m"))$print()
-        select = function(...) {#browser()
+        select = function(...) {
             #IDEA $select(mean(x) >5) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
             #IDEA $select(mean(is.na(x)) >0.2) --> df[, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)]
             e <- if (missing(...))quote(list(NULL)) else substitute(list(...))
@@ -387,7 +387,7 @@ DataFrame <- R6::R6Class(
         #' df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))$print()
         #'
         #' @return Invisibly returns itself.
-        set = function(value) {#browser()
+        set = function(value) {
             #CONSIDER renaming the method due to it overriding the default $set (method) method.
             value <- substitute(function(x) value)
             cols <- if (is.null(private$call$arg(".SDcols"))) names(private$tbl) else private$call$selected_columns()
@@ -422,7 +422,7 @@ DataFrame <- R6::R6Class(
         #' @examples
         #' df <- DF(mtcars, copy=TRUE)
         #' df$insert(mpg2 = mpg**2)
-        insert = function(...) {#browser()
+        insert = function(...) {
             e <- substitute(`:=`(...))
             if (any_unnamed(e)) stop("Must pass named columns!")
             if (any(names(e) %in% names(private$tbl))) stop("Some columns already exist!")
@@ -458,7 +458,7 @@ DataFrame <- R6::R6Class(
         #'    df <- DF(mtcars, copy=TRUE)
         #'    df$insert(a=NA_real_)$where(vs!=0)$group_by(cyl)$update(a= max(mpg))
         #'    df$insert(b=NA_real_)$group_by(cyl)$update(b= max(mpg[vs!=0]))
-        update = function(...) {#browser()
+        update = function(...) {
             #TODO add tests
             j <- substitute(`:=`(...))
             if (!all(names(j)[-1L] %in% names(private$tbl))) {
@@ -492,7 +492,7 @@ DataFrame <- R6::R6Class(
         #' y <- data.table(a=c("b", "c", "a"), b = 5:7)
         #' df <- DF(x)
         #' df$update_join(y, .(b=a), insert="all")
-        update_join = function(other, on, insert=NULL, update=NULL) {#browser()
+        update_join = function(other, on, insert=NULL, update=NULL) {
             #CONSIDER To allow data.tables or only DataFrames or both?
             #REFACTOR
             ins <- substitute(insert)
@@ -536,16 +536,19 @@ DataFrame <- R6::R6Class(
         #'
         #' Part of the *update methods*. Uses `where`, `select` and `group_by`.
         #'
-        #' @param fun A function that is applied to the selected columns.
+        #' @param fun A function that is applied to the columns selected with `select`.
         #' @param ... Optional arguments that are passed to `fun`.
-        #'#'
+        #'
+        #' @details
+        #' Anonymous functions can be supplied to `fun`.
+        #'
         #' @return Invisibly returns itself.
         #'
         #' @examples
         #'    df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
         #'    df$where(b>3)$select("a")$transform(function(x) x + 50)
         #'    df$where(b>3)$select("c")$transform(mean, na.rm=T)
-        transform = function(fun, ...) {#browser()
+        transform = function(fun, ...) {
             cols <- private$call$selected_columns()
             if (length(cols) == 0) {
                 warning("No columns matching the select criteria!")
@@ -575,7 +578,8 @@ DataFrame <- R6::R6Class(
         #' df$aggregate(sum_squares(x), mean(x), sd(x))
         #' df$aggregate(max(x), mean(x))
         #' df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
-        aggregate = function(...) {#browser()
+        aggregate = function(...) {
+            #CONSIDER allowing mean instead of mean(x).
             f <- substitute(list(...))
             if (grepl("function\\(", deparse(f))) stop("Anonymous functions are not supported!")
             groups <- private$call$grouping()
@@ -625,7 +629,7 @@ DataFrame <- R6::R6Class(
         #' df <- DF(mtcars, copy=TRUE)
         #' df$set_key("mpg", "cyl")
         #' df$set_key(mpg, vs)
-        set_key = function(...) {#browser()
+        set_key = function(...) {
             key <- stringify_dots(...)
             data.table::setkeyv(x=private$tbl, cols=key)
             invisible(self)
