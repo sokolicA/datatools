@@ -228,7 +228,9 @@ DataFrame <- R6::R6Class(
         left_join = function(other, on) {
             call <- Call$new()$set(
                 x=quote(other), i=quote(private$tbl),
-                on=substitute(on), mult="all", nomatch=NA, env=environment()
+                on=substitute(on), mult="all", nomatch=NA,
+                allow.cartesian = TRUE,
+                env=environment()
             )
 
             ON <- call$arg("on")
@@ -236,6 +238,9 @@ DataFrame <- R6::R6Class(
             ON_REV <- call$arg("on")
 
             result <- call$eval(environment())
+            if (dim(result)[1] > dim(private$tbl)[1] + dim(other)[1]) {
+                warning("Performed join resulted in multiple matches. Check the specification of 'on' if this was not intentional.")
+            }
             private$l_join_rename(result, names(ON)[-1L], names(ON_REV)[-1L], names(other))
             setcolorder(result, names(private$tbl))
             DataFrame$new(result)
