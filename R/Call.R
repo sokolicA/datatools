@@ -476,6 +476,10 @@ Call <- R6::R6Class(
             result
         },
 
+        parse_allow.cartesian = function(arg) {
+            arg
+        },
+
         is_update = function() {
             j <- private$expr[["j"]]
             !is.null(j) && length(j) > 1 && j[[1]] == quote(`:=`)
