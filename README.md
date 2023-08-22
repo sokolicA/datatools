@@ -6,8 +6,8 @@
 
 - Validators.
 
-- Stat functions.
-
 - Missing data analysis.
 
 - Ggplot support.
+
+- Correlations.
