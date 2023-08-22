@@ -40,30 +40,6 @@ A wrapper class for tabular data objects of class \code{data.frame}.
    df$tail(1)
 
 ## ------------------------------------------------
-## Method `DataFrame$sort`
-## ------------------------------------------------
-
-   df <- DF(data.frame(a=1:5, b=1:5))
-   df$sort(-b)
-
-## ------------------------------------------------
-## Method `DataFrame$is_key_unique`
-## ------------------------------------------------
-
-df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
-df$is_key_unique()
-df <- DF(data.frame(a=1:5, b=1:5))
-df$is_key_unique()
-
-## ------------------------------------------------
-## Method `DataFrame$count`
-## ------------------------------------------------
-
-df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
-df$count()
-df$group_by(g)$count()
-
-## ------------------------------------------------
 ## Method `DataFrame$filter`
 ## ------------------------------------------------
 
@@ -81,66 +57,6 @@ df$filter_(a > 2)
 df
 
 ## ------------------------------------------------
-## Method `DataFrame$group_by`
-## ------------------------------------------------
-
-df <- DF(data.table(a=1:5, b=3))
-df$group_by(a)
-df$group_by("a")
-df$group_by(a, b)
-df$group_by(c("a", "b"))
-df$group_by(a > 2)
-df$group_by(s = a > 2) # will name the grouping column with s
-a <- "b"
-df$group_by(a) #will group by a
-df$group_by(c(a)) # will group by b
-df$group_by(NULL) # will remove grouping
-
-## ------------------------------------------------
-## Method `DataFrame$set`
-## ------------------------------------------------
-
-df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
-df$select(is.character)$where(a==2)$set(a); df
-df$where(a==2)$set(fifelse(a==3, 1, 0)); df
-df$select(is.numeric)$set(NA); df
-
-
-## ------------------------------------------------
-## Method `DataFrame$transform`
-## ------------------------------------------------
-
-   df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
-   df$where(b>3)$select("a")$transform(function(x) x + 50)
-   df$where(b>3)$select("c")$transform(mean, na.rm=T)
-
-## ------------------------------------------------
-## Method `DataFrame$update`
-## ------------------------------------------------
-
-   df <- DF(data.frame(a=1:5, b=1:5))
-   df$update(a = 2)
-   df$update(g = a, dd = ifelse(a==2, b, 0))
-
-## ------------------------------------------------
-## Method `DataFrame$update_join`
-## ------------------------------------------------
-
-x <- data.table(a=1:3, b = c("a", "b", "a"))
-y <- data.table(a=c("b", "c", "a"), b = 5:7)
-df <- DF(x)
-df$update_join(y, .(b=a), insert="all")
-
-## ------------------------------------------------
-## Method `DataFrame$left_join`
-## ------------------------------------------------
-
-x <- data.table(a=1:3, b = c("a", "b", "a"))
-y <- data.table(a=c("b", "c", "a"), b = 5:7)
-df <- DF(x)
-df$left_join(y, .(b=a))
-
-## ------------------------------------------------
 ## Method `DataFrame$remove`
 ## ------------------------------------------------
 
@@ -150,12 +66,6 @@ df <- DF(data.frame(a=1:5, b=1:5))
 df$remove(c(1, 3, 5))
 df <- DF(data.frame(a=1:3, b=1:3))
 df$remove(c(TRUE, NA, FALSE))
-
-## ------------------------------------------------
-## Method `DataFrame$insert`
-## ------------------------------------------------
-
-#TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
 
 ## ------------------------------------------------
 ## Method `DataFrame$concat`
@@ -177,6 +87,109 @@ df$concat_(y, x, y, df)
 
 
 ## ------------------------------------------------
+## Method `DataFrame$left_join`
+## ------------------------------------------------
+
+x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$left_join(y, .(b=a))
+
+## ------------------------------------------------
+## Method `DataFrame$where`
+## ------------------------------------------------
+
+df <- DF(mtcars, copy=TRUE)
+df$where(mpg > 20)$print()
+df$group_by(vs)$where(mpg == max(mpg))$print()
+
+## ------------------------------------------------
+## Method `DataFrame$select`
+## ------------------------------------------------
+
+
+df <- DF(mtcars, copy=TRUE)
+df$select(c("mpg", "cyl"))$print()
+df$select(1:2)$print()
+df$select(is.numeric)$print()
+df$select(is.character)$print()
+df$select(patterns("m"))$print()
+
+## ------------------------------------------------
+## Method `DataFrame$group_by`
+## ------------------------------------------------
+
+df <- DF(data.table(a=1:5, b=3))
+df$group_by(a)
+df$group_by("a")
+df$group_by(a, b)
+df$group_by(c("a", "b"))
+df$group_by(a > 2)
+df$group_by(s = a > 2) # will name the grouping column with s
+a <- "b"
+df$group_by(a) #will group by a
+df$group_by(c(a)) # will group by b
+df$group_by(NULL) # will remove grouping
+
+## ------------------------------------------------
+## Method `DataFrame$reset_setup`
+## ------------------------------------------------
+
+df <- DF(mtcars, copy=TRUE)
+df$where(mpg>15)$print()
+df$reset_setup()$print()
+
+## ------------------------------------------------
+## Method `DataFrame$set`
+## ------------------------------------------------
+
+df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+df$select(is.character)$where(a==2)$set(a)$print()
+df$where(a==2)$set(fifelse(a==3, 1, 0))$print()
+df$select(is.numeric)$set(NA)$print()
+
+df <- DF(mtcars, copy=FALSE)
+df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))$print()
+
+
+## ------------------------------------------------
+## Method `DataFrame$insert`
+## ------------------------------------------------
+
+df <- DF(mtcars, copy=TRUE)
+df$insert(mpg2 = mpg**2)
+
+## ------------------------------------------------
+## Method `DataFrame$update`
+## ------------------------------------------------
+
+   df <- DF(data.frame(a=1:5, b=1:5))
+   df$update(a = 2)
+   df$update(g = a, dd = ifelse(a==2, b, 0))
+
+  # Filtering on i (first transform) vs. filtering on j (second transform)
+   df <- DF(mtcars, copy=TRUE)
+   df$insert(a=NA_real_)$where(vs!=0)$group_by(cyl)$update(a= max(mpg))
+   df$insert(b=NA_real_)$group_by(cyl)$update(b= max(mpg[vs!=0]))
+
+## ------------------------------------------------
+## Method `DataFrame$update_join`
+## ------------------------------------------------
+
+x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$update_join(y, .(b=a), insert="all")
+
+## ------------------------------------------------
+## Method `DataFrame$transform`
+## ------------------------------------------------
+
+   df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+   df$where(b>3)$select("a")$transform(function(x) x + 50)
+   df$where(b>3)$select("c")$transform(mean, na.rm=T)
+
+## ------------------------------------------------
 ## Method `DataFrame$aggregate`
 ## ------------------------------------------------
 
@@ -185,13 +198,68 @@ sum_squares <- function(x) sum(x**2)
 df$aggregate(sum_squares(x), mean(x), sd(x))
 df$aggregate(max(x), mean(x))
 df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
+
+## ------------------------------------------------
+## Method `DataFrame$count`
+## ------------------------------------------------
+
+df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+df$count()
+df$group_by(g)$count()
+
+## ------------------------------------------------
+## Method `DataFrame$order_by`
+## ------------------------------------------------
+
+   df <- DF(data.frame(a=1:5, b=1:5))
+   df$sort(-b)
+
+## ------------------------------------------------
+## Method `DataFrame$is_key_unique`
+## ------------------------------------------------
+
+df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
+df$is_key_unique()
+df <- DF(data.frame(a=1:5, b=1:5))
+df$is_key_unique()
+
+## ------------------------------------------------
+## Method `DataFrame$drop`
+## ------------------------------------------------
+
+x <- DF(data.frame(a=1:5, b=1:5))
+x$drop("b")
+x$drop(a)
+
+## ------------------------------------------------
+## Method `DataFrame$set_order`
+## ------------------------------------------------
+
+x <- DF(data.frame(a=1:5, b=1:5))
+x$set_order(c("b", "a"))$print() # same as x$set_order("b")
+
+## ------------------------------------------------
+## Method `DataFrame$rename`
+## ------------------------------------------------
+
+x <- DF(data.frame(a=1:5, b=1:5))
+x$rename(c("a"="A", "b"="B"))
+
+## ------------------------------------------------
+## Method `DataFrame$rename_with`
+## ------------------------------------------------
+
+x <- DF(data.frame(a=1:5, b=1:5))
+x$rename_with(toupper)
+custom_mapper = function(x) {return(paste0(x, 1))}
+x$rename_with(custom_mapper)
 df <- DF(data.table(a=1, b=2))
 
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{columns}}{Column names object.}
+\item{\code{columns}}{Column names.}
 
 \item{\code{key}}{Key getter.}
 }
@@ -201,37 +269,42 @@ df <- DF(data.table(a=1, b=2))
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-DataFrame-new}{\code{DataFrame$new()}}
+\item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
 \item \href{#method-DataFrame-print}{\code{DataFrame$print()}}
+\item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
 \item \href{#method-DataFrame-head}{\code{DataFrame$head()}}
 \item \href{#method-DataFrame-tail}{\code{DataFrame$tail()}}
-\item \href{#method-DataFrame-sort}{\code{DataFrame$sort()}}
-\item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
-\item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
 \item \href{#method-DataFrame-filter}{\code{DataFrame$filter()}}
 \item \href{#method-DataFrame-filter_}{\code{DataFrame$filter_()}}
+\item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
+\item \href{#method-DataFrame-concat}{\code{DataFrame$concat()}}
+\item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
+\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
 \item \href{#method-DataFrame-where}{\code{DataFrame$where()}}
 \item \href{#method-DataFrame-select}{\code{DataFrame$select()}}
 \item \href{#method-DataFrame-group_by}{\code{DataFrame$group_by()}}
+\item \href{#method-DataFrame-reset_setup}{\code{DataFrame$reset_setup()}}
 \item \href{#method-DataFrame-set}{\code{DataFrame$set()}}
-\item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
+\item \href{#method-DataFrame-insert}{\code{DataFrame$insert()}}
 \item \href{#method-DataFrame-update}{\code{DataFrame$update()}}
 \item \href{#method-DataFrame-update_join}{\code{DataFrame$update_join()}}
-\item \href{#method-DataFrame-left_join}{\code{DataFrame$left_join()}}
-\item \href{#method-DataFrame-remove}{\code{DataFrame$remove()}}
-\item \href{#method-DataFrame-insert}{\code{DataFrame$insert()}}
-\item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
-\item \href{#method-DataFrame-concat}{\code{DataFrame$concat()}}
-\item \href{#method-DataFrame-concat_}{\code{DataFrame$concat_()}}
+\item \href{#method-DataFrame-transform}{\code{DataFrame$transform()}}
 \item \href{#method-DataFrame-aggregate}{\code{DataFrame$aggregate()}}
-\item \href{#method-DataFrame-unwrap}{\code{DataFrame$unwrap()}}
-\item \href{#method-DataFrame-copy}{\code{DataFrame$copy()}}
+\item \href{#method-DataFrame-count}{\code{DataFrame$count()}}
+\item \href{#method-DataFrame-order_by}{\code{DataFrame$order_by()}}
+\item \href{#method-DataFrame-set_key}{\code{DataFrame$set_key()}}
+\item \href{#method-DataFrame-is_key_unique}{\code{DataFrame$is_key_unique()}}
+\item \href{#method-DataFrame-drop}{\code{DataFrame$drop()}}
+\item \href{#method-DataFrame-set_order}{\code{DataFrame$set_order()}}
+\item \href{#method-DataFrame-rename}{\code{DataFrame$rename()}}
+\item \href{#method-DataFrame-rename_with}{\code{DataFrame$rename_with()}}
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-new"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-new}{}}}
 \subsection{Method \code{new()}}{
-\code{DataFrame} Constructor
+\code{DataFrame} Constructor.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$new(tbl, copy = FALSE)}\if{html}{\out{</div>}}
 }
@@ -241,15 +314,28 @@ df <- DF(data.table(a=1, b=2))
 \describe{
 \item{\code{tbl}}{An object of class \code{data.frame}.}
 
-\item{\code{copy}}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}.}
+\item{\code{copy}}{Optional argument specifying whether to wrap a copy of the passed object. Defaults to \code{FALSE}. See details.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-The table is not copied by default which improves speed and memory performance.
+The table is not copied by default for speed and memory performance.
 Potential drawback of not copying the table is the ability to modify the table 'in place' outside the wrapper, which results in modifying the wrapped table.
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-unwrap"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-unwrap}{}}}
+\subsection{Method \code{unwrap()}}{
+Get the underlying data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$unwrap()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+The underlying \code{data.table} object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-print"></a>}}
@@ -257,13 +343,39 @@ Potential drawback of not copying the table is the ability to modify the table '
 \subsection{Method \code{print()}}{
 Print the table object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$print(nrows = 12L)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{nrows}}{Even number of rows to print. Defaults to 12.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Details}{
-The method used is \code{print.data.table}.
+The output is affected by the setup verbs \code{where} and \code{select}.
+The header of the output is information about the \code{DataFrame}.
+The method used to print the table is \code{print.data.table} using custom arguments.
+
+Printing a \code{DataFrame} using the S3 method dispatch (e.g. by just typing
+the object name and pressing enter) is limited to showing
+only the entire table.
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-copy"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-copy}{}}}
+\subsection{Method \code{copy()}}{
+Create a deep copy of the \code{DataFrame} object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$copy()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A new \code{DataFrame} object.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-head"></a>}}
@@ -326,82 +438,6 @@ For negative values of n, this method returns all rows except the first |n| rows
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-sort"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-sort}{}}}
-\subsection{Method \code{sort()}}{
-Sort the table rows
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$sort(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{The columns to sort by. Do not quote column names. See \code{?data.table::setorder}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
-   df$sort(-b)
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-is_key_unique"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-is_key_unique}{}}}
-\subsection{Method \code{is_key_unique()}}{
-Check whether keys represent unique entries
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$is_key_unique()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-\code{TRUE} if the set key is unique and \code{FALSE} otherwise. If no key is set the result is \code{FALSE}.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
-df$is_key_unique()
-df <- DF(data.frame(a=1:5, b=1:5))
-df$is_key_unique()
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-count"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-count}{}}}
-\subsection{Method \code{count()}}{
-Count the number of rows.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-A \code{DataFrame} with the row counts. The result will be keyed by the grouping if a grouped \code{DataFrame} was used.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
-df$count()
-df$group_by(g)$count()
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-filter"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-filter}{}}}
 \subsection{Method \code{filter()}}{
@@ -413,7 +449,7 @@ Create a new \code{DataFrame} with filter applied to the rows.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{keep}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details}
+\item{\code{keep}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details.}
 }
 \if{html}{\out{</div>}}
 }
@@ -421,7 +457,7 @@ Create a new \code{DataFrame} with filter applied to the rows.
 \itemize{
 \item If an expression is passed it will be evaluated inside the context of the table.
 \item If an integer vector is passed, the rows specified will be kept. Passing duplicated numbers will result in duplicated rows and passing numbers larger than the number of rows will result in \code{NA} rows.
-\item If a logical vector is passed it must be of the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
+\item If a logical vector is passed it must either of length one the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be returned.
 }
 }
 
@@ -446,7 +482,7 @@ df$filter(c(TRUE, NA, FALSE, FALSE, TRUE))
 \subsection{Method \code{filter_()}}{
 Filter the table in place.
 
-Same as \verb{$filter} method, just done in place. Opposite of the \verb{$remove} method.
+Same as \verb{$filter} method, just done in place.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$filter_(keep)}\if{html}{\out{</div>}}
 }
@@ -454,18 +490,10 @@ Same as \verb{$filter} method, just done in place. Opposite of the \verb{$remove
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{keep}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details}
+\item{\code{keep}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector. See details of \verb{$filter}.}
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Details}{
-\itemize{
-\item If an expression is passed it will be evaluated inside the context of the table.
-\item If an integer vector is passed, the rows specified will be kept. Passing duplicated numbers will result in duplicated rows and passing numbers larger than the number of rows will result in \code{NA} rows.
-\item If a logical vector is passed it must be of the same length as the number of rows. Logical \code{NA} values are treated as \code{FALSE} and those rows will not be removed.
-}
-}
-
 \subsection{Returns}{
 Returns itself with kept rows only.
 }
@@ -474,297 +502,6 @@ Returns itself with kept rows only.
 \preformatted{df <- DF(data.frame(a=1:5, b=1:5))
 df$filter_(a > 2)
 df
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-where"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-where}{}}}
-\subsection{Method \code{where()}}{
-Work (operate?) on a subset of rows.
-Experimental.
-This method will not remove the rows from the data.
-Selected data modifications or calculations will be based only on the selected subset of data.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$where(rows)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{rows}}{An expression to be evaluated inside the table, integer vector specifying rows to remove or a logical vector.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-If \code{rows} is missing or \code{NULL} then all rows will be used.
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-select"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-select}{}}}
-\subsection{Method \code{select()}}{
-Work on a subset of the columns.
-Experimental. #TODO define behaviour of other methods.
-This method will not remove the columns from the data.
-Selected data modifications or calculations will be based only on the selected subset of data.
-
-$select(mean(x) >5) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
-$select(mean(is.na(x)) >0.2) --> df\link{, .SD, .SDcols = sapply(df, function(x) mean(x) > 5)}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{May be character column names or numeric positions. See details.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-The form startcol:endcol is also allowed. Dropping the specified columns can be accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
-See documentation of \code{.SDcols} in \code{?data.table::data.table} for more possibilities.
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-group_by"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-group_by}{}}}
-\subsection{Method \code{group_by()}}{
-Group or un-group the data.
-Used in calculation of statistics.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., .as_key = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{An expression specifying by what to group the data. See details.}
-
-\item{\code{.as_key}}{Whether to use the grouping as a key of the resulting \code{DataFrame}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-Setting by Will override existing grouping without warning.
-Pass a character vector of groups \code{vec} using \code{c(vec)}.
-Set to \code{NULL} to remove any existing grouping.
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DF(data.table(a=1:5, b=3))
-df$group_by(a)
-df$group_by("a")
-df$group_by(a, b)
-df$group_by(c("a", "b"))
-df$group_by(a > 2)
-df$group_by(s = a > 2) # will name the grouping column with s
-a <- "b"
-df$group_by(a) #will group by a
-df$group_by(c(a)) # will group by b
-df$group_by(NULL) # will remove grouping
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-set"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-set}{}}}
-\subsection{Method \code{set()}}{
-Set column values.
-Experimental. #TODO define behaviour of other methods.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set(value)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{value}}{Value to assign to the columns and rows specified by where.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-TO ADD
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
-df$select(is.character)$where(a==2)$set(a); df
-df$where(a==2)$set(fifelse(a==3, 1, 0)); df
-df$select(is.numeric)$set(NA); df
-
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-transform"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-transform}{}}}
-\subsection{Method \code{transform()}}{
-Transform columns with function
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$transform(fun, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{fun}}{A function that is applied to the selected columns.}
-
-\item{\code{...}}{Optional arguments that are passed to \code{fun}.
-#'}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
-   df$where(b>3)$select("a")$transform(function(x) x + 50)
-   df$where(b>3)$select("c")$transform(mean, na.rm=T)
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-update"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-update}{}}}
-\subsection{Method \code{update()}}{
-Update table columns by reference.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Columns to update and the corresponding calculation.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
-   df$update(a = 2)
-   df$update(g = a, dd = ifelse(a==2, b, 0))
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-update_join"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
-\subsection{Method \code{update_join()}}{
-Perform an update join.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(other, on, insert = NULL, update = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{other}}{The other (right) \code{data.table}.}
-
-\item{\code{on}}{The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).}
-
-\item{\code{insert}}{Optional list specifying which columns to add. \code{NULL} (default) does not insert any. Use \code{'add'} to insert all columns from the other table that are not used for joining.}
-
-\item{\code{update}}{Optional list specifying updates of existing columns. No updates are performed by default.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-Using columns from the wrapped \code{data.table} table in calculations provided in \code{update} can be done by
-prefixing the column names of the left table with \strong{\code{i.}}. See examples.
-
-Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
-
-The join will not be performed if there are multiple matches found in the \code{other} table.
-In such cases use either \code{left_join} or delete duplicated foreign keys in the \code{other} table.
-}
-
-\subsection{Returns}{
-Invisibly returns the updated itself.
-
-Returns an error if there are multiple matches found in the \code{other} table.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
-y <- data.table(a=c("b", "c", "a"), b = 5:7)
-df <- DF(x)
-df$update_join(y, .(b=a), insert="all")
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
-\subsection{Method \code{left_join()}}{
-Perform a left (outer) join.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(other, on)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{other}}{The other (right) \code{data.table}.}
-
-\item{\code{on}}{The condition to join the tables on. Either a...}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-Note that \code{list(...)} can be aliased with \code{.(...)} due to the background use of \code{data.table}.
-}
-
-\subsection{Returns}{
-A new \code{DataFrame} extended with columns from the other table.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
-y <- data.table(a=c("b", "c", "a"), b = 5:7)
-df <- DF(x)
-df$left_join(y, .(b=a))
 }
 \if{html}{\out{</div>}}
 
@@ -813,67 +550,10 @@ df$remove(c(TRUE, NA, FALSE))
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-insert"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-insert}{}}}
-\subsection{Method \code{insert()}}{
-Insert columns to the \code{DataFrame}.
-
-Experimental. Considerations:
-This method will insert new columns by reference.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$insert(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Columns to add.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Details}{
-#'TO ADD
-}
-
-\subsection{Returns}{
-Invisibly returns itself.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{#TODO add information about operations on groups - df$group_by(plate)$insert(test_1=mean(val[id=="CTRL"]))
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-set_key}{}}}
-\subsection{Method \code{set_key()}}{
-Create a key the table.
-
-\code{set_key} sorts the table and marks it as sorted with an attribute sorted.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set_key(key)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{key}}{A Character vector of column names to set the key on.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisibly returns itself.
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-concat"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-concat}{}}}
 \subsection{Method \code{concat()}}{
-Create a new \code{DataFrame} by appending tables using column names.
+Create a new \code{DataFrame} by concatenating table rows.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$concat(..., fill = FALSE)}\if{html}{\out{</div>}}
 }
@@ -887,8 +567,12 @@ Create a new \code{DataFrame} by appending tables using column names.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+The concatenation is based on column names.
+}
+
 \subsection{Returns}{
-A new unkeyed \code{DataFrame} object with rows appended.
+A new unkeyed \code{DataFrame} object with rows from tables passed in \code{...} appended.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -906,8 +590,8 @@ res <- df$concat(y, x, y, df)
 \if{html}{\out{<a id="method-DataFrame-concat_"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-concat_}{}}}
 \subsection{Method \code{concat_()}}{
-Concatenate the rows of the \code{DataFrame}.
-Same as the \verb{$concat} method but without creating a new object.
+Concatenate the rows of the \code{DataFrame} (in place).
+The result of \verb{$concat} method is set as the new underlying table.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$concat_(..., fill = FALSE)}\if{html}{\out{</div>}}
 }
@@ -938,10 +622,443 @@ df$concat_(y, x, y, df)
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-left_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-left_join}{}}}
+\subsection{Method \code{left_join()}}{
+Perform a left (outer) join.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$left_join(other, on)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{other}}{The other \code{data.table}.}
+
+\item{\code{on}}{The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+The method performs a full left outer join.
+}
+
+\subsection{Returns}{
+A new \code{DataFrame} extended with columns from the other table.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$left_join(y, .(b=a))
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-where"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-where}{}}}
+\subsection{Method \code{where()}}{
+Operate on a subset of rows.
+
+Part of the \emph{setup methods}.
+
+This method sets the \code{i} argument of the \code{data.table} call without evaluating the call.
+Eligible data modifications (\emph{update methods}) or calculations
+(\emph{transformation methods}) will be based only on the used subset of data
+and using them will entirely reset the \emph{setup methods}.
+
+Note that this is fundamentally different than the \verb{$filter} method, which
+evaluates and returns the subset.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$where(rows)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rows}}{An expression to be evaluated inside the table,
+integer vector specifying rows to remove or a logical vector.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+If \code{rows} is missing or \code{NULL} then all rows will be used.
+
+Experimental: \strong{Subsetting by group.} If grouping is already specified when calling \code{where}, the
+subsetting will be done by group and the \code{group_by} setup will be consumed. See examples.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(mtcars, copy=TRUE)
+df$where(mpg > 20)$print()
+df$group_by(vs)$where(mpg == max(mpg))$print()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-select"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-select}{}}}
+\subsection{Method \code{select()}}{
+Operate on a subset of the columns.
+
+Part of the \emph{setup methods}. Sets the \code{.SDcols} argument.
+
+Eligible data modifications (\emph{update methods}) or calculations
+(\emph{transformation methods}) will be based only on the used subset of data
+and using them will entirely reset the \emph{setup methods}.
+
+Note that this method will not remove the columns from the data. Use \verb{$columns$drop} instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$select(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{May be character vector of column names or numeric positions. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+The form startcol:endcol is also allowed. Dropping the specified columns can be
+accomplished by prepending the argument with ! or -, e.g. .SDcols = !c('x', 'y').
+See documentation of \code{.SDcols} in \code{?data.table::data.table} for more possibilities.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{
+df <- DF(mtcars, copy=TRUE)
+df$select(c("mpg", "cyl"))$print()
+df$select(1:2)$print()
+df$select(is.numeric)$print()
+df$select(is.character)$print()
+df$select(patterns("m"))$print()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-group_by"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-group_by}{}}}
+\subsection{Method \code{group_by()}}{
+Operate on groups of data.
+
+Part of the \emph{setup methods}. Sets the \code{by} or \code{keyby} argument.
+
+Eligible data modifications (\emph{update methods}) or calculations
+(\emph{transformation methods}) will be group based
+and using them will entirely reset the \emph{setup methods}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$group_by(..., .as_key = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{An expression specifying by what to group the data. See details.}
+
+\item{\code{.as_key}}{Whether to use the grouping as a key of the resulting \code{DataFrame}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Using \code{.as_key=TRUE} is suggested when using \emph{transformation methods} but
+usually discouraged using \emph{update methods}.
+
+Set to \code{NULL} to remove any existing grouping.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.table(a=1:5, b=3))
+df$group_by(a)
+df$group_by("a")
+df$group_by(a, b)
+df$group_by(c("a", "b"))
+df$group_by(a > 2)
+df$group_by(s = a > 2) # will name the grouping column with s
+a <- "b"
+df$group_by(a) #will group by a
+df$group_by(c(a)) # will group by b
+df$group_by(NULL) # will remove grouping
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-reset_setup"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-reset_setup}{}}}
+\subsection{Method \code{reset_setup()}}{
+Reset the setup prepared with setup methods.
+
+Part of the \emph{setup methods}. Resets the setup.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$reset_setup()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(mtcars, copy=TRUE)
+df$where(mpg>15)$print()
+df$reset_setup()$print()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-set"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-set}{}}}
+\subsection{Method \code{set()}}{
+Set column values.
+
+Part of the \emph{update methods}. Uses \code{where}, \code{select} and \code{group_by}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set(value)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{value}}{Value to assign. Can also be a function. See examples.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+If \code{where} is not set then all rows will be set to the value.
+If \code{select} is not set then all columns will be set to the value.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DataFrame$new(data.table(a=1:3, b=1:3, d = LETTERS[1:3]))
+df$select(is.character)$where(a==2)$set(a)$print()
+df$where(a==2)$set(fifelse(a==3, 1, 0))$print()
+df$select(is.numeric)$set(NA)$print()
+
+df <- DF(mtcars, copy=FALSE)
+df$insert(test=1)$group_by(vs)$select("test")$set(max(mpg))$print()
+
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-insert"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-insert}{}}}
+\subsection{Method \code{insert()}}{
+Insert (add) new columns to the \code{DataFrame}.
+
+Part of the \emph{update methods}. Uses \code{where}, \code{select} and \code{group_by}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$insert(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Named arguments in the form \code{column_name} = \code{expression}. See examples.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+This method can only be used to insert new columns and will throw an error
+if any of the columns are already found in the table.
+The \verb{$update} method is intended for adding new columns.
+
+You can also use filtering on \code{j} with this method. This means that the whole table is
+taken but the operations are done only on a subset of the data in \code{.SD}.
+See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
+in the examples.
+This is also an option with \verb{$update}.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(mtcars, copy=TRUE)
+df$insert(mpg2 = mpg**2)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-update"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-update}{}}}
+\subsection{Method \code{update()}}{
+Update table columns by reference.
+
+Part of the \emph{update methods}. Uses \code{where}, \code{select} and \code{group_by}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Named arguments in the form \code{column_name} = \code{expression}. See examples.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+This method can only be used to update existing columns and will throw an error
+if any of the columns are not found in the table.
+The \verb{$insert} method is intended for adding new columns.
+
+You can also use filtering on \code{j} with this method. This means that the whole table is
+taken but the operations are done only on a subset of the data in \code{.SD}.
+See here https://stackoverflow.com/questions/19847121/using-data-table-to-aggregate and
+in the examples.
+This is also an option with \verb{$insert}.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
+   df$update(a = 2)
+   df$update(g = a, dd = ifelse(a==2, b, 0))
+
+  # Filtering on i (first transform) vs. filtering on j (second transform)
+   df <- DF(mtcars, copy=TRUE)
+   df$insert(a=NA_real_)$where(vs!=0)$group_by(cyl)$update(a= max(mpg))
+   df$insert(b=NA_real_)$group_by(cyl)$update(b= max(mpg[vs!=0]))
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-update_join"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-update_join}{}}}
+\subsection{Method \code{update_join()}}{
+Perform an update join.
+
+Part of the \emph{update methods}. Uses \code{where}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$update_join(other, on, insert = NULL, update = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{other}}{The other \code{data.table}.}
+
+\item{\code{on}}{The condition to join the tables on. Either an unnamed character vector c("a") or a named character vector c(a="b") or a list list(a).}
+
+\item{\code{insert}}{Optional list specifying which columns to add. \code{NULL} (default) does not insert any. Use \code{'all'} to insert all columns from the other table that are not used for joining.}
+
+\item{\code{update}}{Optional list specifying updates of existing columns. No updates are performed by default.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Using columns from the wrapped \code{data.table} table in calculations provided in \code{update} can be done by
+prefixing the column names of the left table with \strong{\code{i.}}. See examples.
+}
+
+\subsection{Returns}{
+Invisibly returns the updated itself.
+
+In case of multiple matches in the \code{other} table the update by reference
+can not be performed and an error is thrown.
+In such cases use either \code{left_join} or delete duplicated foreign keys in the \code{other} table.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- data.table(a=1:3, b = c("a", "b", "a"))
+y <- data.table(a=c("b", "c", "a"), b = 5:7)
+df <- DF(x)
+df$update_join(y, .(b=a), insert="all")
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-transform"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-transform}{}}}
+\subsection{Method \code{transform()}}{
+Transform columns with function
+
+Part of the \emph{update methods}. Uses \code{where}, \code{select} and \code{group_by}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$transform(fun, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{fun}}{A function that is applied to the columns selected with \code{select}.}
+
+\item{\code{...}}{Optional arguments that are passed to \code{fun}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+Anonymous functions can be supplied to \code{fun}.
+}
+
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5, c=c(1:4, NA)))
+   df$where(b>3)$select("a")$transform(function(x) x + 50)
+   df$where(b>3)$select("c")$transform(mean, na.rm=T)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataFrame-aggregate"></a>}}
 \if{latex}{\out{\hypertarget{method-DataFrame-aggregate}{}}}
 \subsection{Method \code{aggregate()}}{
-Data aggregation
+Aggregate data.
+
+Part of the \emph{transformation methods}. Uses \code{where}, \code{select} and \code{group_by}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataFrame$aggregate(...)}\if{html}{\out{</div>}}
 }
@@ -954,7 +1071,7 @@ Data aggregation
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-An additional column with the name of the function is added to the table.
+An additional column with the name of the function is added to the resulting table.
 Passing named arguments will result in using the names in the output. See examples.
 }
 
@@ -975,29 +1092,222 @@ df$aggregate(mean(x), mean_na_rm = mean(x, na.rm=T))
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-unwrap"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-unwrap}{}}}
-\subsection{Method \code{unwrap()}}{
-Get the underlying data.
+\if{html}{\out{<a id="method-DataFrame-count"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-count}{}}}
+\subsection{Method \code{count()}}{
+Count the number of rows.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$unwrap()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$count()}\if{html}{\out{</div>}}
+}
+
+\subsection{Details}{
+Affected by the setup verbs \code{where} and \code{group_by}.
 }
 
 \subsection{Returns}{
-The underlying \code{data.table} object.
+A \code{DataFrame} with the row counts.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.frame(x=1:5, g = c("a", "a", "b", "c", "c")))
+df$count()
+df$group_by(g)$count()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-order_by"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-order_by}{}}}
+\subsection{Method \code{order_by()}}{
+Order the table rows by column values.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$order_by(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{The columns to sort by. Do not quote column names. See \code{?data.table::setorder}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{   df <- DF(data.frame(a=1:5, b=1:5))
+   df$sort(-b)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-set_key"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-set_key}{}}}
+\subsection{Method \code{set_key()}}{
+Create a key on the table.
+
+\code{set_key} sorts the table using \code{data.table::setkeyv}, which marks it as sorted with an attribute sorted.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set_key(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Column names. Can either be quoted (strings) or unquoted.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisibly returns itself.
+df <- DF(mtcars, copy=TRUE)
+df$set_key("mpg", "cyl")
+df$set_key(mpg, vs)
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataFrame-copy"></a>}}
-\if{latex}{\out{\hypertarget{method-DataFrame-copy}{}}}
-\subsection{Method \code{copy()}}{
-Create a deep copy of the \code{DataFrame} object.
+\if{html}{\out{<a id="method-DataFrame-is_key_unique"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-is_key_unique}{}}}
+\subsection{Method \code{is_key_unique()}}{
+Check whether keys represent unique entries
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataFrame$copy()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$is_key_unique()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-A new \code{DataFrame} object.
+\code{TRUE} if the set key is unique and \code{FALSE} otherwise. If no key is set the result is \code{FALSE}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{df <- DF(data.frame(a=1:5, b=1:5), key = c("a"))
+df$is_key_unique()
+df <- DF(data.frame(a=1:5, b=1:5))
+df$is_key_unique()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-drop"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-drop}{}}}
+\subsection{Method \code{drop()}}{
+Drop columns in place.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$drop(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Column names to remove. Can be quoted (as strings) or unquoted.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$drop("b")
+x$drop(a)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-set_order"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-set_order}{}}}
+\subsection{Method \code{set_order()}}{
+Set the order of columns in place.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$set_order(order = "key")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{order}}{Vector of column names or column numbers specifying the order. See details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Details}{
+If length(order) < length(x),
+the specified columns are moved in order to the "front" of x.
+By default, reorder without a specified order moves the key columns in order to the "front".
+}
+
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$set_order(c("b", "a"))$print() # same as x$set_order("b")
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-rename"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-rename}{}}}
+\subsection{Method \code{rename()}}{
+Rename column names in place.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$rename(mapping)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{mapping}}{Named character vector.
+Names of the vector elements are the old names and the elements itself are the new names.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$rename(c("a"="A", "b"="B"))
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataFrame-rename_with"></a>}}
+\if{latex}{\out{\hypertarget{method-DataFrame-rename_with}{}}}
+\subsection{Method \code{rename_with()}}{
+Rename column names in place using a mapping function.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataFrame$rename_with(mapper)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{mapper}}{Function that accepts old column names as a character vector and returns a character vector of new column names.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{x <- DF(data.frame(a=1:5, b=1:5))
+x$rename_with(toupper)
+custom_mapper = function(x) {return(paste0(x, 1))}
+x$rename_with(custom_mapper)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 }
