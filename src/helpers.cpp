@@ -23,13 +23,3 @@ bool is_true_or_false(SEXP& x) {
 bool is_string(SEXP& x) {
     return TYPEOF(x)==STRSXP && LENGTH(x)==1 && STRING_ELT(x, 0)!=NA_STRING;
 }
-
-// [[Rcpp::export]]
-SEXP enquo(SEXP expr, SEXP env) {
-    const char* names[] = {"expr", "env", ""};
-    SEXP result = PROTECT(Rf_mkNamed(VECSXP, names));  // creates a list of length 2
-    SET_VECTOR_ELT(result, 0, expr);
-    SET_VECTOR_ELT(result, 1, env);
-    UNPROTECT(1);
-    return result;
-}

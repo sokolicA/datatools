@@ -53,25 +53,12 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// enquo
-SEXP enquo(SEXP expr, SEXP env);
-RcppExport SEXP _datatools_enquo(SEXP exprSEXP, SEXP envSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type expr(exprSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type env(envSEXP);
-    rcpp_result_gen = Rcpp::wrap(enquo(expr, env));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_datatools_replace_na_false", (DL_FUNC) &_datatools_replace_na_false, 1},
     {"_datatools_int_remove_na", (DL_FUNC) &_datatools_int_remove_na, 1},
     {"_datatools_is_true_or_false", (DL_FUNC) &_datatools_is_true_or_false, 1},
     {"_datatools_is_string", (DL_FUNC) &_datatools_is_string, 1},
-    {"_datatools_enquo", (DL_FUNC) &_datatools_enquo, 2},
     {NULL, NULL, 0}
 };
 
